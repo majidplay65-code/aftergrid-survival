@@ -3,10 +3,34 @@
 قالب این فایل از [Keep a Changelog](https://keepachangelog.com/fa-IR/1.1.0/) و
 شماره‌گذاری از [Semantic Versioning](https://semver.org/lang/fa/) پیروی می‌کند.
 
-قاعده‌ی این ریپو: **هر فازی که تمام شد، یک ورودی اینجا اضافه کن.** یک خط هم کافی است.
+## [0.3.0] - 2026-09-08
 
-فازبندی واقعی پروژه: فاز ۰ = Setup، فاز ۱ = Core Systems، فاز ۲ = Player (هر سه انجام‌شده)،
-فاز ۳ = World & Interaction (بعدی).
+تکمیل فاز ۳: دنیای بازی و سیستم تعامل (World & Interaction) + HUD بقا.
+
+### Added
+
+- **سیستم تعامل (Interaction System):**
+  - کلاس پایه‌ی `Interactable` در `core/interaction/interactable.gd`.
+  - کلاس و اسکریپت `ItemPickup` در `entities/interactables/item_pickup.gd` با قابلیت مصرف درجا یا انتقال به اینونتوری.
+  - کلاس و اسکریپت `PowerSwitch` در `entities/interactables/power_switch.gd` برای کنترل چراغ‌ها و تجهیزات محیطی.
+- **اشیاء و آیتم‌های تعاملی تستی در `entities/interactables/`:**
+  - `water_bottle.tscn`: بطری آب معدنی (+30 تشنگی).
+  - `canned_food.tscn`: کنسرو لوبیا (+35 گرسنگی).
+  - `medkit.tscn`: جعبه کمک‌های اولیه (+40 سلامت).
+  - `scrap_metal.tscn`: قطعه آهن‌قراضه (متریال ساخت).
+  - `power_switch.tscn`: کلید فعال‌سازی ژنراتور اضطراری به همراه نشانگر نوری.
+- **رابط کاربری و HUD بقا (`ui/hud/hud.tscn`, `ui/hud/hud.gd`):**
+  - نشانه‌گیر مرکزی (Crosshair).
+  - ویجت پویا با برچسب کلید `[E]` و نام تعامل هنگام نگاه کردن به اشیاء.
+  - نوارهای زنده وضعیت بقا (جان ❤️، استامینا ⚡، غذا 🍖، آب 💧) متصل به `EventBus`.
+  - اعلان پیام دریافت آیتم (Toast notifications) در گوشه بالای صفحه.
+  - صفحه Game Over در صورت افت کامل جان.
+- **کنترلر و فیزیک بازیکن:**
+  - اضافه شدن پرتو `RayCast3D` به مرکز دوربین برای تشخیص اشیاء روبه‌رو.
+  - افت تدریجی تشنگی و گرسنگی در طول زمان (گیم‌پلی بقا).
+  - بازیابی خودکار استامینا در حالت‌های `Idle` و `Walk`.
+- **محیط تست (`levels/test_level.tscn`):**
+  - نورپردازی اتمسفریک گرگ‌ومیش، میزهای تدارکات، آیتم‌های بقا و ژنراتور با نور اسپات‌لایت تعاملی.
 
 ## [0.2.0] - 2026-09-08
 
@@ -25,22 +49,6 @@
 - Input Map کامل در `project.godot`: `move_forward`/`move_back`/`move_left`/`move_right`
   (WASD)، `run` (Shift)، `jump` (Space) و `interact` (E).
 
-### Changed
-
-- `project.godot`: ارتقا از Godot 4.5 به **Godot 4.7**، نسخه‌ی پروژه به `0.2.0`،
-  Main Scene به `res://levels/test_level.tscn` و autoload ها به ترتیب
-  `EventBus` → `GameState` → `SceneManager` → `SaveManager`.
-- `README.md`: فازبندی واقعی (۰=Setup، ۱=Core Systems، ۲=Player انجام‌شده، ۳=World & Interaction بعدی)،
-  ساختار جدید ریپو، قرارداد `EventBus` و راهنمای کامل Setup (autoload، اکشن‌ها، درخت Player.tscn، چک‌لیست صحت).
-
-### Removed
-
-- `autoloads/game_events.gd` (جایگزین: `autoloads/event_bus.gd`).
-- نسخه‌ی JSON قدیمی `autoloads/save_manager.gd` (جایگزین: نسخه‌ی Resource-based).
-- نسخه‌ی دوبعدی موقت `core/main.gd` و `core/main.tscn`.
-- فایل `godot_project_phase0-2.zip` بعد از extract موفق (محتوایش همان baseline بالاست).
-- `.gitkeep` های `entities/`، `resources/` و `levels/` (اولین فایل‌های واقعی نشستند).
-
 ## [0.1.0] - 2026-09-08
 
 ### Added
@@ -48,6 +56,3 @@
 - نام کاری پروژه: **Aftergrid** (قفل‌نشده) و نام ریپو `aftergrid-survival`.
 - ساختار اولیه‌ی پوشه‌ها: `autoloads/`, `core/`, `entities/`, `resources/`, `ui/`, `levels/`.
 - پروژه‌ی Godot 4.5 (`project.godot`) با صحنه‌ی ورودی `core/main.tscn`.
-- دو autoload پایه: `GameEvents` (اتوبوس سیگنال) و `SaveManager` (ذخیره‌ی JSON در `user://`).
-- `README.md` با برنامه‌ی فازها و `CHANGELOG.md`.
-- `.gitignore` مخصوص Godot 4.

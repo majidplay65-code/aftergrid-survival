@@ -8,7 +8,7 @@
 
 - **نام ریپو:** `aftergrid-survival` (lowercase و kebab-case — استاندارد GitHub و Godot)
 - **موتور:** Godot 4.7
-- **وضعیت فعلی:** فازهای `۰` تا `۲` انجام شده (Setup، Core Systems، Player). فاز بعدی: `۳` (World & Interaction).
+- **وضعیت فعلی:** فازهای `۰` تا `۳` انجام شده (Setup، Core Systems، Player، World & Interaction). فاز بعدی: `۴` (Inventory & Crafting).
 
 ---
 
@@ -19,7 +19,8 @@
 | ۰ | Setup — ساختار ریپو + پروژه‌ی Godot که بالا می‌آید | ✅ انجام شد |
 | ۱ | Core Systems — اتوبوس رویداد، وضعیت بازی، مدیر صحنه، ذخیره‌سازی، ماشین حالت، دیتای Resource | ✅ انجام شد |
 | ۲ | Player — کاراکتر سه‌بعدی با حالت‌های Idle/Walk/Run، آمار بقا، دوربین موس | ✅ انجام شد |
-| ۳ | World & Interaction — دنیای واقعی + سیستم تعامل (E) | ⬜ بعدی |
+| ۳ | World & Interaction — سیستم تعامل (E)، اشیاء مصرفی/محیطی، پرتو نگاه و HUD بقا | ✅ انجام شد |
+| ۴ | Inventory & Crafting — اینونتوری شبکه‌ای و ساخت آیتم‌های بقا | ⬜ بعدی |
 
 **معیار عبور از هر فاز:** یک نسخه‌ی قابل بازی که کسی بتواند ۵ دقیقه بازی‌اش کند و بگوید «ادامه بده».
 اگر جواب «نه» بود، همان‌جا متوقف می‌شویم — نه بعد از نوشتن هزار خط کد.
@@ -37,33 +38,43 @@ aftergrid-survival/
 ├── .gitignore
 │
 ├── autoloads/                      ← سینگلتون‌های سراسری (به‌ترتیب لود: EventBus اول)
-│   ├── event_bus.gd                ← اتوبوس سیگنال (جایگزین game_events.gd قدیمی)
+│   ├── event_bus.gd                ← اتوبوس سیگنال
 │   ├── game_state.gd               ← وضعیت سراسری بازی (pause، رفرنس بازیکن، مرحله‌ی فعلی)
 │   ├── scene_manager.gd            ← تعویض متمرکز و امن صحنه
 │   └── save_manager.gd             ← ذخیره/بارگذاری Resource باینری در user://saves/
 ├── core/
+│   ├── interaction/                ← کلاس‌های پایه‌ی تعامل
+│   │   └── interactable.gd         ← کلاس پایه‌ی StaticBody3D قابل تعامل
 │   └── state_machine/              ← ماشین حالت Node-based
 │       ├── state.gd                ← کلاس پایه‌ی انتزاعی هر حالت
 │       └── state_machine.gd        ← ثبت فرزندها + جابه‌جایی با transition_to()
 ├── entities/
-│   └── player/
-│       ├── player.tscn             ← صحنه‌ی بازیکن (طبق درخت «قدم ۴» پایین)
-│       ├── player.gd               ← کنترلر CharacterBody3D (حرکت خام، پرش، دوربین موس)
-│       └── states/                 ← حالت‌های بازیکن (نام نود = نام حالت)
-│           ├── idle_state.gd
-│           ├── walk_state.gd
-│           └── run_state.gd        ← مصرف استامینا + برگشت خودکار به Walk
+│   ├── player/
+│   │   ├── player.tscn             ← صحنه‌ی بازیکن + پرتو تعامل RayCast3D
+│   │   ├── player.gd               ← کنترلر CharacterBody3D + تعامل + مصرف بقا
+│   │   └── states/                 ← حالت‌های بازیکن (Idle, Walk, Run با بازیابی استامینا)
+│   │       ├── idle_state.gd
+│   │       ├── walk_state.gd
+│   │       └── run_state.gd
+│   └── interactables/              ← اشیاء محیطی قابل تعامل
+│       ├── item_pickup.gd          ← اسکریپت برداشتن و مصرف آیتم
+│       ├── power_switch.gd         ← اسکریپت سوئیچ ژنراتور و روشنایی
+│       ├── water_bottle.tscn       ← بطری آب (بازیابی تشنگی)
+│       ├── canned_food.tscn        ← قوطی کنسرو (بازیابی گرسنگی)
+│       ├── medkit.tscn             ← جعبه کمک‌های اولیه (بازیابی جان)
+│       ├── scrap_metal.tscn        ← قطعه آهن‌قراضه (متریال ساخت)
+│       └── power_switch.tscn       ← کلید ژنراتور برق
 ├── resources/
 │   ├── save_data.gd                ← کانتینر داده‌ی خالص برای سیو (بدون منطق)
 │   └── stats/
 │       └── player_stats.gd         ← آمار بازیکن (health/stamina/hunger/thirst) + منطق ایمن تغییر
 ├── levels/
-│   └── test_level.tscn             ← صحنه‌ی تست: زمین + نمونه‌ی Player (صحنه‌ی اصلی پروژه)
-└── ui/                             ← منوها، HUD، دیالوگ‌ها (فعلاً خالی — فازهای بعد)
+│   └── test_level.tscn             ← صحنه‌ی تست مجهز به اشیاء بقا، روشنایی اتمسفریک و HUD
+└── ui/
+    └── hud/                        ← رابط کاربری درون بازی (HUD)
+        ├── hud.gd                  ← کنترل نوارها، اعلان تعامل و پیام‌های دریافت
+        └── hud.tscn                ← نوار جان/استامینا/غذا/آب، کراس‌هیر و پرامپت [E]
 ```
-
-> پوشه‌های خالی در git ردیابی نمی‌شوند، برای همین در هرکدام یک `.gitkeep` گذاشته شده است.
-> به محض گذاشتن اولین فایل واقعی، آن `.gitkeep` را پاک کن.
 
 ## قراردادها
 
@@ -72,105 +83,16 @@ aftergrid-survival/
 - **ارتباط بین سیستم‌ها:** فقط از طریق `autoloads/event_bus.gd`. هیچ `get_node()` عمیقی بین ماژول‌ها.
 - **معماری:** دیتا در `Resource`، رفتار در State Machine مبتنی بر Node، ارتباط در `EventBus`.
 - **GDScript:** همیشه typed (نوع همه‌ی متغیرها، آرگومان‌ها و خروجی‌ها مشخص).
-- **زبان کامنت‌ها:** فارسی (این ریپو شخصی است و خوانایی برای خودت مهم‌تر از استاندارد جهانی است).
+- **زبان کامنت‌ها:** فارسی.
 - **هر فاز = یک ورودی در `CHANGELOG.md`.**
 
 ---
 
-## راه‌اندازی (Setup) — فاز ۰ تا ۲
+## راه‌اندازی و تست
 
-> همه‌ی موارد زیر از قبل داخل `project.godot` و صحنه‌ها اعمال شده و با `F5` اجرا می‌شود.
-> این بخش سند مرجع است: اگر پروژه را از صفر در ادیتور ساختی، قدم‌ها را به همین ترتیب انجام بده.
-
-## قدم ۱ — ساخت پروژه
-
-1. Godot 4.7 (نسخه‌ی Standard) را باز کن.
-2. New Project بزن، Renderer را روی **Forward+** یا **Mobile** بگذار (برای شروع Mobile سبک‌تر است).
-3. فایل‌های این ریپو را داخل `res://` داشته باش، دقیقاً با همین نام پوشه‌ها.
-
-## قدم ۲ — ثبت Autoload ها (بسیار مهم و به‌ترتیب)
-
-مسیر: **Project → Project Settings → Autoload**
-
-به همین ترتیب اضافه کن (ترتیب مهم است چون EventBus باید قبل از بقیه لود شود):
-
-| Path | Node Name |
-|---|---|
-| `res://autoloads/event_bus.gd` | `EventBus` |
-| `res://autoloads/game_state.gd` | `GameState` |
-| `res://autoloads/scene_manager.gd` | `SceneManager` |
-| `res://autoloads/save_manager.gd` | `SaveManager` |
-
-بعد از اضافه‌کردن هر کدام، دکمه‌ی **Add** را بزن. اسم نود (ستون دوم) باید دقیقاً همین‌ها باشد
-چون در کدها با همین نام‌ها صدایشان می‌زنیم (مثلاً `EventBus.player_died.emit()`).
-
-## قدم ۳ — تعریف Input Map
-
-مسیر: **Project → Project Settings → Input Map**
-
-این اکشن‌ها را بساز و برای هرکدام حداقل یک کلید اختصاص بده:
-
-| Action Name | کلید پیشنهادی |
-|---|---|
-| `move_forward` | W |
-| `move_back` | S |
-| `move_left` | A |
-| `move_right` | D |
-| `run` | Shift |
-| `jump` | Space |
-| `interact` | E |
-
-(اکشن `ui_cancel` از قبل توسط Godot ساخته شده است — Esc.)
-
-## قدم ۴ — ساختار صحنه‌ی بازیکن (Player.tscn)
-
-فایل `res://entities/player/player.tscn` با این ساختار دقیق نودها ساخته شده است:
-
-```
-Player  (CharacterBody3D)  <- اسکریپت: entities/player/player.gd
-├── CollisionShape3D        <- یک CapsuleShape3D بهش بده
-├── MeshInstance3D           <- یک CapsuleMesh موقت برای دیدن بازیکن
-├── CameraPivot  (Node3D)    <- در ارتفاع Y = 1.6 (شبیه ارتفاع چشم)
-│   └── Camera3D             <- کمی عقب‌تر (نمای سوم‌شخص برای تست)
-└── StateMachine  (Node)     <- اسکریپت: core/state_machine/state_machine.gd
-    ├── IdleState  (Node)    <- اسکریپت: entities/player/states/idle_state.gd
-    ├── WalkState  (Node)    <- اسکریپت: entities/player/states/walk_state.gd
-    └── RunState   (Node)    <- اسکریپت: entities/player/states/run_state.gd
-```
-
-نکات حیاتی:
-
-- نام هر نود (IdleState, WalkState, RunState) باید **دقیقاً** همین باشد، چون `transition_to(&"WalkState")` با نام نود کار می‌کند.
-- روی نود `StateMachine`، در Inspector، فیلد `Initial State` به `IdleState` وصل است.
-- روی هر یک از سه نود State (Idle/Walk/Run)، در Inspector فیلد `Player` به نود ریشه‌ی `Player` وصل است.
-- `CameraPivot` در Y = 1.6 قرار دارد تا شبیه ارتفاع چشم باشد.
-
-## قدم ۵ — تست
-
-1. صحنه‌ی تست `res://levels/test_level.tscn` شامل یک `StaticBody3D` صاف به‌عنوان زمین + نور + سه جعبه‌ی نشانه (برای فهمیدن حرکت) + نمونه‌ی `Player.tscn` است.
-2. این صحنه به‌عنوان Main Scene تنظیم شده: **Project Settings → Application → Run → Main Scene**.
-3. Run بزن (F5). باید بتوانی با WASD حرکت کنی، با Shift بدوی، و با Space بپری.
-
-## چک‌لیست صحت (Definition of Done فاز ۰+۱+۲)
-
-- [ ] بازیکن با WASD حرکت می‌کند و شتاب/اصطکاک طبیعی دارد
-- [ ] با نگه‌داشتن Shift سرعت افزایش می‌یابد و استامینا (در کد، از طریق `player.stats.stamina`) کم می‌شود
-- [ ] با رهاکردن Shift یا اتمام استامینا، به‌صورت خودکار به WalkState برمی‌گردد
-- [ ] Space باعث پرش می‌شود
-- [ ] موس دوربین را می‌چرخاند و Esc موس را آزاد/قفل می‌کند
-- [ ] در خروجی Output هیچ Error یا Warning قرمزی دیده نمی‌شود
-
-اگر همه‌ی این‌ها تیک خورد، فاز ۰+۱+۲ رسماً کامل است و می‌روی سراغ فاز ۳ (World & Interaction).
-
----
-
-## اجرا
-
-1. Godot 4.7 یا بالاتر را نصب کن.
-2. Godot را باز کن و **Import** را بزن، `project.godot` را انتخاب کن.
-3. `F5` — صحنه‌ی `levels/test_level.tscn` اجرا می‌شود: با WASD حرکت، Shift دویدن، Space پرش، E تعامل (فاز ۳)، Esc آزاد/قفل موس.
-
-## نکته درباره‌ی استفاده از AI برای فازهای بعدی
-
-برای هر فاز بعدی، این متن را دقیقاً به‌عنوان context اول به مدل بده:
-«من از Godot 4.7 با GDScript typed استفاده می‌کنم. معماری من: Resource برای داده، Node-based State Machine برای رفتار، EventBus Autoload برای ارتباط بین سیستم‌ها. این فایل‌های موجودم هستند: [فایل‌های این پوشه را پیست کن]. حالا فاز بعدی (Interaction System) را با همین سبک و بدون تغییر معماری فعلی پیاده‌سازی کن.»
+1. Godot 4.7 را باز کن و پروژه را Import کن.
+2. کلید `F5` را بزن.
+3. با WASD حرکت کن، با Shift بدو (استامینا در توقف/راه‌رفتن بازیابی می‌شود).
+4. به سمت اشیاء (بطری آب، کنسرو، جعبه کمک‌ها، سوئیچ برق) نگاه کن تا نشانگر `[E]` ظاهر شود.
+5. کلید `E` را بزن تا آب بنوشی، غذا بخوری یا ژنراتور را روشن/خاموش کنی.
+6. نوارهای وضعیت سلامت، استامینا، گرسنگی و تشنگی را در پایین سمت چپ به صورت زنده مشاهده کن.
