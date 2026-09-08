@@ -30,6 +30,10 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 3.2)
 current = true
 
+[node name="InteractionRayCast" type="RayCast3D" parent="CameraPivot/Camera3D"]
+target_position = Vector3(0, 0, -5.5)
+collision_mask = 1
+
 [node name="StateMachine" type="Node" parent="."]
 script = ExtResource("2_statemachine")
 initial_state = NodePath("IdleState")
