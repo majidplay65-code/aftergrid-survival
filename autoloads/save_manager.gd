@@ -1,61 +1,56 @@
+## SaveManager
+## Autoload برای ذخیره/بارگذاری بازی روی دیسک با فرمت Resource باینری Godot (.tres/.res).
+## نحوه ثبت: Project Settings -> Autoload -> نام "SaveManager"
 extends Node
 
-## ذخیره/بارگذاری ساده بر پایه‌ی JSON در user://
-##
-## فعلاً فقط یک اسلات ذخیره داریم و ساختار داده‌اش عمداً خام است؛
-## وقتی مکانیک‌های بقا جدی شدند، همین‌جا schema و مهاجرت نسخه اضافه می‌شود.
-## `schema_version` از روز اول هست تا بعداً مجبور نباشیم سیوهای قدیمی را دور بریزیم.
-
-const SAVE_PATH := "user://aftergrid_save.json"
-const SCHEMA_VERSION := 1
+const SAVE_DIR: String = "user://saves/"
+const SAVE_FILE_NAME: String = "save_slot_1.tres"
 
 
-## داده را روی دیسک می‌نویسد. در صورت موفقیت `true` برمی‌گرداند.
-func save_game(data: Dictionary) -> bool:
-	var payload := {
-		"schema_version": SCHEMA_VERSION,
-		"saved_at": Time.get_unix_time_from_system(),
-		"data": data,
-	}
-	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
-	if file == null:
-		push_error(
-			"SaveManager: cannot open \"%s\" for writing (error %d)"
-			% [SAVE_PATH, FileAccess.get_open_error()]
-		)
+func _ready() -> void:
+	_ensure_save_directory_exists()
+
+
+func save_game(data: SaveData) -> bool:
+	_ensure_save_directory_exists()
+	var full_path: String = SAVE_DIR + SAVE_FILE_NAME
+	var error: Error = ResourceSaver.save(data, full_path)
+
+	if error != OK:
+		push_error("SaveManager: failed to save game. Error code: %d" % error)
 		return false
-	file.store_string(JSON.stringify(payload, "\t"))
-	file.close()
+
+	EventBus.game_saved.emit()
 	return true
 
 
-## سیو را می‌خواند. اگر سیوی وجود نداشته باشد یا خراب باشد، دیکشنری خالی برمی‌گرداند.
-func load_game() -> Dictionary:
-	if not FileAccess.file_exists(SAVE_PATH):
-		return {}
-	var file := FileAccess.open(SAVE_PATH, FileAccess.READ)
-	if file == null:
-		push_error(
-			"SaveManager: cannot open \"%s\" for reading (error %d)"
-			% [SAVE_PATH, FileAccess.get_open_error()]
-		)
-		return {}
-	var raw := file.get_as_text()
-	file.close()
+func load_game() -> SaveData:
+	var full_path: String = SAVE_DIR + SAVE_FILE_NAME
 
-	var parsed: Variant = JSON.parse_string(raw)
-	if typeof(parsed) != TYPE_DICTIONARY:
-		push_warning("SaveManager: save file is not a valid JSON object, ignoring it.")
-		return {}
-	return parsed
+	if not FileAccess.file_exists(full_path):
+		push_warning("SaveManager: no save file found at %s" % full_path)
+		return null
+
+	var loaded_resource: Resource = ResourceLoader.load(full_path)
+
+	if loaded_resource == null or not (loaded_resource is SaveData):
+		push_error("SaveManager: save file is corrupted or invalid.")
+		return null
+
+	EventBus.game_loaded.emit()
+	return loaded_resource as SaveData
 
 
-## سیو فعلی را پاک می‌کند (برای «شروع دوباره»).
-func delete_save() -> void:
-	if not FileAccess.file_exists(SAVE_PATH):
-		return
-	var dir := DirAccess.open("user://")
-	if dir == null:
-		push_error("SaveManager: cannot open user:// to delete the save.")
-		return
-	dir.remove(SAVE_PATH.get_file())
+func has_save_file() -> bool:
+	return FileAccess.file_exists(SAVE_DIR + SAVE_FILE_NAME)
+
+
+func delete_save_file() -> void:
+	var full_path: String = SAVE_DIR + SAVE_FILE_NAME
+	if FileAccess.file_exists(full_path):
+		DirAccess.remove_absolute(full_path)
+
+
+func _ensure_save_directory_exists() -> void:
+	if not DirAccess.dir_exists_absolute(SAVE_DIR):
+		DirAccess.make_dir_recursive_absolute(SAVE_DIR)
