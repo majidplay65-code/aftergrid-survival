@@ -1,0 +1,18 @@
+# Godot 4+ — پوشه‌ی کش/ایمپورت موتور، هرگز کامیت نشود
+.godot/
+/android/
+
+# اگر روزی به C#/Mono مهاجرت کردی
+.mono/
+data_*/
+mono_crash.*.json
+
+# خروجی بیلد و فایل‌های موقت
+/build/
+/export/
+*.tmp
+
+# سیستم‌عامل / ادیتور
+.DS_Store
+Thumbs.db
+*.swp
