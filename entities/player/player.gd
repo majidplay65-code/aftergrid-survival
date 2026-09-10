@@ -49,6 +49,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"ui_cancel"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED else Input.MOUSE_MODE_CAPTURED
 
+	# بازگیری موس با کلیک (بعد از رها‌شدن نشانگر با ESC)
+	if event is InputEventMouseButton and event.pressed and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
 	# کلید تعامل با اشیاء محیطی (E)
 	if event.is_action_pressed(&"interact"):
 		_try_interact()
