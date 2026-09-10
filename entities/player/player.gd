@@ -21,6 +21,7 @@ const HUNGER_DECAY_RATE: float = 0.12
 @onready var camera_3d: Camera3D = $CameraPivot/Camera3D
 @onready var state_machine: StateMachine = $StateMachine
 @onready var interaction_raycast: RayCast3D = $CameraPivot/Camera3D/InteractionRayCast
+@onready var flashlight: SpotLight3D = $CameraPivot/Camera3D/Flashlight
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var focused_interactable: Interactable = null
@@ -48,9 +49,17 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"ui_cancel"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED else Input.MOUSE_MODE_CAPTURED
 
+	# بازگیری موس با کلیک (بعد از رها‌شدن نشانگر با ESC)
+	if event is InputEventMouseButton and event.pressed and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
 	# کلید تعامل با اشیاء محیطی (E)
 	if event.is_action_pressed(&"interact"):
 		_try_interact()
+
+	# کلید چراغ‌قوه (F) — روشن/خاموش کردن نور دوربین
+	if event.is_action_pressed(&"flashlight") and flashlight != null:
+		flashlight.visible = not flashlight.visible
 
 
 func _physics_process(delta: float) -> void:

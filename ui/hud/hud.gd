@@ -26,6 +26,7 @@ func _ready() -> void:
 	EventBus.interactable_unfocused.connect(_on_interactable_unfocused)
 	EventBus.item_picked_up.connect(_on_item_picked_up)
 	EventBus.player_died.connect(_on_player_died)
+	EventBus.toast_requested.connect(_on_toast_requested)
 
 
 func _on_player_stat_changed(stat_name: StringName, current_value: float, max_value: float) -> void:
@@ -56,10 +57,19 @@ func _on_interactable_unfocused() -> void:
 
 
 func _on_item_picked_up(item_id: StringName, amount: int) -> void:
+	_show_toast("+%d %s" % [amount, str(item_id).replace("_", " ")], Color(0.3, 1.0, 0.4))
+
+
+func _on_toast_requested(message: String) -> void:
+	_show_toast(message, Color(0.6, 0.8, 1.0))
+
+
+## سیستم toast مشترک: نمایش یک برچسب کوتاه که بعد از ۲ ثانیه محو می‌شود.
+func _show_toast(text: String, color: Color) -> void:
 	var label: Label = Label.new()
-	label.text = "+%d %s" % [amount, str(item_id).replace("_", " ")]
+	label.text = text
 	label.add_theme_font_size_override("font_size", 14)
-	label.add_theme_color_override("font_color", Color(0.3, 1.0, 0.4))
+	label.add_theme_color_override("font_color", color)
 	notification_container.add_child(label)
 
 	# محو شدن خودکار بعد از ۲ ثانیه

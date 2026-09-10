@@ -3,10 +3,11 @@
 class_name SaveData
 extends Resource
 
-@export var save_version: int = 1
+@export var save_version: int = 2
 @export var level_path: String = ""
 @export var player_position: Vector3 = Vector3.ZERO
 @export var player_rotation_y: float = 0.0
+@export var player_pitch: float = 0.0
 
 @export var health: float = 100.0
 @export var max_health: float = 100.0
