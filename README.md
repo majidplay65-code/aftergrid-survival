@@ -8,7 +8,7 @@
 
 - **نام ریپو:** `aftergrid-survival` (lowercase و kebab-case — استاندارد GitHub و Godot)
 - **موتور:** Godot 4.7
-- **وضعیت فعلی:** فازهای `۰` تا `۴` کامل شده (شامل Save واقعی فاز ۳ در `۰.۵.۰`). فاز بعدی: `۵` (Threat/Enemy AI) — بعد از تأیید نهایی کاربر.
+- **وضعیت فعلی:** فازهای `۰` تا `۴` کامل + سیستم تهدید فاز `۵` پیاده‌سازی شده (۰.۶.۰) و در انتظار تأیید تست کاربر.
 
 ---
 
@@ -21,10 +21,10 @@
 | ۲ | Player — کاراکتر سه‌بعدی با حالت‌های Idle/Walk/Run، آمار بقا، دوربین موس، چراغ‌قوه (F) | ✅ انجام شد |
 | ۳ | **Survival Loop** — تعامل (E)، برداشتن/مصرف آب و غذا، تخلیه‌ی hunger/thirst، مرگ، HUD، **Save واقعی** | ✅ انجام شد (۰.۵.۰) |
 | ۴ | **World Identity** — بلوک شهری، تکسچرها، اتمسفر گرگ‌ومیش، چراغ‌قوه | ✅ انجام شد (۰.۴.۰) |
-| ۵ | Threat/Enemy AI | ⬜ بعدی |
+| ۵ | **Threat/Enemy AI** — NavigationRegion + دشمن نمونه (Patrol/Chase/Attack)، Area3D-based، DamageComponent | ✅ پیاده‌سازی شد (۰.۶.۰) — در انتظار تأیید تست |
 | ۶ | Inventory/Crafting عمیق | ⬜ بعد از ۵ |
 
-**اولویت بعدی:** فاز ۵ (Threat/Enemy AI) — بعد از تأیید نهایی تست save/load توسط کاربر.
+**اولویت بعدی:** فاز ۶ (Inventory/Crafting) — بعد از تأیید تست دشمن توسط کاربر.
 
 ---
 
@@ -43,6 +43,19 @@
 - [x] تست کارکردی headless: `tests/save_load_test.gd` (۷ گروه بررسی؛ اجرا: `godot --headless --path . -s res://tests/save_load_test.gd`)
 - [x] گزارش تست کاربر روی صحنه‌ی جدید (بصری/کالیژن) — تأیید شد ۲۰۲۶-۰۹-۱۱
 - [ ] تأیید نهایی کاربر: بازی را ببند، دوباره باز کن، ادامه از نقطه‌ی رهاشده
+
+---
+
+## Definition of Done — فاز ۵ (Threat System)
+
+- [x] `NavigationRegion3D` روی `test_level.tscn` (پلیگون مسطح کل فضای عبور) + ۶ `NavigationObstacle3D` برای ساختمان‌ها
+- [x] `entities/enemy/enemy.gd`: `CharacterBody3D` + `NavigationAgent3D` با **همان الگوی** `core/state_machine/`
+- [x] سه حالت: `PatrolState` (۴ نقطه‌ی گشت از پیش‌تعیین‌شده)، `ChaseState`، `AttackState`
+- [x] تشخیص بازیکن فقط با `body_entered/body_exited` دو `Area3D` (شعاع دید ۷m، محدوده‌ی حمله ۱٫۴m) — بدون فاصله‌ی خام در `_process`
+- [x] `DamageComponent` قابل‌استفاده‌ی مجدد (`core/damage/`) متصل به `PlayerStats.take_damage` (آسیب ۸، کول‌داون ۱.۲s)
+- [x] یک دشمن نمونه در `test_level.tscn`، در بازوی شمالی تقاطع (قابل‌تست از نقطه‌ی شروع بازیکن)
+- [x] `gdparse 4.5.0` روی همه‌ی فایل‌های جدید + وریفای ساختاری صحنه‌ها
+- [ ] اجرای واقعی در Godot 4.7 (سنبوکس: باینری Godot در دسترس نبود) + تأیید تست کاربر
 
 **معیار عبور از هر فاز:** یک نسخه‌ی قابل بازی که کسی بتواند ۵ دقیقه بازی‌اش کند و بگوید «ادامه بده».
 اگر جواب «نه» بود، همان‌جا متوقف می‌شویم — نه بعد از نوشتن هزار خط کد.
@@ -72,6 +85,8 @@ aftergrid-survival/
 │   ├── scene_manager.gd            ← تعویض متمرکز و امن صحنه
 │   └── save_manager.gd             ← ذخیره/بارگذاری Resource باینری در user://saves/
 ├── core/
+│   ├── damage/
+│   │   └── damage_component.gd     ← کامپوننت آسیب قابل‌استفاده‌ی مجدد (→ PlayerStats.take_damage)
 │   ├── interaction/                ← کلاس‌های پایه‌ی تعامل
 │   │   └── interactable.gd         ← کلاس پایه‌ی StaticBody3D قابل تعامل
 │   ├── save/
@@ -80,6 +95,13 @@ aftergrid-survival/
 │       ├── state.gd                ← کلاس پایه‌ی انتزاعی هر حالت
 │       └── state_machine.gd        ← ثبت فرزندها + جابه‌جایی با transition_to()
 ├── entities/
+│   ├── enemy/
+│   │   ├── enemy.tscn              ← صحنه‌ی دشمن نمونه (NavigationAgent3D + ۲ Area3D + Damage)
+│   │   ├── enemy.gd                ← CharacterBody3D دشمن + تشخیص فقط با سیگنال‌های Area3D
+│   │   └── states/                 ← حالت‌های دشمن (همان الگوی StateMachine بازیکن)
+│   │       ├── patrol_state.gd     ← گشت بین نقاط از پیش‌تعیین‌شده
+│   │       ├── chase_state.gd      ← تعقیب (ورود بازیکن به شعاع دید)
+│   │       └── attack_state.gd     ← حمله (ورود بازیکن به محدوده‌ی حمله)
 │   ├── player/
 │   │   ├── player.tscn             ← صحنه‌ی بازیکن + پرتو تعامل RayCast3D
 │   │   ├── player.gd               ← کنترلر CharacterBody3D + تعامل + مصرف بقا
@@ -136,3 +158,5 @@ aftergrid-survival/
 10. `F5` بازی را ذخیره می‌کند (toast «ذخیره شد» + auto-save هر ۶۰ ثانیه). بازی را ببند و دوباره باز کن —
     از نقطه‌ی رهاشده (موقعیت/زاویه/آمار) ادامه می‌یابد. `F8` آخرین سیو را بارگذاری می‌کند.
 11. تست خودکار save/load: `godot --headless --path . -s res://tests/save_load_test.gd`
+12. دشمن نمونه در بازوی شمالی تقاطع گشت می‌زند؛ اگر وارد شعاع دید (~۷ متر) شوی تعقیبت می‌کند،
+    نزدیک شود حمله می‌کند (آسیب ۸ با کول‌داون ۱.۲ ثانیه) و اگر فرار کنی به گشت برمی‌گردد. بدو (Shift) تا از او سبکت.

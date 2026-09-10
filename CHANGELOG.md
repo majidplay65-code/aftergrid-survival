@@ -3,6 +3,32 @@
 قالب این فایل از [Keep a Changelog](https://keepachangelog.com/fa-IR/1.1.0/) و
 شماره‌گذاری از [Semantic Versioning](https://semver.org/lang/fa/) پیروی می‌کند.
 
+## [0.6.0] - 2026-09-11
+
+فاز ۵ (Threat System): سیستم تهدید نمونه با الگوی موجود StateMachine.
+
+### Added
+
+- **`NavigationRegion3D` + موانع ناوبری در `levels/test_level.tscn`:**
+  پلیگون مسطح کل فضای عبور + ۶ `NavigationObstacle3D` (پایه‌ی ساختمان‌ها) تا مسیرها دور ساختمان‌ها بروند.
+- **دشمن نمونه (`entities/enemy/`):**
+  - `enemy.tscn`/`enemy.gd`: `CharacterBody3D` + `NavigationAgent3D`، دقیقاً با الگوی `core/state_machine/`.
+  - `states/patrol_state.gd`: گشت بین ۴ نقطه‌ی از پیش‌تعیین‌شده روی صحنه.
+  - `states/chase_state.gd`: تعقیب موقعیت لحظه‌ای بازیکن روی مسیر ناوبری.
+  - `states/attack_state.gd`: توقف، روکردن به بازیکن، ضربه با کول‌داون.
+  - تشخیص بازیکن **فقط** با `body_entered/body_exited` دو `Area3D` (شعاع دید ۷m / محدوده‌ی حمله ۱.۴m).
+- **`core/damage/damage_component.gd`:** کامپوننت آسیب قابل‌استفاده‌ی مجدد (آسیب ۸، کول‌داون ۱.۲s)
+  که `PlayerStats.take_damage` را صدا می‌زند — برای هر هدفی که `stats` از نوع PlayerStats داشته باشد.
+- یک دشمن نمونه در بازوی شمالی تقاطع (مسیر: `res://entities/enemy/enemy.tscn`).
+
+### Not included (طبق توافق، خارج از محدوده‌ی فاز ۵)
+
+سیستم موج، spawn تصادفی، صداگذاری، انیمیشن پیچیده.
+
+### Known / در انتظار
+
+- اجرای واقعی Godot در سنبوکس ممکن نبود (CDN باینری مسدود)؛ `gdparse 4.5.0` روی همه‌ی فایل‌ها PASS.
+
 ## [0.5.0] - 2026-09-11
 
 تکمیل فاز ۳ (Survival Loop): اتصال واقعی SaveManager به گیم‌پلی.
