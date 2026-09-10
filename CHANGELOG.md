@@ -3,6 +3,36 @@
 قالب این فایل از [Keep a Changelog](https://keepachangelog.com/fa-IR/1.1.0/) و
 شماره‌گذاری از [Semantic Versioning](https://semver.org/lang/fa/) پیروی می‌کند.
 
+## [0.5.0] - 2026-09-11
+
+تکمیل فاز ۳ (Survival Loop): اتصال واقعی SaveManager به گیم‌پلی.
+
+### Added
+
+- **سیستم save/load کامل (`core/save/save_controller.gd`):**
+  - سیو دستی با `F5` (اکشن جدید `save_game`): SaveData شامل موقعیت، yaw بازیکن، pitch دوربین،
+    همه‌ی آمار PlayerStats (+ maxها) و Dictionary رزرو‌شده‌ی inventory_items.
+  - لود دستی با `F8` (اکشن جدید `load_game`).
+  - **لود خودکار هنگام شروع:** اگر سیو موجود باشد، بازی از همان‌جا ادامه می‌یابد؛
+    در نبود سیو (یا سیو خراب) شروع پیش‌فرض بدون کرش.
+  - **auto-save** هر ۶۰ ثانیه با Timer (`autosave_interval` قابل تنظیم در صحنه برای تست).
+- **سیستم toast مشترک HUD:** سیگنال جدید `EventBus.toast_requested` + `_show_toast()` در `hud.gd`
+  (toast قبلی آیتم‌ها هم به همین تابع بازسازی شد). سیو/لود پیام «ذخیره شد» / «بازی از سیو بارگذاری شد» نشان می‌دهد.
+- **تست کارکردی headless (`tests/save_load_test.gd`):** ۷ گروه بررسی (شروع بدون سیو، سیو/لود دستی،
+  بازیابی پوزیشن/yaw/pitch/آمار، شبیه‌سازی restart با auto-load، auto-save) —
+  اجرا: `godot --headless --path . -s res://tests/save_load_test.gd`.
+
+### Changed
+
+- `SaveData`: فیلد جدید `player_pitch` و `save_version` به ۲ ارتقا (سیوهای v1 همچنان لود می‌شوند).
+- `project.godot`: اکشن‌های ورودی جدید `save_game` (F5) و `load_game` (F8).
+- README: فاز ۳ ✅ انجام شد؛ فاز بعدی = ۵ (Threat/Enemy AI).
+
+### Known / در انتظار
+
+- اجرای تست headless در سنبوکس Arena ممکن نبود (CDN باینری Godot مسدود است)؛
+  تست آماده است و باید یک‌بار در سیستم کاربر (یا هر جایی که Godot 4.7 دارد) اجرا شود.
+
 ## [0.4.1] - 2026-09-10
 
 فیکس‌های توافق‌شده‌ی فاز ۳.۰ + اصلاح فازبندی.

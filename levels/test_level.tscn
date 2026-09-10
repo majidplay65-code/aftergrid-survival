@@ -1,4 +1,4 @@
-[gd_scene load_steps=94 format=3]
+[gd_scene load_steps=95 format=3]
 
 [ext_resource type="PackedScene" path="res://entities/player/player.tscn" id="1_player"]
 [ext_resource type="PackedScene" path="res://ui/hud/hud.tscn" id="2_hud"]
@@ -11,6 +11,7 @@
 [ext_resource type="Texture2D" path="res://assets/textures/concrete_wall.jpg" id="9_concrete"]
 [ext_resource type="Texture2D" path="res://assets/textures/rusted_metal.jpg" id="10_rust"]
 [ext_resource type="Texture2D" path="res://assets/textures/wood_planks.jpg" id="11_wood"]
+[ext_resource type="Script" path="res://core/save/save_controller.gd" id="12_savectrl"]
 
 [sub_resource type="StandardMaterial3D" id="mat_asphalt"]
 albedo_texture = ExtResource("8_asphalt")
@@ -1178,6 +1179,9 @@ omni_range = 16.0
 
 [node name="WaterBottle2" parent="." instance=ExtResource("3_water")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.6, 0, 12.1)
+
+[node name="SaveController" type="Node" parent="."]
+script = ExtResource("12_savectrl")
 
 [node name="Player" parent="." instance=ExtResource("1_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 7)

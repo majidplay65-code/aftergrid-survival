@@ -28,3 +28,7 @@ signal interaction_performed(interactable: Node)
 signal game_paused(is_paused: bool)
 signal game_saved
 signal game_loaded
+
+# --- UI ---
+## هر سیستمی که بخواهد پیامی روی HUD نشان دهد (toast) این سیگنال را emit می‌کند.
+signal toast_requested(message: String)
