@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=21 format=3]
 
 [ext_resource type="Script" path="res://entities/player/player.gd" id="1_player"]
 [ext_resource type="Script" path="res://core/state_machine/state_machine.gd" id="2_statemachine"]
@@ -6,22 +6,116 @@
 [ext_resource type="Script" path="res://entities/player/states/walk_state.gd" id="4_walk"]
 [ext_resource type="Script" path="res://entities/player/states/run_state.gd" id="5_run"]
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_body"]
+[sub_resource type="CapsuleShape3D" id="shape_body"]
 radius = 0.4
 height = 1.8
 
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_body"]
-radius = 0.4
-height = 1.8
+[sub_resource type="StandardMaterial3D" id="mat_body"]
+albedo_color = Color(0.16, 0.17, 0.13, 1)
+roughness = 0.9
+
+[sub_resource type="CapsuleMesh" id="m_body"]
+radius = 0.3
+height = 1.4
+
+[sub_resource type="StandardMaterial3D" id="mat_pants"]
+albedo_color = Color(0.12, 0.12, 0.14, 1)
+roughness = 0.9
+
+[sub_resource type="BoxMesh" id="m_leg"]
+size = Vector3(0.16, 0.62, 0.19)
+
+[sub_resource type="StandardMaterial3D" id="mat_head"]
+albedo_color = Color(0.72, 0.58, 0.46, 1)
+roughness = 0.7
+
+[sub_resource type="SphereMesh" id="m_head"]
+radius = 0.16
+
+[sub_resource type="StandardMaterial3D" id="mat_beanie"]
+albedo_color = Color(0.38, 0.14, 0.12, 1)
+roughness = 0.9
+
+[sub_resource type="CylinderMesh" id="m_beanie"]
+top_radius = 0.175
+bottom_radius = 0.175
+height = 0.12
+
+[sub_resource type="StandardMaterial3D" id="mat_pack"]
+albedo_color = Color(0.2, 0.18, 0.14, 1)
+roughness = 0.95
+
+[sub_resource type="BoxMesh" id="m_pack"]
+size = Vector3(0.42, 0.5, 0.2)
+
+[sub_resource type="StandardMaterial3D" id="mat_flash"]
+albedo_color = Color(0.1, 0.1, 0.12, 1)
+metallic = 0.6
+roughness = 0.4
+
+[sub_resource type="CylinderMesh" id="m_flash"]
+top_radius = 0.035
+bottom_radius = 0.035
+height = 0.16
+
+[sub_resource type="StandardMaterial3D" id="mat_lens"]
+albedo_color = Color(1, 0.95, 0.85, 1)
+emission_enabled = true
+emission = Color(1, 0.95, 0.8, 1)
+emission_energy_multiplier = 3.0
+roughness = 0.3
+
+[sub_resource type="SphereMesh" id="m_lens"]
+radius = 0.03
 
 [node name="Player" type="CharacterBody3D"]
 script = ExtResource("1_player")
+floor_snap_length = 0.2
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-shape = SubResource("CapsuleShape3D_body")
+shape = SubResource("shape_body")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-mesh = SubResource("CapsuleMesh_body")
+[node name="Model" type="Node3D" parent="."]
+
+[node name="BodyMesh" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+mesh = SubResource("m_body")
+surface_material_override/0 = SubResource("mat_body")
+
+[node name="LegL" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.14, 0.31, 0)
+mesh = SubResource("m_leg")
+surface_material_override/0 = SubResource("mat_pants")
+
+[node name="LegR" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.14, 0.31, 0)
+mesh = SubResource("m_leg")
+surface_material_override/0 = SubResource("mat_pants")
+
+[node name="ArmL" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(0.9903, 0.1392, 0, -0.1392, 0.9903, 0, 0, 0, 1, -0.4, 1.02, 0)
+mesh = SubResource("m_body")
+surface_material_override/0 = SubResource("mat_body")
+
+[node name="ArmR" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(0.9903, -0.1392, 0, 0.1392, 0.9903, 0, 0, 0, 1, 0.4, 1.02, 0)
+mesh = SubResource("m_body")
+surface_material_override/0 = SubResource("mat_body")
+
+[node name="HeadMesh" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.66, 0)
+mesh = SubResource("m_head")
+surface_material_override/0 = SubResource("mat_head")
+
+[node name="BeanieMesh" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.78, 0)
+mesh = SubResource("m_beanie")
+surface_material_override/0 = SubResource("mat_beanie")
+
+[node name="PackMesh" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1, 0.32)
+mesh = SubResource("m_pack")
+surface_material_override/0 = SubResource("mat_pack")
 
 [node name="CameraPivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
@@ -33,6 +127,24 @@ current = true
 [node name="InteractionRayCast" type="RayCast3D" parent="CameraPivot/Camera3D"]
 target_position = Vector3(0, 0, -5.5)
 collision_mask = 1
+
+[node name="Flashlight" type="SpotLight3D" parent="CameraPivot/Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, -0.12, 0.3)
+light_color = Color(1, 0.94, 0.82, 1)
+light_energy = 3.0
+spot_range = 26.0
+spot_attenuation = 1.5
+shadow_enabled = true
+
+[node name="FlashMesh" type="MeshInstance3D" parent="CameraPivot/Camera3D"]
+transform = Transform3D(0, 1, 0, -1, 0, 0, 0, 0, 1, 0.18, -0.12, 0.42)
+mesh = SubResource("m_flash")
+surface_material_override/0 = SubResource("mat_flash")
+
+[node name="LensMesh" type="MeshInstance3D" parent="CameraPivot/Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, -0.12, 0.335)
+mesh = SubResource("m_lens")
+surface_material_override/0 = SubResource("mat_lens")
 
 [node name="StateMachine" type="Node" parent="."]
 script = ExtResource("2_statemachine")
