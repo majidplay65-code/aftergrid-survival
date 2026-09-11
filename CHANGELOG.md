@@ -3,6 +3,19 @@
 قالب این فایل از [Keep a Changelog](https://keepachangelog.com/fa-IR/1.1.0/) و
 شماره‌گذاری از [Semantic Versioning](https://semver.org/lang/fa/) پیروی می‌کند.
 
+## [0.6.1] - 2026-09-11
+
+فیکس فاز ۵: خطای runtime در حالت گشت دشمن — `Vector3` در Godot متد `horizontal_length()` ندارد.
+
+### Fixed
+
+- **`entities/enemy/enemy.gd`:** متد کمکی جدید `horizontal_distance_to(world_point)` که فاصله‌ی افقی
+  (صفحه‌ی XZ، بدون مولفه‌ی y) تا یک نقطه‌ی جهانی را برمی‌گرداند — در کنار helperهای قبلی
+  (`move_along_agent`، `stop_moving`، `face_toward`).
+- **`entities/enemy/states/patrol_state.gd`:** هر دو فراخوانی نامعتبر `.horizontal_length()`
+  (انتخاب نزدیک‌ترین نقطه‌ی گشت در `enter` و چک رسیدن به نقطه در `physics_update`)
+  با `enemy.horizontal_distance_to(...)` جایگزین شدند.
+
 ## [0.6.0] - 2026-09-11
 
 فاز ۵ (Threat System): سیستم تهدید نمونه با الگوی موجود StateMachine.

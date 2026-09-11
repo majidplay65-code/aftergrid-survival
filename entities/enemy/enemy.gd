@@ -107,3 +107,11 @@ func face_toward(world_point: Vector3) -> void:
 	d.y = 0.0
 	if d.length() > 0.05:
 		rotation.y = atan2(-d.x, -d.z)
+
+
+## فاصله‌ی افقی (روی صفحه‌ی XZ) تا یک نقطه‌ی جهانی — بدون اثر اختلاف ارتفاع.
+## (Vector3 در Godot متد horizontal_length ندارد؛ این helper همان معنا را امن پیاده می‌کند.)
+func horizontal_distance_to(world_point: Vector3) -> float:
+	var d: Vector3 = world_point - global_position
+	d.y = 0.0
+	return d.length()

@@ -17,7 +17,7 @@ func enter(_msg: Dictionary = {}) -> void:
 	var best_index: int = 0
 	var best_distance: float = INF
 	for i in enemy.patrol_points.size():
-		var d: float = (enemy.patrol_points[i] - enemy.global_position).horizontal_length()
+		var d: float = enemy.horizontal_distance_to(enemy.patrol_points[i])
 		if d < best_distance:
 			best_distance = d
 			best_index = i
@@ -31,6 +31,6 @@ func physics_update(delta: float) -> void:
 	var point: Vector3 = enemy.patrol_points[enemy.current_patrol_index]
 	enemy.agent.target_position = point
 	# رسیدن به «نقطه‌ی مسیر» (نه بازیکن) چک می‌شود
-	if (point - enemy.global_position).horizontal_length() < ARRIVE_DISTANCE:
+	if enemy.horizontal_distance_to(point) < ARRIVE_DISTANCE:
 		enemy.current_patrol_index = (enemy.current_patrol_index + 1) % enemy.patrol_points.size()
 	enemy.move_along_agent(delta, SPEED)
