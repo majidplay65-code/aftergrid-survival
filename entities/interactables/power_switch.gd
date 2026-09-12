@@ -18,6 +18,8 @@ func _ready() -> void:
 func _on_interact(_actor: Node3D) -> void:
 	is_powered_on = not is_powered_on
 	_update_switch_state()
+	if is_powered_on:
+		EventBus.generator_charge_requested.emit()
 
 
 func _update_switch_state() -> void:

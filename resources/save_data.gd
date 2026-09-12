@@ -17,6 +17,8 @@ extends Resource
 @export var max_hunger: float = 100.0
 @export var thirst: float = 100.0
 @export var max_thirst: float = 100.0
+## باتری چراغ‌قوه. سیوهای قدیمی این فیلد را ندارند → پیش‌فرض ۱۰۰.
+@export var flashlight_battery: float = 100.0
 
 ## Dictionary[StringName, int] -> item_id به‌مقدار stack
 @export var inventory_items: Dictionary = {}

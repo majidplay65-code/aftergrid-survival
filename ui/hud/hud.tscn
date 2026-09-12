@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://ui/hud/hud.gd" id="1_hud"]
 
@@ -52,6 +52,13 @@ corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_thirst"]
 bg_color = Color(0.2, 0.65, 0.95, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_battery"]
+bg_color = Color(0.85, 0.85, 0.25, 1)
 corner_radius_top_left = 4
 corner_radius_top_right = 4
 corner_radius_bottom_right = 4
@@ -144,7 +151,7 @@ layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_top = -180.0
+offset_top = -220.0
 offset_right = 240.0
 grow_vertical = 0
 theme_override_constants/margin_left = 20
@@ -208,6 +215,19 @@ custom_minimum_size = Vector2(0, 10)
 layout_mode = 2
 theme_override_styles/background = SubResource("StyleBoxFlat_bar_bg")
 theme_override_styles/fill = SubResource("StyleBoxFlat_thirst")
+value = 100.0
+show_percentage = false
+
+[node name="BatteryLabel" type="Label" parent="Root/MarginContainer/VitalsContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "🔋 باتری (Battery)"
+
+[node name="BatteryBar" type="ProgressBar" parent="Root/MarginContainer/VitalsContainer"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_bar_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_battery")
 value = 100.0
 show_percentage = false
 

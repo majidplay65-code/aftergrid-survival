@@ -93,6 +93,7 @@ func _capture_data(player: Node3D) -> SaveData:
 	data.max_hunger = stats.max_hunger
 	data.thirst = stats.thirst
 	data.max_thirst = stats.max_thirst
+	data.flashlight_battery = float(player.get("flashlight_battery"))
 	# اینونتوری واقعی (فاز ۶): از InventoryManager سراسری خوانده می‌شود.
 	data.inventory_items = InventoryManager.get_items()
 	return data
@@ -114,6 +115,8 @@ func _apply_data(data: SaveData) -> bool:
 	stats.stamina = data.stamina
 	stats.hunger = data.hunger
 	stats.thirst = data.thirst
+	if player.has_method("set_flashlight_battery"):
+		player.call("set_flashlight_battery", data.flashlight_battery)
 
 	# بازیابی اینونتوری از سیو (فاز ۶)
 	InventoryManager.restore_items(data.inventory_items)

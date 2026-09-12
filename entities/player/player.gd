@@ -17,6 +17,8 @@ const STAND_PIVOT_Y: float = 1.6
 const CROUCH_PIVOT_Y: float = 1.05
 const STAND_CAPSULE_HEIGHT: float = 1.8
 const CROUCH_CAPSULE_HEIGHT: float = 1.2
+const FLASHLIGHT_DRAIN_RATE: float = 8.0
+const MAX_FLASHLIGHT_BATTERY: float = 100.0
 
 # نرخ مصرف حیاتی در هر ثانیه
 const THIRST_DECAY_RATE: float = 0.25
@@ -35,6 +37,7 @@ var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var focused_interactable: Interactable = null
 ## تایمر فاصله‌ی قدم‌ها برای emit نویز (نه polling تشخیص دشمن).
 var _footstep_timer: float = 0.0
+var flashlight_battery: float = MAX_FLASHLIGHT_BATTERY
 
 
 func _ready() -> void:
@@ -42,6 +45,7 @@ func _ready() -> void:
 	GameState.register_player(self)
 	stats.stat_changed.connect(_on_stat_changed)
 	stats.died.connect(_on_died)
+	EventBus.generator_charge_requested.connect(_on_generator_charge_requested)
 
 	if interaction_raycast != null:
 		interaction_raycast.add_exception(self)
@@ -68,9 +72,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"interact"):
 		_try_interact()
 
-	# کلید چراغ‌قوه (F) — روشن/خاموش کردن نور دوربین
+	# کلید چراغ‌قوه (F) — روشن/خاموش کردن نور دوربین (بدون باتری روشن نمی‌شود)
 	if event.is_action_pressed(&"flashlight") and flashlight != null:
-		flashlight.visible = not flashlight.visible
+		_toggle_flashlight()
 
 
 func _physics_process(delta: float) -> void:
@@ -84,6 +88,7 @@ func _physics_process(delta: float) -> void:
 	stats.decrease_thirst(THIRST_DECAY_RATE * delta)
 	stats.decrease_hunger(HUNGER_DECAY_RATE * delta)
 
+	_update_flashlight_battery(delta)
 	_update_interaction_raycast()
 	_update_run_fov(delta)
 	_update_crouch_pose(delta)
@@ -160,6 +165,46 @@ func is_run_pressed() -> bool:
 	return Input.is_action_pressed(&"run")
 
 
+func is_crouch_pressed() -> bool:
+	return Input.is_action_pressed(&"crouch")
+
+
+func _toggle_flashlight() -> void:
+	if flashlight.visible:
+		flashlight.visible = false
+		return
+	if flashlight_battery <= 0.0:
+		EventBus.toast_requested.emit("باتری چراغ‌قوه خالی است")
+		return
+	flashlight.visible = true
+
+
+func _update_flashlight_battery(delta: float) -> void:
+	if flashlight == null or not flashlight.visible:
+		return
+	flashlight_battery = maxf(flashlight_battery - FLASHLIGHT_DRAIN_RATE * delta, 0.0)
+	EventBus.player_stat_changed.emit(&"battery", flashlight_battery, MAX_FLASHLIGHT_BATTERY)
+	if flashlight_battery <= 0.0:
+		flashlight.visible = false
+		EventBus.toast_requested.emit("باتری چراغ‌قوه خالی است")
+
+
+func recharge_flashlight() -> void:
+	set_flashlight_battery(MAX_FLASHLIGHT_BATTERY)
+	EventBus.toast_requested.emit("چراغ‌قوه شارژ شد")
+
+
+func set_flashlight_battery(value: float) -> void:
+	flashlight_battery = clampf(value, 0.0, MAX_FLASHLIGHT_BATTERY)
+	EventBus.player_stat_changed.emit(&"battery", flashlight_battery, MAX_FLASHLIGHT_BATTERY)
+	if flashlight != null and flashlight.visible and flashlight_battery <= 0.0:
+		flashlight.visible = false
+
+
+func _on_generator_charge_requested() -> void:
+	recharge_flashlight()
+
+
 ## بررسی پرتو نگاه بازیکن برای تشخیص شیء تعاملی روبه‌رو
 func _update_interaction_raycast() -> void:
 	if interaction_raycast == null:
@@ -192,6 +237,7 @@ func _emit_initial_stats() -> void:
 	EventBus.player_stat_changed.emit(&"stamina", stats.stamina, stats.max_stamina)
 	EventBus.player_stat_changed.emit(&"hunger", stats.hunger, stats.max_hunger)
 	EventBus.player_stat_changed.emit(&"thirst", stats.thirst, stats.max_thirst)
+	EventBus.player_stat_changed.emit(&"battery", flashlight_battery, MAX_FLASHLIGHT_BATTERY)
 
 
 func _on_stat_changed(stat_name: StringName, current_value: float, max_value: float) -> void:

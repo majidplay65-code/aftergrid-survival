@@ -11,6 +11,7 @@ extends CanvasLayer
 @onready var stamina_bar: ProgressBar = $Root/MarginContainer/VitalsContainer/StaminaBar
 @onready var hunger_bar: ProgressBar = $Root/MarginContainer/VitalsContainer/HungerBar
 @onready var thirst_bar: ProgressBar = $Root/MarginContainer/VitalsContainer/ThirstBar
+@onready var battery_bar: ProgressBar = $Root/MarginContainer/VitalsContainer/BatteryBar
 
 @onready var notification_container: VBoxContainer = $Root/NotificationContainer
 @onready var game_over_panel: Panel = $Root/GameOverPanel
@@ -114,6 +115,8 @@ func _on_player_stat_changed(stat_name: StringName, current_value: float, max_va
 			_update_bar(hunger_bar, current_value, max_value)
 		&"thirst":
 			_update_bar(thirst_bar, current_value, max_value)
+		&"battery":
+			_update_bar(battery_bar, current_value, max_value)
 
 
 func _update_bar(bar: ProgressBar, current_val: float, max_val: float) -> void:
