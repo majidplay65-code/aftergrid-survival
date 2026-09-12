@@ -18,6 +18,8 @@ extends CanvasLayer
 
 var pause_panel: Panel
 var _pause_built: bool = false
+var night_label: Label
+var survive_panel: Panel
 
 
 func _ready() -> void:
@@ -166,3 +168,57 @@ func _on_restart_button_pressed() -> void:
 	if GameState.is_paused:
 		GameState.is_paused = false
 	SceneManager.reload_current_scene()
+
+
+func _build_night_hud() -> void:
+	var root_control: Control = $Root
+	night_label = Label.new()
+	night_label.name = "NightLabel"
+	night_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	night_label.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	night_label.offset_top = 12.0
+	night_label.offset_bottom = 36.0
+	night_label.text = "شب ۱"
+	root_control.add_child(night_label)
+
+	survive_panel = Panel.new()
+	survive_panel.name = "SurvivePanel"
+	survive_panel.visible = false
+	survive_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	root_control.add_child(survive_panel)
+	var center: CenterContainer = CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	survive_panel.add_child(center)
+	var box: VBoxContainer = VBoxContainer.new()
+	center.add_child(box)
+	var title: Label = Label.new()
+	title.name = "SurviveTitle"
+	title.text = "زنده ماندی"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.add_child(title)
+	var cont: Button = Button.new()
+	cont.name = "SurviveContinue"
+	cont.text = "ادامه"
+	cont.pressed.connect(_on_survive_continue)
+	box.add_child(cont)
+
+
+func _on_time_of_day_changed(normalized: float) -> void:
+	if night_label == null:
+		return
+	var until_dawn: float = 0.25 - normalized
+	if until_dawn < 0.0:
+		until_dawn += 1.0
+	var pct: int = int(round((1.0 - until_dawn) * 100.0))
+	night_label.text = "شب %d — تا سپیده %d%%" % [GameState.night_index, pct]
+
+
+func _on_night_survived(_night_index: int) -> void:
+	if survive_panel != null:
+		survive_panel.visible = true
+	EventBus.toast_requested.emit("شب را زنده ماندی")
+
+
+func _on_survive_continue() -> void:
+	if survive_panel != null:
+		survive_panel.visible = false

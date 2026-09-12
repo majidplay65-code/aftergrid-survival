@@ -22,3 +22,6 @@ extends Resource
 
 ## Dictionary[StringName, int] -> item_id به‌مقدار stack
 @export var inventory_items: Dictionary = {}
+## شمارهٔ شب. سیوهای قدیمی این فیلد را ندارند → پیش‌فرض ۱.
+@export var night_index: int = 1
+@export var radio_is_on: bool = false

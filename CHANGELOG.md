@@ -3,6 +3,17 @@
 قالب این فایل از [Keep a Changelog](https://keepachangelog.com/fa-IR/1.1.0/) و
 شماره‌گذاری از [Semantic Versioning](https://semver.org/lang/fa/) پیروی می‌کند.
 
+## [0.23.0] - 2026-09-12
+
+فاز ۲۲ (برد شب): زنده ماندن تا سپیده.
+
+### Added
+
+- `EventBus.night_survived` هنگام عبور از سپیده.
+- HUD: برچسب شب و پنل «زنده ماندی».
+- `SaveData.night_index` پیش‌فرض ۱.
+- تست headless `tests/night_survive_test.gd` (۹ چک).
+
 ## [0.22.0] - 2026-09-12
 
 فاز ۲۱ (چرخه شب): زمان Resource و تاریکی محیط.

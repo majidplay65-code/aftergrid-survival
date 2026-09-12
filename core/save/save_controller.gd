@@ -98,6 +98,8 @@ func _capture_data(player: Node3D) -> SaveData:
 	data.flashlight_battery = float(player.get("flashlight_battery"))
 	# اینونتوری واقعی (فاز ۶): از InventoryManager سراسری خوانده می‌شود.
 	data.inventory_items = InventoryManager.get_items()
+	data.night_index = GameState.night_index
+	data.radio_is_on = GameState.radio_is_on
 	return data
 
 
@@ -122,6 +124,8 @@ func _apply_data(data: SaveData) -> bool:
 
 	# بازیابی اینونتوری از سیو (فاز ۶)
 	InventoryManager.restore_items(data.inventory_items)
+	GameState.night_index = data.night_index
+	GameState.radio_is_on = data.radio_is_on
 
 	player.rotation.y = data.player_rotation_y
 	var camera_pivot: Node3D = player.get_node_or_null("CameraPivot")
