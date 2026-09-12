@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/items/item_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+item_id = &"water_bottle"
+item_name = "بطری آب معدنی"
+description = "آب آشامیدنی؛ تشنگی را برطرف می‌کند."
+category = 1
+max_stack = 5
+is_consumable = true

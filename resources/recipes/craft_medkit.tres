@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="RecipeData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/items/recipe_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+recipe_id = &"craft_medkit"
+recipe_name = "کیت کمک‌های اولیه ساده"
+result_item_id = &"medkit"
+result_amount = 1
+ingredients = {
+&"canned_food": 1,
+&"scrap_metal": 1
+}
+craft_time = 3.0
