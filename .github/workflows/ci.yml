@@ -132,7 +132,25 @@ jobs:
           for script in "${scripts[@]}"; do
             echo "── ${script}"
             # اسکریپت خودش با quit(0)/quit(1) نتیجه را اعلام می‌کند و exit code حفظ می‌شود.
-            godot --headless --path . -s "res://${script}" || failed=1
+            # TEMPDEBUG-START (این بلوک موقتی است و بعد از تأیید حذف می‌شود)
+            set +e
+            output="$(godot --headless --path . -s "res://${script}" 2>&1)"
+            status=$?
+            set -e
+            printf '%s\n' "${output}"
+            if [ "${status}" -ne 0 ]; then failed=1; fi
+            pass_count="$(printf '%s\n' "${output}" | grep -c '^PASS:' || true)"
+            fail_count="$(printf '%s\n' "${output}" | grep -c '^FAIL:' || true)"
+            err_count="$(printf '%s\n' "${output}" | grep -cE 'ERROR' || true)"
+            warn_count="$(printf '%s\n' "${output}" | grep -c 'WARNING' || true)"
+            echo "::notice title=DoD summary::${script} :: PASS=${pass_count} FAIL=${fail_count} ERROR=${err_count} WARNING=${warn_count} exit=${status}"
+            printf '%s\n' "${output}" | grep -E 'ERROR|WARNING|^FAIL:' | sort -u | head -40 | while IFS= read -r line; do
+              echo "::notice title=DoD problem::${line}"
+            done
+            printf '%s\n' "${output}" | grep '^PASS:' | grep -vF -e 'در صحنه هست' -e 'محوطه را با vertices' -e 'علامت‌های affect' -e 'ارتفاع ساختمان' -e 'مرکز محوطه‌ی' -e 'نقطه‌ی حیاتی' -e 'پای گشت' | while IFS= read -r line; do
+              echo "::notice title=DoD check::${line}"
+            done
+            # TEMPDEBUG-END
           done
 
           if [ "${failed}" -ne 0 ]; then
