@@ -26,6 +26,38 @@ const SAVED_POSITION: Vector3 = Vector3(26.0, 1.0, 0.0)
 ##  فریم فیزیک باشد نه فریم رندر.)
 const NAV_PROBE_PHYSICS_FRAMES: int = 60
 
+## تعداد رأس/مثلث‌های navmesh کاروشده در `levels/test_level.tscn`.
+## چرا این اعداد؟ سطحِ صافِ `[-40,40]²` منهای ۶ محوطه‌ی ساختمان‌ها، با شبکه‌ای
+## هم‌ترازِ لبه‌های همان محوطه‌ها (بدون T-junction؛ چون موتور لبه‌ها را فقط وقتی
+## به هم وصل می‌کند که «هر دو سرِ لبه» یکی باشند) = ۸۶ خانه × ۲ مثلث = ۱۷۲ مثلث
+## و ۱۳۴ رأس. عدد دقیق، محافظِ رگرسیون است: هر تغییرِ ناخواسته در navmesh را می‌گیرد.
+const NAVMESH_VERTEX_COUNT: int = 134
+const NAVMESH_POLYGON_COUNT: int = 172
+
+## نام ۶ مانع ناوبری (پایه‌ی ساختمان‌ها) در `test_level.tscn`.
+const OBSTACLE_NAMES: Array[String] = ["ObstacleB1", "ObstacleB2", "ObstacleB3",
+		"ObstacleB4", "ObstacleB5", "ObstacleB6"]
+
+## نقاطی که بعد از کارو (بریدن محوطه‌ی ساختمان‌ها از navmesh) باید هنوز روی navmesh
+## باشند: اسپاون بازیکن، نقطه‌ی سیو/لود تست، اسپاون دشمن و ۴ نقطه‌ی گشت دشمن.
+## اگر کارو زیاده‌روی کرده باشد، یکی از این‌ها از شبکه جدا می‌شود.
+const NAV_FREE_POINTS: Array[Vector3] = [
+	Vector3(0.0, 0.0, 7.0), Vector3(26.0, 0.0, 0.0), Vector3(-1.5, 0.0, -12.0),
+	Vector3(0.0, 0.0, -12.0), Vector3(-12.0, 0.0, 0.0), Vector3(0.0, 0.0, 12.0), Vector3(12.0, 0.0, 0.0),
+]
+
+## ۴ نقطه‌ی گشت دشمن — همان مقادیر `patrol_points` در `entities/enemy/enemy.tscn`.
+const PATROL_POINTS: Array[Vector3] = [
+	Vector3(0.0, 0.0, 12.0), Vector3(-12.0, 0.0, 0.0), Vector3(0.0, 0.0, -12.0), Vector3(12.0, 0.0, 0.0),
+]
+
+## دو نقطه در دو طرف ساختمان Bldg1 (محوطه‌ی مانع: x∈[-26.5,-7.5]، z∈[-25.5,-8.5]).
+## خط مستقیم بین این دو ۲۶ متر است و از وسط ساختمان می‌گذرد؛ روی navmeshِ کاروشده
+## موتور باید مسیر را دور ساختمان بچرخاند (طول واقعی ≈ ۴۳ متر).
+const CARVE_PROBE_WEST: Vector3 = Vector3(-30.0, 0.5, -17.0)
+const CARVE_PROBE_EAST: Vector3 = Vector3(-4.0, 0.5, -17.0)
+const CARVE_STRAIGHT_METERS: float = 26.0
+
 var frame: int = 0
 var phase: int = 0
 var level: Node = null
@@ -194,8 +226,97 @@ func _check_navigation_mesh() -> void:
 	if navmesh == null:
 		return
 
-	_check(navmesh.get_vertices().size() == 4, "P0: navmesh هر ۴ رأس را دارد")
-	_check(navmesh.get_polygon_count() == 2, "P0: navmesh هر ۲ مثلث را دارد")
+	_check(navmesh.get_vertices().size() == NAVMESH_VERTEX_COUNT,
+			"P0: navmesh هر %d رأس را دارد" % NAVMESH_VERTEX_COUNT)
+	_check(navmesh.get_polygon_count() == NAVMESH_POLYGON_COUNT,
+			"P0: navmesh هر %d مثلث را دارد" % NAVMESH_POLYGON_COUNT)
+	_check_navigation_carve(navmesh)
+
+
+## چک: فیکسِ `NavigationObstacle3D` واقعاً کار می‌کند (نه فقط ادعا).
+## تاریخِ باگ: نودهای مانع پراپرتی `shape` داشتند که در Godot 4.7.2 اصلاً وجود ندارد
+## (فقط به‌صورت خاموش نادیده گرفته می‌شد) و `sync_to_physics` هم در ۴.x حذف شده است؛
+## یعنی هیچ‌کدام از ۶ مانع کاری نمی‌کردند و مسیر دشمن از وسط ساختمان‌ها می‌گذشت.
+## فیکس: `vertices` (محوطه) + `affect_navigation_mesh` + `carve_navigation_mesh`.
+## چون این دو فلگ فقط در «bake» اثر دارند و navmesh این پروژه دستی نوشته شده
+## (هیچ‌وقت bake نمی‌شود)، نتیجه‌ی همان bake به‌صورت چندضلعی‌های کاروشده داخل
+## `polygons` نوشته شده است. این تابع هر دو طرف را چک می‌کند:
+##   ۱) داده‌ی مانع‌ها همان چیزی است که باید باشد،
+##   ۲) داخل محوطه‌های مانع هیچ سطحی از navmesh نیست (کارو انجام شده)،
+##   ۳) نقاط حیاتی بازی هنوز روی navmesh هستند (کارو زیاده‌روی نکرده).
+func _check_navigation_carve(navmesh: NavigationMesh) -> void:
+	var vertices: PackedVector3Array = navmesh.get_vertices()
+	var polygons: Array = navmesh.get_polygons()
+
+	for obstacle_name in OBSTACLE_NAMES:
+		var obstacle: NavigationObstacle3D = level.get_node_or_null(NodePath(obstacle_name)) as NavigationObstacle3D
+		_check(obstacle != null, "P0: مانع %s در صحنه هست" % obstacle_name)
+		if obstacle == null:
+			continue
+		_check(obstacle.get_vertices().size() == 4,
+				"P0: %s محوطه را با vertices تعریف کرده (نه shape ناموجود)" % obstacle_name)
+		_check(obstacle.affect_navigation_mesh and obstacle.carve_navigation_mesh,
+				"P0: %s علامت‌های affect + carve را دارد" % obstacle_name)
+		_check(obstacle.height >= 4.5,
+				"P0: %s ارتفاع ساختمان را دارد (%.1f متر)" % [obstacle_name, obstacle.height])
+		var footprint: Rect2 = _obstacle_footprint(obstacle)
+		_check(not _navmesh_covers_xz(vertices, polygons, footprint.get_center()),
+				"P0: مرکز محوطه‌ی %s از navmesh کارو شده" % obstacle_name)
+
+	for point in NAV_FREE_POINTS:
+		_check(_navmesh_covers_xz(vertices, polygons, Vector2(point.x, point.z)),
+				"P0: نقطه‌ی حیاتی (%.0f، %.0f) هنوز روی navmesh است" % [point.x, point.z])
+
+
+## محوطه‌ی جهانیِ مانع در صفحه‌ی XZ (از روی `vertices` محلی × ترنسفورم گره).
+func _obstacle_footprint(obstacle: NavigationObstacle3D) -> Rect2:
+	var local: PackedVector3Array = obstacle.get_vertices()
+	if local.is_empty():
+		return Rect2()
+	var first: Vector3 = obstacle.global_transform * local[0]
+	var min_x: float = first.x
+	var max_x: float = first.x
+	var min_z: float = first.z
+	var max_z: float = first.z
+	for v in local:
+		var world: Vector3 = obstacle.global_transform * v
+		min_x = minf(min_x, world.x)
+		max_x = maxf(max_x, world.x)
+		min_z = minf(min_z, world.z)
+		max_z = maxf(max_z, world.z)
+	return Rect2(min_x, min_z, max_x - min_x, max_z - min_z)
+
+
+## آیا این نقطه‌ی XZ روی یکی از چندضلعی‌های navmesh می‌افتد؟
+## (چندضلعی‌ها محدب‌اند؛ تست علامتِ ضربِ خارجی برای هر ضلع.)
+func _navmesh_covers_xz(vertices: PackedVector3Array, polygons: Array, point_xz: Vector2) -> bool:
+	for poly_value in polygons:
+		var poly: PackedInt32Array = poly_value
+		var count: int = poly.size()
+		var positive: int = 0
+		var negative: int = 0
+		for i in count:
+			var a: Vector3 = vertices[poly[i]]
+			var b: Vector3 = vertices[poly[(i + 1) % count]]
+			var cross: float = (b.x - a.x) * (point_xz.y - a.z) - (b.z - a.z) * (point_xz.x - a.x)
+			if cross > 0.000001:
+				positive += 1
+			elif cross < -0.000001:
+				negative += 1
+		if positive == 0 or negative == 0:
+			return true
+	return false
+
+
+## آیا این نقطه داخل محوطه‌ی یکی از مانع‌ها است؟ (`erode` = چند متر داخل‌تر)
+func _point_inside_any_obstacle(point_xz: Vector2, erode: float) -> bool:
+	for obstacle_name in OBSTACLE_NAMES:
+		var obstacle: NavigationObstacle3D = level.get_node_or_null(NodePath(obstacle_name)) as NavigationObstacle3D
+		if obstacle == null:
+			continue
+		if _obstacle_footprint(obstacle).grow(-erode).has_point(point_xz):
+			return true
+	return false
 
 
 ## چک: دشمن واقعاً روی navmesh گشت می‌زند (نه اینکه فقط بی‌خطا کرش نکند).
@@ -209,6 +330,45 @@ func _check_enemy_patrols() -> void:
 	var moved: float = enemy.global_position.distance_to(enemy_start_position)
 	_check(moved > 0.1, "P0: دشمن روی navmesh حرکت کرد (%.2f متر در %d فریم فیزیک)"
 			% [moved, NAV_PROBE_PHYSICS_FRAMES])
+	_check_navigation_paths(enemy)
+
+
+## چک: اثباتِ موتوربنیانِ کارو روی navigation map زنده‌ی موتور (نه فقط خواندن ریسورس).
+## در این لحظه دشمن با همین map واقعاً حرکت کرده، پس map sync شده است.
+func _check_navigation_paths(enemy: Node3D) -> void:
+	var map: RID = enemy.get_navigation_map()
+	_check(map.is_valid(), "P0: navigation map دشمن معتبر است")
+	if not map.is_valid():
+		return
+
+	# ۱) مسیر دو طرف ساختمان Bldg1: روی navmeshِ کارونشده باید دور ساختمان بچرخد.
+	var path: PackedVector3Array = NavigationServer3D.map_get_path(
+			map, CARVE_PROBE_WEST, CARVE_PROBE_EAST, true)
+	_check(path.size() >= 2, "P0: مسیر ناوبری بین دو طرف ساختمان پیدا شد (%d نقطه)" % path.size())
+	var length: float = 0.0
+	for i in path.size() - 1:
+		length += path[i].distance_to(path[i + 1])
+	_check(length > CARVE_STRAIGHT_METERS + 4.0,
+			"P0: مسیر دور ساختمان می‌چرخد (%.1f متر > خط مستقیم %.1f متر)"
+			% [length, CARVE_STRAIGHT_METERS])
+	var inside: bool = false
+	for point in path:
+		if _point_inside_any_obstacle(Vector2(point.x, point.z), 0.1):
+			inside = true
+	_check(not inside, "P0: هیچ نقطه‌ی مسیر داخل محوطه‌ی ساختمان‌ها نیست (کارو واقعی است)")
+
+	# ۲) اتصال شبکه بعد از کارو: هر چهار پای گشت دشمن باید مسیر کامل داشته باشند.
+	for i in PATROL_POINTS.size():
+		var from_point: Vector3 = PATROL_POINTS[i]
+		var to_point: Vector3 = PATROL_POINTS[(i + 1) % PATROL_POINTS.size()]
+		var leg: PackedVector3Array = NavigationServer3D.map_get_path(map,
+				from_point + Vector3(0.0, 0.5, 0.0), to_point + Vector3(0.0, 0.5, 0.0), true)
+		var reached: bool = false
+		if leg.size() >= 2:
+			var end_xz: Vector2 = Vector2(leg[leg.size() - 1].x, leg[leg.size() - 1].z)
+			reached = end_xz.distance_to(Vector2(to_point.x, to_point.z)) < 0.5
+		_check(reached, "P0: پای گشت %d→%d بعد از کارو متصل است (%d نقطه)"
+				% [i, (i + 1) % PATROL_POINTS.size(), leg.size()])
 
 
 func _controller() -> Node:
