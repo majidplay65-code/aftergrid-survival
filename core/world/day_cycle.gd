@@ -16,6 +16,8 @@ func _ready() -> void:
 		if world_env != null:
 			_environment = world_env.environment
 		_sun = level.get_node_or_null("Sun") as DirectionalLight3D
+	if not EventBus.rest_requested.is_connected(_on_rest_requested):
+		EventBus.rest_requested.connect(_on_rest_requested)
 	apply_lighting()
 
 
@@ -31,6 +33,10 @@ func set_time_of_day(value: float) -> void:
 	if clock.time_of_day < 0.0:
 		clock.time_of_day += 1.0
 	_after_time_changed()
+
+
+func _on_rest_requested(time_skip: float) -> void:
+	set_time_of_day(fmod(clock.time_of_day + time_skip, 1.0))
 
 
 func apply_lighting() -> void:

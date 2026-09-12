@@ -11,8 +11,8 @@ config_version=5
 [application]
 
 config/name="Aftergrid"
-config/description="Working title — survival after the grid goes down. Phases 0-22 (… survive the night)."
-config/version="0.23.0"
+config/description="Working title — survival after the grid goes down. Phases 0-23 (… rest spot)."
+config/version="0.24.0"
 run/main_scene="res://ui/menus/main_menu.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"

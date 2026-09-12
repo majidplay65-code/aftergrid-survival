@@ -81,7 +81,7 @@ Resource برای داده، Node-based State Machine (core/state_machine/) بر
 
 ## فازبندی فعلی پروژه
 
-فاز 0-22 انجام‌شده (تا برد شب). فاز بعدی پیشنهادی مالک: ۲۳ پناه. جزئیات در README.md و docs/ARCHITECT_REPORT.md.
+فاز 0-23 انجام‌شده (تا پناه). فاز بعدی پیشنهادی مالک: ۲۴ حافظه دشمن. جزئیات در README.md و docs/ARCHITECT_REPORT.md.
 
 ## فازهای ۷–۱۸ (پیاده‌سازی‌شده در همین برنچ؛ تست دستی کاربر در انتظار)
 
@@ -103,6 +103,7 @@ Resource برای داده، Node-based State Machine (core/state_machine/) بر
 - یک کیف — برداشت دنیا به اینونتوری؛ سقف ۱۲
 - چرخه شب — WorldClock Resource + DayCycle
 - برد شب — night_survived تا سپیده
+- پناه — RestSpot + rest_requested
 
 ### «Noise-Based Awareness» — سه اصلاح مستندشده (اجراشده)
 

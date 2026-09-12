@@ -1,8 +1,9 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://entities/interactables/door.gd" id="1_door"]
 [ext_resource type="PackedScene" path="res://entities/interactables/water_bottle.tscn" id="2_water"]
 [ext_resource type="PackedScene" path="res://entities/interactables/canned_food.tscn" id="3_food"]
+[ext_resource type="PackedScene" path="res://entities/interactables/rest_spot.tscn" id="4_rest"]
 
 [sub_resource type="BoxMesh" id="m_wall"]
 size = Vector3(5, 3, 0.3)
@@ -108,4 +109,7 @@ light_energy = 0.35
 light_color = Color(1, 0.82, 0.55, 1)
 omni_range = 5.0
 shadow_enabled = true
+
+[node name="RestSpot" parent="." instance=ExtResource("4_rest")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2, 0, -1.2)
 

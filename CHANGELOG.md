@@ -3,6 +3,15 @@
 قالب این فایل از [Keep a Changelog](https://keepachangelog.com/fa-IR/1.1.0/) و
 شماره‌گذاری از [Semantic Versioning](https://semver.org/lang/fa/) پیروی می‌کند.
 
+## [0.24.0] - 2026-09-12
+
+فاز ۲۳ (پناه): RestSpot داخل فروشگاه.
+
+### Added
+
+- `RestSpot` Interactable؛ `EventBus.rest_requested` زمان را جلو می‌برد و سیو می‌کند. نویز صفر.
+- تست headless `tests/rest_spot_test.gd` (۸ چک).
+
 ## [0.23.0] - 2026-09-12
 
 فاز ۲۲ (برد شب): زنده ماندن تا سپیده.

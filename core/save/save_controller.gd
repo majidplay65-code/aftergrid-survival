@@ -137,3 +137,7 @@ func _apply_data(data: SaveData) -> bool:
 
 func _on_autosave_timeout() -> void:
 	save_now()
+
+
+func _on_rest_requested(_time_skip: float) -> void:
+	save_now()

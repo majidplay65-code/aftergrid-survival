@@ -49,3 +49,4 @@ signal enemy_died(death_position: Vector3)
 signal time_of_day_changed(normalized: float)
 signal night_survived(night_index: int)
 signal radio_activated
+signal rest_requested(time_skip: float)
