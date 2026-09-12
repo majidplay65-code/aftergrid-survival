@@ -8,7 +8,7 @@
 
 - **نام ریپو:** `aftergrid-survival` (lowercase و kebab-case — استاندارد GitHub و Godot)
 - **موتور:** Godot 4.7
-- **وضعیت فعلی:** فازهای `۰` تا `۴` کامل + سیستم تهدید فاز `۵` پیاده‌سازی شده (۰.۶.۰) و در انتظار تأیید تست کاربر.
+- **وضعیت فعلی:** فازهای `۰` تا `۴` کامل + سیستم تهدید فاز `۵` پیاده‌سازی و **تأیید**شده (۰.۶.۰؛ فیکس‌ها: ۰.۶.۱/۰.۶.۲) — تأییدشده: CI روی Godot 4.7.2 (تست دستی کاربر هنوز انجام نشده).
 
 ---
 
@@ -21,10 +21,10 @@
 | ۲ | Player — کاراکتر سه‌بعدی با حالت‌های Idle/Walk/Run، آمار بقا، دوربین موس، چراغ‌قوه (F) | ✅ انجام شد |
 | ۳ | **Survival Loop** — تعامل (E)، برداشتن/مصرف آب و غذا، تخلیه‌ی hunger/thirst، مرگ، HUD، **Save واقعی** | ✅ انجام شد (۰.۵.۰) |
 | ۴ | **World Identity** — بلوک شهری، تکسچرها، اتمسفر گرگ‌ومیش، چراغ‌قوه | ✅ انجام شد (۰.۴.۰) |
-| ۵ | **Threat/Enemy AI** — NavigationRegion + دشمن نمونه (Patrol/Chase/Attack)، Area3D-based، DamageComponent | ✅ پیاده‌سازی شد (۰.۶.۰) — در انتظار تأیید تست |
+| ۵ | **Threat/Enemy AI** — NavigationRegion + دشمن نمونه (Patrol/Chase/Attack)، Area3D-based، DamageComponent | ✅ انجام شد + تأیید CI (۰.۶.۰؛ فیکس مانع‌های ناوبری: ۰.۶.۲؛ تست دستی کاربر: در انتظار) |
 | ۶ | Inventory/Crafting عمیق | ⬜ بعد از ۵ |
 
-**اولویت بعدی:** فاز ۶ (Inventory/Crafting) — بعد از تأیید تست دشمن توسط کاربر.
+**اولویت بعدی:** فاز ۶ (Inventory/Crafting) — تأیید CI انجام شد؛ تست دستی کاربر هنوز انجام نشده.
 
 ---
 
@@ -48,14 +48,18 @@
 
 ## Definition of Done — فاز ۵ (Threat System)
 
-- [x] `NavigationRegion3D` روی `test_level.tscn` (پلیگون مسطح کل فضای عبور) + ۶ `NavigationObstacle3D` برای ساختمان‌ها
+- [x] `NavigationRegion3D` روی `test_level.tscn` با navmeshِ **کاروشده** + ۶ `NavigationObstacle3D` برای ساختمان‌ها
+      (محوطه با `vertices`؛ پراپرتی `shape` در Godot 4.7.2 وجود ندارد. به‌همراه `affect_navigation_mesh` + `carve_navigation_mesh`)
+      — چون این دو فلگ فقط در «bake» اثر دارند و navmesh این پروژه دستی نوشته شده و bake نمی‌شود، نتیجه‌ی همان carve
+      داخل `polygons` نوشته شده (۱۳۴ رأس، ۱۷۲ مثلث) تا مسیرها واقعاً دور ساختمان‌ها بچرخند؛
+      تست این را با مسیر واقعی موتور اثبات می‌کند: ۳۷.۴ متر دور ساختمان در برابر ۲۶ متر خط مستقیم.
 - [x] `entities/enemy/enemy.gd`: `CharacterBody3D` + `NavigationAgent3D` با **همان الگوی** `core/state_machine/`
 - [x] سه حالت: `PatrolState` (۴ نقطه‌ی گشت از پیش‌تعیین‌شده)، `ChaseState`، `AttackState`
 - [x] تشخیص بازیکن فقط با `body_entered/body_exited` دو `Area3D` (شعاع دید ۷m، محدوده‌ی حمله ۱٫۴m) — بدون فاصله‌ی خام در `_process`
 - [x] `DamageComponent` قابل‌استفاده‌ی مجدد (`core/damage/`) متصل به `PlayerStats.take_damage` (آسیب ۸، کول‌داون ۱.۲s)
 - [x] یک دشمن نمونه در `test_level.tscn`، در بازوی شمالی تقاطع (قابل‌تست از نقطه‌ی شروع بازیکن)
 - [x] `gdparse 4.5.0` روی همه‌ی فایل‌های جدید + وریفای ساختاری صحنه‌ها
-- [ ] اجرای واقعی در Godot 4.7 (سنبوکس: باینری Godot در دسترس نبود) + تأیید تست کاربر
+- [x] اجرای واقعی در Godot 4.7 — **تأییدشده: CI روی Godot 4.7.2 (تست دستی کاربر هنوز انجام نشده):** اجرای واقعی headless در CI (GitHub Actions)؛ هر ۶۶ چک پاس می‌شوند و گاردِ ثابتِ CI هر خط `SCRIPT ERROR`/`ERROR:`/`WARNING:` را — حتی با exit code صفر — شکست می‌دهد.
 
 **معیار عبور از هر فاز:** یک نسخه‌ی قابل بازی که کسی بتواند ۵ دقیقه بازی‌اش کند و بگوید «ادامه بده».
 اگر جواب «نه» بود، همان‌جا متوقف می‌شویم — نه بعد از نوشتن هزار خط کد.

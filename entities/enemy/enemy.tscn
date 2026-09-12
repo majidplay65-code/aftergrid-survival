@@ -36,7 +36,7 @@ emission_energy_multiplier = 3.0
 
 [node name="Enemy" type="CharacterBody3D"]
 script = ExtResource("1_enemy")
-patrol_points = PackedVector3Array(0, 0, 12, -12, 0, 0, 0, 0, -12, 12, 0, 0)
+patrol_points = Array[Vector3]([Vector3(0, 0, 12), Vector3(-12, 0, 0), Vector3(0, 0, -12), Vector3(12, 0, 0)])
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("shape_body")
@@ -80,18 +80,18 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.1, 0.42, -0.24)
 mesh = SubResource("mesh_eye")
 surface_material_override/0 = SubResource("mat_eye")
 
-[node name="StateMachine" type="Node" parent="."]
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
 script = ExtResource("2_statemachine")
 initial_state = NodePath("PatrolState")
 
-[node name="PatrolState" type="Node" parent="StateMachine"]
+[node name="PatrolState" type="Node" parent="StateMachine" node_paths=PackedStringArray("enemy")]
 script = ExtResource("4_patrol")
 enemy = NodePath("../..")
 
-[node name="ChaseState" type="Node" parent="StateMachine"]
+[node name="ChaseState" type="Node" parent="StateMachine" node_paths=PackedStringArray("enemy")]
 script = ExtResource("5_chase")
 enemy = NodePath("../..")
 
-[node name="AttackState" type="Node" parent="StateMachine"]
+[node name="AttackState" type="Node" parent="StateMachine" node_paths=PackedStringArray("enemy")]
 script = ExtResource("6_attack")
 enemy = NodePath("../..")

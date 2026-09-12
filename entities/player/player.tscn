@@ -146,18 +146,18 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, -0.12, 0.335)
 mesh = SubResource("m_lens")
 surface_material_override/0 = SubResource("mat_lens")
 
-[node name="StateMachine" type="Node" parent="."]
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
 script = ExtResource("2_statemachine")
 initial_state = NodePath("IdleState")
 
-[node name="IdleState" type="Node" parent="StateMachine"]
+[node name="IdleState" type="Node" parent="StateMachine" node_paths=PackedStringArray("player")]
 script = ExtResource("3_idle")
 player = NodePath("../..")
 
-[node name="WalkState" type="Node" parent="StateMachine"]
+[node name="WalkState" type="Node" parent="StateMachine" node_paths=PackedStringArray("player")]
 script = ExtResource("4_walk")
 player = NodePath("../..")
 
-[node name="RunState" type="Node" parent="StateMachine"]
+[node name="RunState" type="Node" parent="StateMachine" node_paths=PackedStringArray("player")]
 script = ExtResource("5_run")
 player = NodePath("../..")

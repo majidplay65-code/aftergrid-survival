@@ -66,7 +66,12 @@ func _on_attack_body_exited(body: Node3D) -> void:
 
 ## حرکت روی مسیر NavigationAgent3D با سرعت داده‌شده (توسط State ها فراخوانی می‌شود).
 func move_along_agent(delta: float, speed: float) -> void:
-	if agent == null or not agent.is_on_navigation_map():
+	# نکته‌ی مهم (قانون ضد Hallucination در AGENTS.md):
+	# NavigationAgent3D در Godot 4.7 متدی به نام is_on_navigation_map ندارد؛ صدا زدنش
+	# خطای runtime می‌دهد. معادلِ درست و موجود: get_navigation_map() که RID می‌دهد و
+	# RID.is_valid(). این باگ قبلاً پنهان بود چون PatrolState به‌خاطر آرایه‌ی خالی
+	# patrol_points همیشه early-return می‌کرد و این خط اصلاً اجرا نمی‌شد.
+	if agent == null or not agent.get_navigation_map().is_valid():
 		_slow_down_and_slide(delta)
 		return
 
