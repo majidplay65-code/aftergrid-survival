@@ -14,6 +14,8 @@ signal player_respawned
 signal item_picked_up(item_id: StringName, amount: int)
 signal item_dropped(item_id: StringName, amount: int)
 signal inventory_changed
+## مصرف یک آیتم از اینونتوری (بازیکن اثر آماری را از کاتالوگ اعمال می‌کند).
+signal item_consumed(item_id: StringName)
 
 # --- Crafting ---
 signal item_crafted(recipe_id: StringName)

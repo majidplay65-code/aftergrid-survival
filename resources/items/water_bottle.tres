@@ -10,3 +10,4 @@ description = "آب آشامیدنی؛ تشنگی را برطرف می‌کند.
 category = 1
 max_stack = 5
 is_consumable = true
+stat_restore_amount = 30.0

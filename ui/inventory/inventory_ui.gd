@@ -123,9 +123,23 @@ func _refresh_inventory() -> void:
 		inventory_list.add_child(empty)
 		return
 	for item_id in items:
+		var item: ItemData = null
+		if InventoryManager.catalog != null:
+			item = InventoryManager.catalog.get_item(item_id)
 		var label: Label = Label.new()
 		label.text = "%s ×%d" % [_item_name(item_id), int(items[item_id])]
-		inventory_list.add_child(label)
+		# قراضه و غیرمصرفی‌ها فقط Label می‌مانند تا تست UI اولین فرزند را Label ببیند.
+		if item != null and item.is_consumable:
+			var row: HBoxContainer = HBoxContainer.new()
+			row.add_child(label)
+			var use_btn: Button = Button.new()
+			use_btn.text = "مصرف"
+			use_btn.focus_mode = Control.FOCUS_NONE
+			use_btn.pressed.connect(_on_use_pressed.bind(item_id))
+			row.add_child(use_btn)
+			inventory_list.add_child(row)
+		else:
+			inventory_list.add_child(label)
 
 
 func _refresh_crafting() -> void:
@@ -146,6 +160,10 @@ func _refresh_crafting() -> void:
 
 func _on_craft_pressed(recipe: RecipeData) -> void:
 	craft_recipe(recipe)
+
+
+func _on_use_pressed(item_id: StringName) -> void:
+	InventoryManager.use_item(item_id)
 
 
 func _on_inventory_changed() -> void:

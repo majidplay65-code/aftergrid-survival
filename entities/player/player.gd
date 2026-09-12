@@ -46,6 +46,7 @@ func _ready() -> void:
 	stats.stat_changed.connect(_on_stat_changed)
 	stats.died.connect(_on_died)
 	EventBus.generator_charge_requested.connect(_on_generator_charge_requested)
+	EventBus.item_consumed.connect(_on_item_consumed)
 
 	if interaction_raycast != null:
 		interaction_raycast.add_exception(self)
@@ -203,6 +204,23 @@ func set_flashlight_battery(value: float) -> void:
 
 func _on_generator_charge_requested() -> void:
 	recharge_flashlight()
+
+
+func _on_item_consumed(item_id: StringName) -> void:
+	var catalog: ItemCatalog = InventoryManager.catalog
+	if catalog == null:
+		return
+	var item: ItemData = catalog.get_item(item_id)
+	if item == null:
+		return
+	match item.category:
+		ItemData.ItemCategory.WATER:
+			stats.drink(item.stat_restore_amount)
+		ItemData.ItemCategory.FOOD:
+			stats.eat(item.stat_restore_amount)
+		ItemData.ItemCategory.MEDKIT:
+			stats.heal(item.stat_restore_amount)
+	EventBus.toast_requested.emit("مصرف شد: %s" % item.item_name)
 
 
 ## بررسی پرتو نگاه بازیکن برای تشخیص شیء تعاملی روبه‌رو
