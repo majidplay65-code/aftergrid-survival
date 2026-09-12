@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/items/item_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+item_id = &"air_filter"
+item_name = "فیلتر هوا"
+description = "فیلتر هوادهی؛ برای تهویه‌ی هوای داخل پناهگاه."
+category = 6
+max_stack = 2
+is_consumable = false
+stat_restore_amount = 0.0
