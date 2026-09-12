@@ -89,7 +89,7 @@ func _run_tests() -> void:
 	_check(catalog != null, "P0: کاتالوگ واقعی .tres لود شد")
 	if catalog == null:
 		return
-	_check(catalog.recipes.size() == 3, "P0: کاتالوگ سه دستور دارد")
+	_check(catalog.recipes.size() == 4, "P0: کاتالوگ چهار دستور دارد")
 	var water: RecipeData = catalog.get_recipe(&"craft_water_filter")
 	var medkit: RecipeData = catalog.get_recipe(&"craft_medkit")
 	_check(water != null and medkit != null, "P0: هر دو دستور واقعی در کاتالوگ هستند")

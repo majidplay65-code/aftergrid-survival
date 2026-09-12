@@ -103,7 +103,7 @@ func _check_inventory_display() -> void:
 
 
 func _check_crafting_display() -> void:
-	_check(ui.crafting_list.get_child_count() == 3, "سه دکمه‌ی ساخت ساخته شد")
+	_check(ui.crafting_list.get_child_count() == 4, "چهار دکمه‌ی ساخت ساخته شد")
 	var water_btn: Button = ui.get_craft_button(&"craft_water_filter")
 	_check(water_btn != null, "دکمه‌ی فیلتر آب موجود است")
 	if water_btn != null:

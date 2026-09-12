@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="RecipeData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/items/recipe_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+recipe_id = &"craft_air_filter"
+recipe_name = "فیلتر هوا"
+result_item_id = &"air_filter"
+result_amount = 1
+ingredients = {
+&"scrap_metal": 2,
+&"cloth": 1
+}
+craft_time = 3.0
