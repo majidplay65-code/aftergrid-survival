@@ -51,8 +51,10 @@ func _process(_delta: float) -> bool:
 	match phase:
 		0:
 			if frame >= 4:
-				# نویز نزدیک: باید Investigate شود (loudness 8، ضریب ۱، فاصله ۰).
-				event_bus.noise_emitted.emit(enemy.global_position, 8.0)
+				# نویز نزدیک: باید Investigate شود (loudness 8، ضریب ۱، فاصله ۳ متر).
+				# فاصله‌ی صفر باعث می‌شد InvestigateState بلافاصله «رسیده» حساب شود
+				# و در اولین فریم فیزیک به PatrolState برگردد.
+				event_bus.noise_emitted.emit(enemy.global_position + Vector3(3.0, 0.0, 0.0), 8.0)
 				phase = 1
 		1:
 			if frame >= 8:

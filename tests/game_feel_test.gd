@@ -89,7 +89,7 @@ func _process(_delta: float) -> bool:
 func _check_static() -> void:
 	_check(ResourceLoader.exists(MENU_PATH), "صحنه‌ی منوی اصلی موجود است")
 	_check(ResourceLoader.exists(AUDIO_SCRIPT), "اسکریپت AudioManager موجود است")
-	_check(ResourceLoader.exists(EXPORT_PATH), "export_presets.cfg موجود است")
+	_check(FileAccess.file_exists(EXPORT_PATH), "export_presets.cfg موجود است")
 	var event_bus: Variant = root.get_node_or_null("EventBus")
 	_check(event_bus != null and event_bus.has_signal("footstep_played"),
 			"سیگنال footstep_played روی EventBus هست")

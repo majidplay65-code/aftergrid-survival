@@ -26,6 +26,9 @@ func _initialize() -> void:
 	_ensure_autoloads()
 	player = load(PLAYER_PATH).instantiate()
 	if player != null:
+		# باتری اولیه را پیش از ورود به درخت (و پیش از هر فریم drain) می‌سنجیم؛
+		# flashlight_battery یک عضو ساده است و نیازی به _ready ندارد.
+		_check(absf(player.flashlight_battery - 100.0) < 0.01, "باتری اولیه ۱۰۰ است")
 		root.add_child(player)
 
 
@@ -46,7 +49,9 @@ func _run() -> void:
 	_check(player != null, "بازیکن instantiate می‌شود")
 	if player == null:
 		return
-	_check(absf(player.flashlight_battery - 100.0) < 0.01, "باتری اولیه ۱۰۰ است")
+	# در فریم‌های انتظار، چراغ‌قوه (که در صحنه به‌صورت پیش‌فرض روشن است) باتری را کم کرده؛
+	# برای یک نقطه‌ی شروع تمیز، باتری را به سقف برمی‌گردانیم.
+	player.set_flashlight_battery(100.0)
 	player.flashlight.visible = true
 	player._update_flashlight_battery(1.0)
 	_check(absf(player.flashlight_battery - 92.0) < 0.05, "یک ثانیه روشن → ۹۲ باقی می‌ماند")
