@@ -3,6 +3,56 @@
 قالب این فایل از [Keep a Changelog](https://keepachangelog.com/fa-IR/1.1.0/) و
 شماره‌گذاری از [Semantic Versioning](https://semver.org/lang/fa/) پیروی می‌کند.
 
+## [0.11.0] - 2026-09-12
+
+فاز ۱۰ (Game Feel & Shareable Build): صدا، منو، توقف، FOV، export.
+
+### Added
+
+- **صدا:** ۷ افکت WAV پروسیجرال (`assets/audio/`) + autoload `AudioManager` که فقط از EventBus تغذیه می‌شود (در headless پخش نمی‌شود تا CI WARNING ندهد).
+- **منوی اصلی** `ui/menus/main_menu.tscn` — همان مسیری که `SceneManager` از قبل می‌شناخت؛ حالا `main_scene` است.
+- **منوی توقف با ESC** در HUD (`process_mode = ALWAYS`).
+- **FOV نرم هنگام دویدن** (۷۵→۸۵).
+- **`export_presets.cfg`:** Linux و Windows Desktop.
+- تست headless `tests/game_feel_test.gd` (۱۹ چک).
+
+## [0.10.0] - 2026-09-12
+
+فاز ۹ (World Expansion): حیاط صنعتی شرقی.
+
+### Added
+
+- دو انبار، سه کانتینر، یک سوله + ۶ `NavigationObstacle3D` + ۴ آیتم + Enemy4.
+- مولد `tools/regen_navmesh.py` با وفاداری اثبات‌شده نسبت به navmesh قبلی (۱۳۴ رأس / ۱۷۲ مثلث) و خروجی جدید ۳۴۱/۴۹۴.
+- تست headless `tests/world_expansion_test.gd` (۲۲ چک).
+
+### Changed
+
+- `tests/save_load_test.gd`: شمار رأس/مثلث و فهرست مانع‌ها به‌روز شد (۹۸ چک).
+
+## [0.9.0] - 2026-09-12
+
+فاز ۸ (Noise-Based Awareness): شنیدن event-driven.
+
+### Added
+
+- سیگنال `EventBus.noise_emitted(noise_position, loudness)` — نام پارامتر عمداً `position` نیست.
+- نویز از راه‌رفتن (۶m)، دویدن (۱۴m) و ساخت آیتم (۱۰m)؛ بدون فرض شلیک.
+- `InvestigateState`؛ چک فاصله فقط در هندلر سیگنال.
+- ضریب شنوایی: Stalker ×۱٫۵، Brute ×۰٫۶، Shambler ×۱٫۰.
+- تست headless `tests/noise_awareness_test.gd` (۱۴ چک).
+
+## [0.8.0] - 2026-09-12
+
+فاز ۷ (Threat Variety): سه واریانت دشمن data-driven.
+
+### Added
+
+- سرعت گشت/تعقیب `@export` شد.
+- `enemy_stalker.tscn` (سریع/ضعیف/تیزبین) و `enemy_brute.tscn` (کند/کوبنده).
+- Enemy2 و Enemy3 در سطح تست.
+- تست headless `tests/threat_variety_test.gd` (۲۲ چک).
+
 ## [0.7.0] - 2026-09-12
 
 فاز ۶ (Inventory/Crafting عمیق): داده → منطق → اتصال → UI، در شش لایه‌ی منطقی.

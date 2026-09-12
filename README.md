@@ -8,7 +8,7 @@
 
 - **نام ریپو:** `aftergrid-survival` (lowercase و kebab-case — استاندارد GitHub و Godot)
 - **موتور:** Godot 4.7
-- **وضعیت فعلی:** فازهای `۰` تا `۵` کامل و **تأیید**شده + فاز `۶` (Inventory/Crafting) پیاده‌سازی و **تأییدشده با CI** (۰.۷.۰) — تأییدشده: CI روی Godot 4.7.2؛ تست دستی کاربر هنوز انجام نشده.
+- **وضعیت فعلی:** فازهای `۰` تا `۶` کامل و **تأیید**شده با CI + فازهای `۷` تا `۱۰` پیاده‌سازی‌شده (۰.۱۱.۰) — تست دستی کاربر برای ۷–۱۰ هنوز انجام نشده.
 
 ---
 
@@ -23,8 +23,12 @@
 | ۴ | **World Identity** — بلوک شهری، تکسچرها، اتمسفر گرگ‌ومیش، چراغ‌قوه | ✅ انجام شد (۰.۴.۰) |
 | ۵ | **Threat/Enemy AI** — NavigationRegion + دشمن نمونه (Patrol/Chase/Attack)، Area3D-based، DamageComponent | ✅ انجام شد + تأیید CI (۰.۶.۰؛ فیکس مانع‌های ناوبری: ۰.۶.۲؛ تست دستی کاربر: در انتظار) |
 | ۶ | Inventory/Crafting عمیق — داده، منطق، اتصال، UI | ✅ انجام شد + تأیید CI (۰.۷.۰؛ تست دستی: در انتظار) |
+| ۷ | **Threat Variety** — Shambler / Stalker / Brute | ✅ پیاده شد (۰.۸.۰؛ تست دستی: در انتظار) |
+| ۸ | **Noise-Based Awareness** — شنیدن event-driven | ✅ پیاده شد (۰.۹.۰؛ تست دستی: در انتظار) |
+| ۹ | **World Expansion** — حیاط صنعتی شرقی | ✅ پیاده شد (۰.۱۰.۰؛ تست دستی: در انتظار) |
+| ۱۰ | **Game Feel & Shareable Build** — صدا، منو، export | ✅ پیاده شد (۰.۱۱.۰؛ تست دستی: در انتظار) |
 
-**اولویت بعدی:** تست دستی فاز ۶ توسط کاربر (طبق DoD)؛ فاز بعدی پس از تأیید مالک تعریف می‌شود.
+**اولویت بعدی:** تست دستی فازهای ۷–۱۰ توسط کاربر (طبق DoDهای زیر).
 
 ---
 
@@ -99,7 +103,8 @@ aftergrid-survival/
 │   ├── event_bus.gd                ← اتوبوس سیگنال
 │   ├── game_state.gd               ← وضعیت سراسری بازی (pause، رفرنس بازیکن، مرحله‌ی فعلی)
 │   ├── scene_manager.gd            ← تعویض متمرکز و امن صحنه
-│   └── save_manager.gd             ← ذخیره/بارگذاری Resource باینری در user://saves/
+│   ├── save_manager.gd             ← ذخیره/بارگذاری Resource باینری در user://saves/
+│   └── audio_manager.gd            ← پخش صدای event-driven (فاز ۱۰)
 ├── core/
 │   ├── damage/
 │   │   └── damage_component.gd     ← کامپوننت آسیب قابل‌استفاده‌ی مجدد (→ PlayerStats.take_damage)
@@ -116,12 +121,15 @@ aftergrid-survival/
 │       └── crafting_system.gd      ← autoload ساخت اتمیک (can_craft/craft + سیگنال‌ها)
 ├── entities/
 │   ├── enemy/
-│   │   ├── enemy.tscn              ← صحنه‌ی دشمن نمونه (NavigationAgent3D + ۲ Area3D + Damage)
-│   │   ├── enemy.gd                ← CharacterBody3D دشمن + تشخیص فقط با سیگنال‌های Area3D
+│   │   ├── enemy.tscn              ← Shambler پایه (NavigationAgent3D + ۲ Area3D + Damage)
+│   │   ├── enemy_stalker.tscn      ← واریانت سریع/ضعیف/تیزبین (فاز ۷)
+│   │   ├── enemy_brute.tscn        ← واریانت کند/کوبنده (فاز ۷)
+│   │   ├── enemy.gd                ← CharacterBody3D دشمن + تشخیص Area3D + شنیدن نویز
 │   │   └── states/                 ← حالت‌های دشمن (همان الگوی StateMachine بازیکن)
 │   │       ├── patrol_state.gd     ← گشت بین نقاط از پیش‌تعیین‌شده
 │   │       ├── chase_state.gd      ← تعقیب (ورود بازیکن به شعاع دید)
-│   │       └── attack_state.gd     ← حمله (ورود بازیکن به محدوده‌ی حمله)
+│   │       ├── attack_state.gd     ← حمله (ورود بازیکن به محدوده‌ی حمله)
+│   │       └── investigate_state.gd ← بررسی محل نویز (فاز ۸)
 │   ├── player/
 │   │   ├── player.tscn             ← صحنه‌ی بازیکن + پرتو تعامل RayCast3D
 │   │   ├── player.gd               ← کنترلر CharacterBody3D + تعامل + مصرف بقا
@@ -147,15 +155,22 @@ aftergrid-survival/
 │   ├── recipes/                    ← دستورهای ساخت واقعی (.tres)
 │   └── item_catalog.tres           ← کاتالوگ مرجع آیتم‌ها/دستورها
 ├── levels/
-│   └── test_level.tscn             ← بلوک شهری پس از فروپاشی: ساختمان‌ها، تقاطع، آوار،
-│                                     ستون برق، خودروی سوخته، ژنراتور + اشیاء بقا و HUD
+│   └── test_level.tscn             ← بلوک شهری + حیاط صنعتی شرقی، navmesh کاروشده،
+│                                     چهار دشمن، اشیاء بقا و HUD
 ├── ui/
 │   ├── hud/                        ← رابط کاربری درون بازی (HUD)
-│   │   ├── hud.gd                  ← کنترل نوارها، اعلان تعامل، toast مشترک، صفحه‌ی Game Over
+│   │   ├── hud.gd                  ← کنترل نوارها، اعلان تعامل، toast، Game Over، توقف ESC
 │   │   └── hud.tscn                ← نوار جان/استامینا/غذا/آب، کراس‌هیر و پرامپت [E]
-│   └── inventory/                  ← پنل اینونتوری/ساخت (کلید Tab)
-│       ├── inventory_ui.gd         ← ساخت رابط در کد (فهرست + دکمه‌های ساخت)
-│       └── inventory_ui.tscn       ← صحنه‌ی حداقلی (CanvasLayer + اسکریپت)
+│   ├── inventory/                  ← پنل اینونتوری/ساخت (کلید Tab)
+│   │   ├── inventory_ui.gd         ← ساخت رابط در کد (فهرست + دکمه‌های ساخت)
+│   │   └── inventory_ui.tscn       ← صحنه‌ی حداقلی (CanvasLayer + اسکریپت)
+│   └── menus/
+│       ├── main_menu.gd            ← منوی اصلی (شروع / خروج)
+│       └── main_menu.tscn          ← صحنه‌ی ورودی پروژه (فاز ۱۰)
+├── tools/
+│   ├── regen_navmesh.py            ← مولد navmesh دستی هم‌لبه (فاز ۹)
+│   └── generate_sfx.py             ← مولد WAV پروسیجرال (فاز ۱۰)
+├── assets/audio/                   ← ۷ افکت WAV پروسیجرال
 └── tests/
     ├── save_load_test.gd           ← تست کارکردی headless برای save/load
     ├── inventory_data_test.gd      ← داده/Resource (ItemData/RecipeData/ItemCatalog)
@@ -163,7 +178,11 @@ aftergrid-survival/
     ├── item_catalog_test.gd        ← داده‌ی واقعی .tres + اتصال دستورها
     ├── crafting_test.gd            ← منطق Crafting اتمیک (موفق/کمبود/پر بودن)
     ├── inventory_wiring_test.gd    ← اتصال autoload/pickup/save-load انتها‌به‌انتها
-    └── inventory_ui_test.gd        ← UI پنل اینونتوری/ساخت
+    ├── inventory_ui_test.gd        ← UI پنل اینونتوری/ساخت
+    ├── threat_variety_test.gd      ← سه واریانت دشمن (فاز ۷)
+    ├── noise_awareness_test.gd     ← نویز event-driven (فاز ۸)
+    ├── world_expansion_test.gd     ← حیاط صنعتی + navmesh (فاز ۹)
+    └── game_feel_test.gd           ← منو / صدا / توقف / export (فاز ۱۰)
 ```
 
 ## قراردادها
@@ -181,10 +200,10 @@ aftergrid-survival/
 ## راه‌اندازی و تست
 
 1. Godot 4.7 را باز کن و پروژه را Import کن.
-2. کلید `F5` را بزن.
+2. کلید `F5` را بزن — منوی اصلی می‌آید؛ «شروع» سطح تست را لود می‌کند.
 3. با WASD حرکت کن، با Shift بدو (استامینا در توقف/راه‌رفتن بازیابی می‌شود).
 4. کلید `F` چراغ‌قوه را روشن/خاموش می‌کند (برای دیدن جزئیات در سایه‌ها).
-5. `ESC` نشانگر موس را رها می‌کند؛ **کلیک** دوباره آن را قفل می‌کند.
+5. `ESC` منوی توقف را باز/بسته می‌کند (ادامه / منوی اصلی).
 6. به سمت اشیاء (بطری آب، کنسرو، جعبه کمک‌ها، سوئیچ برق) نگاه کن تا نشانگر `[E]` ظاهر شود.
 7. کلید `E` را بزن تا آب بنوشی، غذا بخوری یا ژنراتور را روشن/خاموش کنی.
 8. نوارهای وضعیت سلامت، استامینا، گرسنگی و تشنگی را در پایین سمت چپ به صورت زنده مشاهده کن.
@@ -192,5 +211,7 @@ aftergrid-survival/
 10. `F5` بازی را ذخیره می‌کند (toast «ذخیره شد» + auto-save هر ۶۰ ثانیه). بازی را ببند و دوباره باز کن —
     از نقطه‌ی رهاشده (موقعیت/زاویه/آمار) ادامه می‌یابد. `F8` آخرین سیو را بارگذاری می‌کند.
 11. تست خودکار save/load: `godot --headless --path . -s res://tests/save_load_test.gd`
-12. دشمن نمونه در بازوی شمالی تقاطع گشت می‌زند؛ اگر وارد شعاع دید (~۷ متر) شوی تعقیبت می‌کند،
-    نزدیک شود حمله می‌کند (آسیب ۸ با کول‌داون ۱.۲ ثانیه) و اگر فرار کنی به گشت برمی‌گردد. بدو (Shift) تا از او سبکت.
+12. سه نوع دشمن: Shambler در تقاطع (آسیب ۸)، Stalker سریع در جنوب‌شرق، Brute کوبنده در جنوب‌غرب.
+    دویدن نویز ۱۴ متری می‌سازد و دشمنِ دور را خبر می‌کند؛ راه‌رفتن آرام‌تر است (۶ متر).
+13. شرق نقشه حیاط صنعتی است (انبار، کانتینر، سوله) با آیتم و Enemy4.
+14. صداهای قدم/ساخت/برداشت/ضربه از طریق EventBus پخش می‌شوند؛ دویدن FOV را کمی باز می‌کند.
