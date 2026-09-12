@@ -11,6 +11,8 @@ signal state_changed(from_state_name: StringName, to_state_name: StringName)
 
 var current_state: State = null
 var states: Dictionary = {}  # StringName -> State
+## آیا حالت جاری enter() شده است؟ (پایین را ببین: ورود اولیه «مؤخر» انجام می‌شود)
+var _state_entered: bool = false
 
 
 func _ready() -> void:
@@ -21,25 +23,37 @@ func _ready() -> void:
 
 	if initial_state != null:
 		current_state = initial_state
-		current_state.enter()
 	elif states.size() > 0:
 		push_warning("StateMachine: no initial_state set, defaulting to first child.")
 		current_state = states.values()[0]
+
+	# ورود به حالت اولیه عمداً یک فریم «مؤخر» است.
+	# دلیل: در Godot، _ready فرزندها زودتر از _ready والد اجرا می‌شود؛ پس اگر enter()
+	# همان‌جا در _ready صدا زده شود، @onready var های والد (مثل agent در Enemy یا
+	# camera_pivot در Player) هنوز null هستند و هر حالتی که در enter() به آن‌ها
+	# نگاه کند خطای runtime می‌دهد. با call_deferred، enter() بعد از _ready والد و
+	# بعد از مقداردهی همه‌ی @onready varها اجرا می‌شود.
+	call_deferred("_enter_current_state")
+
+
+func _enter_current_state() -> void:
+	if current_state != null and not _state_entered:
+		_state_entered = true
 		current_state.enter()
 
 
 func _process(delta: float) -> void:
-	if current_state != null:
+	if _state_entered and current_state != null:
 		current_state.update(delta)
 
 
 func _physics_process(delta: float) -> void:
-	if current_state != null:
+	if _state_entered and current_state != null:
 		current_state.physics_update(delta)
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if current_state != null:
+	if _state_entered and current_state != null:
 		current_state.handle_input(event)
 
 
@@ -58,6 +72,7 @@ func transition_to(state_name: StringName, msg: Dictionary = {}) -> void:
 		current_state.exit()
 
 	current_state = states[state_name]
+	_state_entered = true
 	current_state.enter(msg)
 
 	state_changed.emit(previous_name, state_name)
