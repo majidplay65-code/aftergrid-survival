@@ -14,6 +14,8 @@ signal player_respawned
 signal item_picked_up(item_id: StringName, amount: int)
 signal item_dropped(item_id: StringName, amount: int)
 signal inventory_changed
+## مصرف یک آیتم از اینونتوری (بازیکن اثر آماری را از کاتالوگ اعمال می‌کند).
+signal item_consumed(item_id: StringName)
 
 # --- Crafting ---
 signal item_crafted(recipe_id: StringName)
@@ -23,6 +25,11 @@ signal craft_failed(recipe_id: StringName, reason: String)
 signal interactable_focused(interactable_name: String)
 signal interactable_unfocused
 signal interaction_performed(interactable: Node)
+## نویز محیطی (قدم/دویدن/ساخت). پارامتر `noise_position` عمداً `position` نیست
+## تا با Node3D.position تداخل (shadowing) نداشته باشد.
+signal noise_emitted(noise_position: Vector3, loudness: float)
+## قدم برای لایه‌ی صدا (AudioManager) — جدا از نویز آگاهی دشمن.
+signal footstep_played(is_running: bool)
 
 # --- Game Flow ---
 signal game_paused(is_paused: bool)
@@ -32,3 +39,14 @@ signal game_loaded
 # --- UI ---
 ## هر سیستمی که بخواهد پیامی روی HUD نشان دهد (toast) این سیگنال را emit می‌کند.
 signal toast_requested(message: String)
+
+## ژنراتور اضطراری روشن شد — بازیکن چراغ‌قوه را شارژ می‌کند (بدون ارجاع مستقیم).
+signal generator_charge_requested
+## دشمن مرد؛ موقعیت برای لوت. `death_position` تا با Node3D.position تداخل نکند.
+signal enemy_died(death_position: Vector3)
+
+# --- World clock / session ---
+signal time_of_day_changed(normalized: float)
+signal night_survived(night_index: int)
+signal radio_activated
+signal rest_requested(time_skip: float)

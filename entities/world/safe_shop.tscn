@@ -1,0 +1,115 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://entities/interactables/door.gd" id="1_door"]
+[ext_resource type="PackedScene" path="res://entities/interactables/water_bottle.tscn" id="2_water"]
+[ext_resource type="PackedScene" path="res://entities/interactables/canned_food.tscn" id="3_food"]
+[ext_resource type="PackedScene" path="res://entities/interactables/rest_spot.tscn" id="4_rest"]
+
+[sub_resource type="BoxMesh" id="m_wall"]
+size = Vector3(5, 3, 0.3)
+
+[sub_resource type="BoxShape3D" id="s_wall_long"]
+size = Vector3(5, 3, 0.3)
+
+[sub_resource type="BoxMesh" id="m_wall_side"]
+size = Vector3(0.3, 3, 5)
+
+[sub_resource type="BoxShape3D" id="s_wall_side"]
+size = Vector3(0.3, 3, 5)
+
+[sub_resource type="BoxMesh" id="m_jamb"]
+size = Vector3(0.3, 3, 1.9)
+
+[sub_resource type="BoxShape3D" id="s_jamb"]
+size = Vector3(0.3, 3, 1.9)
+
+[sub_resource type="BoxMesh" id="m_door"]
+size = Vector3(0.12, 2.2, 1.2)
+
+[sub_resource type="BoxShape3D" id="s_door"]
+size = Vector3(0.12, 2.2, 1.2)
+
+[sub_resource type="StandardMaterial3D" id="mat_wood"]
+albedo_color = Color(0.35, 0.28, 0.2, 1)
+roughness = 0.9
+
+[node name="SafeShop" type="Node3D"]
+
+[node name="WallNorth" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -2.35)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WallNorth"]
+shape = SubResource("s_wall_long")
+
+[node name="Mesh" type="MeshInstance3D" parent="WallNorth"]
+mesh = SubResource("m_wall")
+surface_material_override/0 = SubResource("mat_wood")
+
+[node name="WallSouth" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 2.35)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WallSouth"]
+shape = SubResource("s_wall_long")
+
+[node name="Mesh" type="MeshInstance3D" parent="WallSouth"]
+mesh = SubResource("m_wall")
+surface_material_override/0 = SubResource("mat_wood")
+
+[node name="WallWest" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.35, 1.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WallWest"]
+shape = SubResource("s_wall_side")
+
+[node name="Mesh" type="MeshInstance3D" parent="WallWest"]
+mesh = SubResource("m_wall_side")
+surface_material_override/0 = SubResource("mat_wood")
+
+[node name="WallEastNorth" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.35, 1.5, -1.55)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WallEastNorth"]
+shape = SubResource("s_jamb")
+
+[node name="Mesh" type="MeshInstance3D" parent="WallEastNorth"]
+mesh = SubResource("m_jamb")
+surface_material_override/0 = SubResource("mat_wood")
+
+[node name="WallEastSouth" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.35, 1.5, 1.55)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WallEastSouth"]
+shape = SubResource("s_jamb")
+
+[node name="Mesh" type="MeshInstance3D" parent="WallEastSouth"]
+mesh = SubResource("m_jamb")
+surface_material_override/0 = SubResource("mat_wood")
+
+[node name="Door" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.35, 1.1, 0)
+script = ExtResource("1_door")
+prompt_message = "بازکردن در"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Door"]
+shape = SubResource("s_door")
+
+[node name="Mesh" type="MeshInstance3D" parent="Door"]
+mesh = SubResource("m_door")
+surface_material_override/0 = SubResource("mat_wood")
+
+[node name="WaterBottle" parent="." instance=ExtResource("2_water")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, 0, 0.4)
+
+[node name="CannedFood" parent="." instance=ExtResource("3_food")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, 0, 0.4)
+
+[node name="InteriorLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.2, 0)
+light_energy = 0.35
+light_color = Color(1, 0.82, 0.55, 1)
+omni_range = 5.0
+shadow_enabled = true
+
+[node name="RestSpot" parent="." instance=ExtResource("4_rest")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2, 0, -1.2)
+

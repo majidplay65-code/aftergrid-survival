@@ -131,12 +131,17 @@ func _check_craft_flow() -> void:
 
 
 ## متن اولین برچسب در یک لیست (برای بازرسی headless).
+## ردیف مصرفی ممکن است HBox(Label, Button) باشد؛ قراضه همچنان Label تنها است.
 func _list_text(list: Node) -> String:
 	if list.get_child_count() == 0:
 		return ""
 	var child: Node = list.get_child(0)
 	if child is Label:
 		return (child as Label).text
+	if child.get_child_count() > 0:
+		var nested: Node = child.get_child(0)
+		if nested is Label:
+			return (nested as Label).text
 	return ""
 
 

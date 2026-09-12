@@ -22,7 +22,8 @@ item_id = &"canned_food"
 item_name = "کنسرو لوبیا"
 item_category = 2
 stat_restore_amount = 35.0
-prompt_message = "خوردن کنسرو لوبیا (+35 گرسنگی)"
+is_consumable_on_pickup = false
+prompt_message = "برداشتن کنسرو لوبیا"
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.15, 0)

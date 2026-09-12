@@ -6,10 +6,28 @@ extends CharacterBody3D
 
 const WALK_SPEED: float = 3.5
 const RUN_SPEED: float = 6.5
+const CROUCH_SPEED: float = 1.6
 const ACCELERATION: float = 10.0
 const FRICTION: float = 12.0
 const JUMP_VELOCITY: float = 4.5
+const AIR_CONTROL_SPEED: float = 3.0
+const JUMP_NOISE: float = 7.0
+const LAND_NOISE: float = 9.0
+const FALL_DAMAGE_SPEED: float = 12.0
+const HARD_LAND_NOISE: float = 14.0
 const MOUSE_SENSITIVITY: float = 0.0025
+const WALK_FOV: float = 75.0
+const RUN_FOV: float = 85.0
+const STAND_PIVOT_Y: float = 1.6
+const CROUCH_PIVOT_Y: float = 1.05
+const STAND_CAPSULE_HEIGHT: float = 1.8
+const CROUCH_CAPSULE_HEIGHT: float = 1.2
+const FLASHLIGHT_DRAIN_RATE: float = 8.0
+const MAX_FLASHLIGHT_BATTERY: float = 100.0
+const MELEE_STAMINA_COST: float = 12.0
+const MELEE_NOISE: float = 8.0
+const MELEE_RANGE: float = 2.0
+const MELEE_DAMAGE: float = 15.0
 
 # نرخ مصرف حیاتی در هر ثانیه
 const THIRST_DECAY_RATE: float = 0.25
@@ -22,9 +40,15 @@ const HUNGER_DECAY_RATE: float = 0.12
 @onready var state_machine: StateMachine = $StateMachine
 @onready var interaction_raycast: RayCast3D = $CameraPivot/Camera3D/InteractionRayCast
 @onready var flashlight: SpotLight3D = $CameraPivot/Camera3D/Flashlight
+@onready var collision_shape: CollisionShape3D = $CollisionShape3D
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var focused_interactable: Interactable = null
+## تایمر فاصله‌ی قدم‌ها برای emit نویز (نه polling تشخیص دشمن).
+var _footstep_timer: float = 0.0
+var flashlight_battery: float = MAX_FLASHLIGHT_BATTERY
+var is_dead: bool = false
+var peak_fall_speed: float = 0.0
 
 
 func _ready() -> void:
@@ -32,6 +56,8 @@ func _ready() -> void:
 	GameState.register_player(self)
 	stats.stat_changed.connect(_on_stat_changed)
 	stats.died.connect(_on_died)
+	EventBus.generator_charge_requested.connect(_on_generator_charge_requested)
+	EventBus.item_consumed.connect(_on_item_consumed)
 
 	if interaction_raycast != null:
 		interaction_raycast.add_exception(self)
@@ -41,15 +67,16 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if GameState.is_paused or is_dead:
+		return
+
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
 		camera_pivot.rotate_x(-event.relative.y * MOUSE_SENSITIVITY)
 		camera_pivot.rotation.x = clampf(camera_pivot.rotation.x, deg_to_rad(-80.0), deg_to_rad(80.0))
 
-	if event.is_action_pressed(&"ui_cancel"):
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED else Input.MOUSE_MODE_CAPTURED
-
-	# بازگیری موس با کلیک (بعد از رها‌شدن نشانگر با ESC)
+	# ESC را HUD برای منوی توقف می‌گیرد؛ اینجا موس را toggle نمی‌کنیم.
+	# بازگیری موس با کلیک فقط وقتی بازی متوقف نیست.
 	if event is InputEventMouseButton and event.pressed and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
@@ -57,23 +84,27 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"interact"):
 		_try_interact()
 
-	# کلید چراغ‌قوه (F) — روشن/خاموش کردن نور دوربین
+	# کلید چراغ‌قوه (F) — روشن/خاموش کردن نور دوربین (بدون باتری روشن نمی‌شود)
 	if event.is_action_pressed(&"flashlight") and flashlight != null:
-		flashlight.visible = not flashlight.visible
+		_toggle_flashlight()
 
 
 func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 
-	if Input.is_action_just_pressed(&"jump") and is_on_floor():
-		velocity.y = JUMP_VELOCITY
+	if is_dead:
+		move_and_slide()
+		return
 
 	# افت تدریجی آب و غذا در طول زمان (گیم‌پلی بقا)
 	stats.decrease_thirst(THIRST_DECAY_RATE * delta)
 	stats.decrease_hunger(HUNGER_DECAY_RATE * delta)
 
+	_update_flashlight_battery(delta)
 	_update_interaction_raycast()
+	_update_run_fov(delta)
+	_update_crouch_pose(delta)
 	move_and_slide()
 
 
@@ -85,16 +116,59 @@ func get_input_direction() -> Vector3:
 
 
 ## حرکت افقی را با شتاب/اصطکاک به سمت سرعت هدف می‌برد. توسط State ها فراخوانی می‌شود.
-func apply_horizontal_movement(delta: float, target_speed: float) -> void:
+func apply_horizontal_movement(delta: float, target_speed: float, emit_footsteps: bool = true) -> void:
 	var direction: Vector3 = get_input_direction()
 
 	if direction.length() > 0.01:
 		var target_velocity: Vector3 = direction * target_speed
 		velocity.x = move_toward(velocity.x, target_velocity.x, ACCELERATION * delta)
 		velocity.z = move_toward(velocity.z, target_velocity.z, ACCELERATION * delta)
+		if emit_footsteps:
+			if target_speed >= RUN_SPEED:
+				_tick_footstep_noise(delta, 14.0, 0.32, true)
+			elif target_speed >= WALK_SPEED:
+				_tick_footstep_noise(delta, 6.0, 0.48, false)
+			elif target_speed >= CROUCH_SPEED:
+				_tick_footstep_noise(delta, 2.5, 0.7, false)
 	else:
+		_footstep_timer = 0.0
 		velocity.x = move_toward(velocity.x, 0.0, FRICTION * delta)
 		velocity.z = move_toward(velocity.z, 0.0, FRICTION * delta)
+
+
+## نویز قدم از کنش موجود (راه‌رفتن/دویدن) — بدون فرض شلیک.
+func _tick_footstep_noise(delta: float, loudness: float, interval: float, is_running: bool) -> void:
+	_footstep_timer += delta
+	if _footstep_timer >= interval:
+		_footstep_timer = 0.0
+		EventBus.noise_emitted.emit(global_position, loudness)
+		EventBus.footstep_played.emit(is_running)
+
+
+## FOV نرم هنگام دویدن (Game Feel).
+func _update_run_fov(delta: float) -> void:
+	if camera_3d == null:
+		return
+	var target_fov: float = RUN_FOV if is_run_pressed() and is_moving() and not is_crouch_pressed() else WALK_FOV
+	camera_3d.fov = lerpf(camera_3d.fov, target_fov, clampf(8.0 * delta, 0.0, 1.0))
+
+
+## دوربین و کپسول برخورد را نرم به حالت خزیده/ایستاده می‌برد.
+func _update_crouch_pose(delta: float) -> void:
+	var crouched: bool = is_crouch_pressed()
+	var target_pivot_y: float = CROUCH_PIVOT_Y if crouched else STAND_PIVOT_Y
+	var target_height: float = CROUCH_CAPSULE_HEIGHT if crouched else STAND_CAPSULE_HEIGHT
+	var t: float = clampf(10.0 * delta, 0.0, 1.0)
+	if camera_pivot != null:
+		var pivot_pos: Vector3 = camera_pivot.position
+		pivot_pos.y = lerpf(pivot_pos.y, target_pivot_y, t)
+		camera_pivot.position = pivot_pos
+	if collision_shape != null and collision_shape.shape is CapsuleShape3D:
+		var capsule: CapsuleShape3D = collision_shape.shape as CapsuleShape3D
+		capsule.height = lerpf(capsule.height, target_height, t)
+		var shape_pos: Vector3 = collision_shape.position
+		shape_pos.y = lerpf(shape_pos.y, (target_height - STAND_CAPSULE_HEIGHT) * 0.5, t)
+		collision_shape.position = shape_pos
 
 
 func is_moving() -> bool:
@@ -103,6 +177,131 @@ func is_moving() -> bool:
 
 func is_run_pressed() -> bool:
 	return Input.is_action_pressed(&"run")
+
+
+func is_crouch_pressed() -> bool:
+	return Input.is_action_pressed(&"crouch")
+
+
+func is_melee_just_pressed() -> bool:
+	return Input.is_action_just_pressed(&"melee")
+
+
+func is_jump_just_pressed() -> bool:
+	return Input.is_action_just_pressed(&"jump")
+
+
+## پرش فقط از زمین و وقتی خزیده نیست.
+func wants_jump() -> bool:
+	return (not is_dead) and is_jump_just_pressed() and is_on_floor() and not is_crouch_pressed()
+
+
+func start_jump() -> void:
+	if is_dead:
+		return
+	peak_fall_speed = 0.0
+	velocity.y = JUMP_VELOCITY
+	EventBus.noise_emitted.emit(global_position, JUMP_NOISE)
+
+
+func note_fall_speed() -> void:
+	if velocity.y < 0.0:
+		peak_fall_speed = maxf(peak_fall_speed, -velocity.y)
+
+
+func land_from_jump() -> void:
+	var hard: bool = peak_fall_speed >= FALL_DAMAGE_SPEED
+	var noise: float = HARD_LAND_NOISE if hard else LAND_NOISE
+	if hard:
+		var extra: float = peak_fall_speed - FALL_DAMAGE_SPEED
+		stats.take_damage(extra * 4.0)
+	EventBus.noise_emitted.emit(global_position, noise)
+	EventBus.footstep_played.emit(false)
+	peak_fall_speed = 0.0
+
+
+## ضربه‌ی نزدیک: استامینا، نویز ۸ متری، آسیب به دشمنان جلوی بازیکن.
+func try_melee() -> bool:
+	if is_dead:
+		return false
+	if not stats.consume_stamina(MELEE_STAMINA_COST):
+		EventBus.toast_requested.emit("استقامت کافی نیست")
+		return false
+	EventBus.noise_emitted.emit(global_position, MELEE_NOISE)
+	var forward: Vector3 = -global_transform.basis.z
+	forward.y = 0.0
+	if forward.length() < 0.01:
+		forward = Vector3.FORWARD
+	else:
+		forward = forward.normalized()
+	for node in get_tree().get_nodes_in_group(&"enemies"):
+		if not (node is Enemy):
+			continue
+		var enemy: Enemy = node as Enemy
+		if not is_instance_valid(enemy):
+			continue
+		var to_enemy: Vector3 = enemy.global_position - global_position
+		to_enemy.y = 0.0
+		var distance: float = to_enemy.length()
+		if distance > MELEE_RANGE or distance < 0.01:
+			continue
+		if forward.dot(to_enemy / distance) < 0.25:
+			continue
+		enemy.take_damage(MELEE_DAMAGE)
+	return true
+
+
+func _toggle_flashlight() -> void:
+	if flashlight.visible:
+		flashlight.visible = false
+		return
+	if flashlight_battery <= 0.0:
+		EventBus.toast_requested.emit("باتری چراغ‌قوه خالی است")
+		return
+	flashlight.visible = true
+
+
+func _update_flashlight_battery(delta: float) -> void:
+	if flashlight == null or not flashlight.visible:
+		return
+	flashlight_battery = maxf(flashlight_battery - FLASHLIGHT_DRAIN_RATE * delta, 0.0)
+	EventBus.player_stat_changed.emit(&"battery", flashlight_battery, MAX_FLASHLIGHT_BATTERY)
+	if flashlight_battery <= 0.0:
+		flashlight.visible = false
+		EventBus.toast_requested.emit("باتری چراغ‌قوه خالی است")
+
+
+func recharge_flashlight() -> void:
+	set_flashlight_battery(MAX_FLASHLIGHT_BATTERY)
+	EventBus.toast_requested.emit("چراغ‌قوه شارژ شد")
+
+
+func set_flashlight_battery(value: float) -> void:
+	flashlight_battery = clampf(value, 0.0, MAX_FLASHLIGHT_BATTERY)
+	EventBus.player_stat_changed.emit(&"battery", flashlight_battery, MAX_FLASHLIGHT_BATTERY)
+	if flashlight != null and flashlight.visible and flashlight_battery <= 0.0:
+		flashlight.visible = false
+
+
+func _on_generator_charge_requested() -> void:
+	recharge_flashlight()
+
+
+func _on_item_consumed(item_id: StringName) -> void:
+	var catalog: ItemCatalog = InventoryManager.catalog
+	if catalog == null:
+		return
+	var item: ItemData = catalog.get_item(item_id)
+	if item == null:
+		return
+	match item.category:
+		ItemData.ItemCategory.WATER:
+			stats.drink(item.stat_restore_amount)
+		ItemData.ItemCategory.FOOD:
+			stats.eat(item.stat_restore_amount)
+		ItemData.ItemCategory.MEDKIT:
+			stats.heal(item.stat_restore_amount)
+	EventBus.toast_requested.emit("مصرف شد: %s" % item.item_name)
 
 
 ## بررسی پرتو نگاه بازیکن برای تشخیص شیء تعاملی روبه‌رو
@@ -137,6 +336,7 @@ func _emit_initial_stats() -> void:
 	EventBus.player_stat_changed.emit(&"stamina", stats.stamina, stats.max_stamina)
 	EventBus.player_stat_changed.emit(&"hunger", stats.hunger, stats.max_hunger)
 	EventBus.player_stat_changed.emit(&"thirst", stats.thirst, stats.max_thirst)
+	EventBus.player_stat_changed.emit(&"battery", flashlight_battery, MAX_FLASHLIGHT_BATTERY)
 
 
 func _on_stat_changed(stat_name: StringName, current_value: float, max_value: float) -> void:
@@ -144,4 +344,14 @@ func _on_stat_changed(stat_name: StringName, current_value: float, max_value: fl
 
 
 func _on_died() -> void:
+	if is_dead:
+		return
+	is_dead = true
+	if flashlight != null:
+		flashlight.visible = false
+	if focused_interactable != null:
+		focused_interactable = null
+		EventBus.interactable_unfocused.emit()
+	if state_machine != null:
+		state_machine.transition_to(&"DeadState")
 	EventBus.player_died.emit()

@@ -1,0 +1,108 @@
+[gd_scene load_steps=15 format=3]
+
+[ext_resource type="Script" path="res://entities/enemy/enemy.gd" id="1_enemy"]
+[ext_resource type="Script" path="res://core/state_machine/state_machine.gd" id="2_statemachine"]
+[ext_resource type="Script" path="res://core/damage/damage_component.gd" id="3_damage"]
+[ext_resource type="Script" path="res://entities/enemy/states/patrol_state.gd" id="4_patrol"]
+[ext_resource type="Script" path="res://entities/enemy/states/chase_state.gd" id="5_chase"]
+[ext_resource type="Script" path="res://entities/enemy/states/attack_state.gd" id="6_attack"]
+[ext_resource type="Script" path="res://entities/enemy/states/investigate_state.gd" id="7_investigate"]
+
+[sub_resource type="CapsuleShape3D" id="shape_body"]
+radius = 0.5
+height = 1.8
+
+[sub_resource type="SphereShape3D" id="shape_sight"]
+radius = 5.5
+
+[sub_resource type="SphereShape3D" id="shape_attack"]
+radius = 1.8
+
+[sub_resource type="CapsuleMesh" id="mesh_body"]
+radius = 0.42
+height = 1.45
+
+[sub_resource type="StandardMaterial3D" id="mat_body"]
+albedo_color = Color(0.22, 0.07, 0.07, 1)
+roughness = 0.98
+
+[sub_resource type="SphereMesh" id="mesh_eye"]
+radius = 0.055
+
+[sub_resource type="StandardMaterial3D" id="mat_eye"]
+albedo_color = Color(0.85, 0.12, 0.08, 1)
+emission_enabled = true
+emission = Color(0.9, 0.15, 0.05, 1)
+emission_energy_multiplier = 2.4
+
+[node name="Enemy" type="CharacterBody3D"]
+script = ExtResource("1_enemy")
+patrol_points = Array[Vector3]([Vector3(-32, 0, 8), Vector3(-32, 0, 32), Vector3(-8, 0, 32), Vector3(-8, 0, 26)])
+hearing_multiplier = 0.6
+max_health = 70.0
+memory_seconds = 2.5
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("shape_body")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+radius = 0.65
+height = 1.8
+max_speed = 2.5
+
+[node name="SightArea" type="Area3D" parent="."]
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SightArea"]
+shape = SubResource("shape_sight")
+
+[node name="AttackArea" type="Area3D" parent="."]
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="AttackArea"]
+shape = SubResource("shape_attack")
+
+[node name="Damage" type="Node" parent="."]
+script = ExtResource("3_damage")
+damage_amount = 18.0
+cooldown = 1.8
+
+[node name="Model" type="Node3D" parent="."]
+
+[node name="BodyMesh" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.08, 0)
+mesh = SubResource("mesh_body")
+surface_material_override/0 = SubResource("mat_body")
+
+[node name="EyeL" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.14, 0.55, -0.32)
+mesh = SubResource("mesh_eye")
+surface_material_override/0 = SubResource("mat_eye")
+
+[node name="EyeR" type="MeshInstance3D" parent="Model"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.14, 0.55, -0.32)
+mesh = SubResource("mesh_eye")
+surface_material_override/0 = SubResource("mat_eye")
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
+script = ExtResource("2_statemachine")
+initial_state = NodePath("PatrolState")
+
+[node name="PatrolState" type="Node" parent="StateMachine" node_paths=PackedStringArray("enemy")]
+script = ExtResource("4_patrol")
+enemy = NodePath("../..")
+speed = 1.2
+
+[node name="ChaseState" type="Node" parent="StateMachine" node_paths=PackedStringArray("enemy")]
+script = ExtResource("5_chase")
+enemy = NodePath("../..")
+speed = 2.3
+
+[node name="AttackState" type="Node" parent="StateMachine" node_paths=PackedStringArray("enemy")]
+script = ExtResource("6_attack")
+enemy = NodePath("../..")
+
+[node name="InvestigateState" type="Node" parent="StateMachine" node_paths=PackedStringArray("enemy")]
+script = ExtResource("7_investigate")
+enemy = NodePath("../..")
+speed = 1.4

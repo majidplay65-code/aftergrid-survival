@@ -42,6 +42,8 @@ func save_now() -> bool:
 	var player: Node3D = _get_player()
 	if player == null:
 		return false
+	if bool(player.get("is_dead")):
+		return false
 
 	var data: SaveData = _capture_data(player)
 
@@ -93,8 +95,11 @@ func _capture_data(player: Node3D) -> SaveData:
 	data.max_hunger = stats.max_hunger
 	data.thirst = stats.thirst
 	data.max_thirst = stats.max_thirst
+	data.flashlight_battery = float(player.get("flashlight_battery"))
 	# اینونتوری واقعی (فاز ۶): از InventoryManager سراسری خوانده می‌شود.
 	data.inventory_items = InventoryManager.get_items()
+	data.night_index = GameState.night_index
+	data.radio_is_on = GameState.radio_is_on
 	return data
 
 
@@ -114,9 +119,13 @@ func _apply_data(data: SaveData) -> bool:
 	stats.stamina = data.stamina
 	stats.hunger = data.hunger
 	stats.thirst = data.thirst
+	if player.has_method("set_flashlight_battery"):
+		player.call("set_flashlight_battery", data.flashlight_battery)
 
 	# بازیابی اینونتوری از سیو (فاز ۶)
 	InventoryManager.restore_items(data.inventory_items)
+	GameState.night_index = data.night_index
+	GameState.radio_is_on = data.radio_is_on
 
 	player.rotation.y = data.player_rotation_y
 	var camera_pivot: Node3D = player.get_node_or_null("CameraPivot")
@@ -127,4 +136,8 @@ func _apply_data(data: SaveData) -> bool:
 
 
 func _on_autosave_timeout() -> void:
+	save_now()
+
+
+func _on_rest_requested(_time_skip: float) -> void:
 	save_now()

@@ -3,6 +3,232 @@
 قالب این فایل از [Keep a Changelog](https://keepachangelog.com/fa-IR/1.1.0/) و
 شماره‌گذاری از [Semantic Versioning](https://semver.org/lang/fa/) پیروی می‌کند.
 
+## [0.28.0] - 2026-09-12
+
+فاز ۲۷ (رادیو شرق): دلیل رفتن به حیاط صنعتی.
+
+### Added
+
+- `RadioBeacon` در شرق سوله؛ هزینه ۱ قراضه؛ `EventBus.radio_activated`.
+- تست headless `tests/radio_beacon_test.gd` (۹ چک). بدون سلاح گرم.
+
+## [0.27.0] - 2026-09-12
+
+فاز ۲۶ (میز ساخت): ساخت با الزام ایستگاه `too_far` می‌دهد.
+
+### Added
+
+- `Workbench` نزدیک ژنراتور، گروه `workbenches`.
+- `CraftingSystem.craft(..., require_station)`؛ دلیل `too_far`.
+- تست headless `tests/workbench_test.gd` (۸ چک). UI موجود ۲۷ چک را عوض نمی‌کند.
+
+## [0.26.0] - 2026-09-12
+
+فاز ۲۵ (سقوط): فرود سخت آسیب و نویز بیشتر دارد.
+
+### Added
+
+- آستانه ۱۲ m/s؛ نویز فرود سخت ۱۴ متر.
+- تست headless `tests/fall_damage_test.gd` (۸ چک).
+
+## [0.25.0] - 2026-09-12
+
+فاز ۲۴ (حافظه دشمن): گم‌کردن دید → Investigate نه Patrol فوری.
+
+### Added
+
+- `last_seen_position` و `memory_seconds` روی Enemy (Stalker ۶، Brute ۲.۵).
+- تست headless `tests/enemy_memory_test.gd` (۹ چک).
+
+## [0.24.0] - 2026-09-12
+
+فاز ۲۳ (پناه): RestSpot داخل فروشگاه.
+
+### Added
+
+- `RestSpot` Interactable؛ `EventBus.rest_requested` زمان را جلو می‌برد و سیو می‌کند. نویز صفر.
+- تست headless `tests/rest_spot_test.gd` (۸ چک).
+
+## [0.23.0] - 2026-09-12
+
+فاز ۲۲ (برد شب): زنده ماندن تا سپیده.
+
+### Added
+
+- `EventBus.night_survived` هنگام عبور از سپیده.
+- HUD: برچسب شب و پنل «زنده ماندی».
+- `SaveData.night_index` پیش‌فرض ۱.
+- تست headless `tests/night_survive_test.gd` (۹ چک).
+
+## [0.22.0] - 2026-09-12
+
+فاز ۲۱ (چرخه شب): زمان Resource و تاریکی محیط.
+
+### Added
+
+- `WorldClock` Resource و `DayCycle` روی سطح تست.
+- `EventBus.time_of_day_changed(normalized)`.
+- نیمه‌شب `ambient_light_energy` زیر ۰.۲؛ باتری چراغ‌قوه اجباری می‌شود.
+- تست headless `tests/day_cycle_test.gd` (۱۲ چک).
+
+## [0.21.0] - 2026-09-12
+
+فاز ۲۰ (یک کیف): برداشت از دنیا به اینونتوری می‌رود.
+
+### Changed
+
+- آب/غذا/دارو: `is_consumable_on_pickup = false`؛ مصرف فقط از Tab.
+- سقف مجموع کیف ۱۲ واحد؛ اگر جا نبود شیء سر جایش می‌ماند.
+- `inventory_wiring_test`: آب به کیف می‌رود و تشنگی عوض نمی‌شود (۲۱ چک).
+
+## [0.20.0] - 2026-09-12
+
+فاز ۱۹ (در و فضای داخلی): فروشگاه قابل‌ورود با در Interactable.
+
+### Added
+
+- `Door` از `Interactable` (E باز/بسته، نویز ۴ متر، لغزش روی لولا).
+- `entities/world/safe_shop.tscn`: سه دیوار + دهانه شرقی، آب و کنسرو داخل، نور ضعیف.
+- `ObstacleShop` + navmesh کاروشده ۳۹۴ رأس / ۵۸۲ مثلث (`tools/regen_navmesh.py`).
+- تست headless `tests/interiors_test.gd` (۱۷ چک).
+
+### Changed
+
+- `save_load_test` ۱۰۳ چک؛ `world_expansion_test` شمار رأس/مثلث به‌روز.
+
+## [0.19.0] - 2026-09-12
+
+فاز ۱۸ (Line of Sight): تعقیب فقط با پرتو فیزیک آزاد.
+
+### Added
+
+- `has_line_of_sight_to` با `PhysicsRayQueryParameters3D` از چشم دشمن تا سینهٔ بازیکن.
+- Area3D فقط کرهٔ دید است؛ Chase وقتی دیوار وسط باشد شروع نمی‌شود.
+- Patrol/Investigate وقتی بازیکن از گوشه بیرون می‌آید دوباره امتحان می‌کنند.
+- تست headless `tests/line_of_sight_test.gd` (۱۲ چک).
+
+### Fixed
+
+- `ChaseState` از identifier ناموجود `SPEED` به `speed` اصلاح شد (تعقیب در runtime می‌شکست).
+
+## [0.18.0] - 2026-09-12
+
+فاز ۱۷ (Death): مرگ واقعی روی StateMachine.
+
+### Added
+
+- `DeadState`؛ قفل پرش/ضربه/تعامل؛ بدون سیو بعد از مرگ.
+- Game Over → `SceneManager.reload_current_scene`.
+- تست headless `tests/player_death_test.gd` (۱۲ چک).
+
+## [0.17.0] - 2026-09-12
+
+فاز ۱۶ (Jump): پرش روی StateMachine.
+
+### Added
+
+- `JumpState`، نویز پرش ۷ متر / فرود ۹ متر؛ خزیدن پرش ندارد.
+- تست headless `tests/jump_state_test.gd` (۱۱ چک).
+
+## [0.16.0] - 2026-09-12
+
+فاز ۱۵ (Enemy Loot): قراضه روی مرگ دشمن.
+
+### Added
+
+- `LootSpawner` گوش به `EventBus.enemy_died`؛ دراپ `scrap_metal` در محل مرگ.
+- تست headless `tests/enemy_loot_test.gd` (۸ چک).
+
+## [0.15.0] - 2026-09-12
+
+فاز ۱۴ (Melee): ضربه‌ی نزدیک بدون سلاح گرم.
+
+### Added
+
+- `MeleeState`، اکشن `melee` (کلیک چپ / V)، استامینا ۱۲، نویز ۸ متر، آسیب ۱۵.
+- جان دشمن: Shambler ۴۰، Stalker ۲۵، Brute ۷۰؛ مرگ → `enemy_died`.
+- تست headless `tests/melee_combat_test.gd` (۱۳ چک).
+
+## [0.14.0] - 2026-09-12
+
+فاز ۱۳ (Consume): مصرف آب/غذا/دارو از اینونتوری.
+
+### Added
+
+- `ItemData.stat_restore_amount` (آب ۳۰ / غذا ۳۵ / مدکیت ۴۰).
+- `InventoryManager.use_item` + `EventBus.item_consumed`.
+- دکمه «مصرف» فقط برای آیتم‌های مصرفی؛ قراضه Label تنها می‌ماند.
+- تست headless `tests/consume_item_test.gd` (۱۲ چک).
+
+## [0.13.0] - 2026-09-12
+
+فاز ۱۲ (Flashlight Battery): تخلیه و شارژ ژنراتور.
+
+### Added
+
+- تخلیه ۸ واحد/ثانیه؛ شارژ از `EventBus.generator_charge_requested` هنگام روشن‌کردن کلید ژنراتور.
+- نوار باتری HUD؛ سیو `flashlight_battery` با پیش‌فرض ۱۰۰ برای فایل‌های قدیمی.
+- تست headless `tests/flashlight_battery_test.gd` (۱۲ چک).
+
+## [0.12.0] - 2026-09-12
+
+فاز ۱۱ (Stealth Crouch): خزیدن کم‌صدا.
+
+### Added
+
+- `CrouchState`، اکشن `crouch` (C)، سرعت ۱.۶، نویز ۲.۵ متر، دوربین/کپسول نرم.
+- تست headless `tests/stealth_crouch_test.gd` (۱۲ چک).
+
+## [0.11.0] - 2026-09-12
+
+فاز ۱۰ (Game Feel & Shareable Build): صدا، منو، توقف، FOV، export.
+
+### Added
+
+- **صدا:** ۷ افکت WAV پروسیجرال (`assets/audio/`) + autoload `AudioManager` که فقط از EventBus تغذیه می‌شود (در headless پخش نمی‌شود تا CI WARNING ندهد).
+- **منوی اصلی** `ui/menus/main_menu.tscn` — همان مسیری که `SceneManager` از قبل می‌شناخت؛ حالا `main_scene` است.
+- **منوی توقف با ESC** در HUD (`process_mode = ALWAYS`).
+- **FOV نرم هنگام دویدن** (۷۵→۸۵).
+- **`export_presets.cfg`:** Linux و Windows Desktop.
+- تست headless `tests/game_feel_test.gd` (۱۹ چک).
+
+## [0.10.0] - 2026-09-12
+
+فاز ۹ (World Expansion): حیاط صنعتی شرقی.
+
+### Added
+
+- دو انبار، سه کانتینر، یک سوله + ۶ `NavigationObstacle3D` + ۴ آیتم + Enemy4.
+- مولد `tools/regen_navmesh.py` با وفاداری اثبات‌شده نسبت به navmesh قبلی (۱۳۴ رأس / ۱۷۲ مثلث) و خروجی جدید ۳۴۱/۴۹۴.
+- تست headless `tests/world_expansion_test.gd` (۲۲ چک).
+
+### Changed
+
+- `tests/save_load_test.gd`: شمار رأس/مثلث و فهرست مانع‌ها به‌روز شد (۹۸ چک).
+
+## [0.9.0] - 2026-09-12
+
+فاز ۸ (Noise-Based Awareness): شنیدن event-driven.
+
+### Added
+
+- سیگنال `EventBus.noise_emitted(noise_position, loudness)` — نام پارامتر عمداً `position` نیست.
+- نویز از راه‌رفتن (۶m)، دویدن (۱۴m) و ساخت آیتم (۱۰m)؛ بدون فرض شلیک.
+- `InvestigateState`؛ چک فاصله فقط در هندلر سیگنال.
+- ضریب شنوایی: Stalker ×۱٫۵، Brute ×۰٫۶، Shambler ×۱٫۰.
+- تست headless `tests/noise_awareness_test.gd` (۱۴ چک).
+
+## [0.8.0] - 2026-09-12
+
+فاز ۷ (Threat Variety): سه واریانت دشمن data-driven.
+
+### Added
+
+- سرعت گشت/تعقیب `@export` شد.
+- `enemy_stalker.tscn` (سریع/ضعیف/تیزبین) و `enemy_brute.tscn` (کند/کوبنده).
+- Enemy2 و Enemy3 در سطح تست.
+- تست headless `tests/threat_variety_test.gd` (۲۲ چک).
+
 ## [0.7.0] - 2026-09-12
 
 فاز ۶ (Inventory/Crafting عمیق): داده → منطق → اتصال → UI، در شش لایه‌ی منطقی.

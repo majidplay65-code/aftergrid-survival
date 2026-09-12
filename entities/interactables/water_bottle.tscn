@@ -24,7 +24,8 @@ item_id = &"water_bottle"
 item_name = "بطری آب معدنی"
 item_category = 1
 stat_restore_amount = 30.0
-prompt_message = "نوشیدن آب معدنی (+30 تشنگی)"
+is_consumable_on_pickup = false
+prompt_message = "برداشتن بطری آب معدنی"
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.25, 0)

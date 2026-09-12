@@ -85,3 +85,18 @@ func total_count() -> int:
 ## بازیابی کامل اینونتوری از داده‌ی سیو (فاز ۶ — لایه‌ی اتصال). SaveController صدا می‌زند.
 func restore_items(saved_items: Dictionary) -> void:
 	inventory.restore_items(saved_items)
+
+
+## مصرف یک واحد از آیتم مصرفی. موفقیت → EventBus.item_consumed.
+func use_item(item_id: StringName) -> bool:
+	if catalog == null or inventory == null:
+		return false
+	var item: ItemData = catalog.get_item(item_id)
+	if item == null or not item.is_consumable:
+		return false
+	if not inventory.has_item(item_id, 1):
+		return false
+	if inventory.remove_item(item_id, 1) < 1:
+		return false
+	EventBus.item_consumed.emit(item_id)
+	return true

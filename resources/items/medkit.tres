@@ -10,3 +10,4 @@ description = "کیت کمک‌های اولیه؛ سلامتی را بازیا�
 category = 3
 max_stack = 3
 is_consumable = true
+stat_restore_amount = 40.0

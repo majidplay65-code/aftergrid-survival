@@ -34,5 +34,8 @@ enum ItemCategory {
 ## آیا این آیتم مصرف‌شدنی است (آب/غذا/دارو)؟ برای آیتم‌های ساخت (مثل قراضه) false می‌ماند.
 @export var is_consumable: bool = false
 
+## مقدار بازیابی آمار هنگام مصرف از اینونتوری (آب/غذا/جان).
+@export var stat_restore_amount: float = 0.0
+
 ## آیکون برای نمایش در UI (اختیاری؛ در لایه‌ی UI استفاده می‌شود).
 @export var icon: Texture2D

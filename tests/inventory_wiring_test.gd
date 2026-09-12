@@ -80,7 +80,7 @@ func _check_autoload_wiring() -> void:
 	_check(crafting.catalog.recipes.size() == 2, "کاتالوگ autoload دو دستور دارد")
 
 
-## بخش ب — سیم‌کشی ItemPickup: غیرمصرفی به اینونتوری، مصرفی نه.
+## بخش ب — سیم‌کشی ItemPickup: E به کیف می‌رود، مصرف فوری نیست.
 func _check_pickup_wiring() -> void:
 	var player: Node3D = _player()
 	_check(player != null, "بازیکن در صحنه حاضر است")
@@ -92,8 +92,8 @@ func _check_pickup_wiring() -> void:
 	player.stats.thirst = 50.0
 	var water: Interactable = _instantiate_pickup(WATER_SCENE_PATH)
 	water.interact(player)
-	_check(inv_manager.count_item(&"water_bottle") == 0, "نوشیدن آب → به اینونتوری نمی‌رود")
-	_check(absf(player.stats.thirst - 80.0) < 0.01, "نوشیدن آب → تشنگی ۵۰ به ۸۰ رسید")
+	_check(inv_manager.count_item(&"water_bottle") == 1, "برداشتن آب → به اینونتوری می‌رود")
+	_check(absf(player.stats.thirst - 50.0) < 0.01, "برداشتن آب → تشنگی عوض نمی‌شود")
 
 
 ## بخش ج — ساخت از طریق CraftingSystem روی اینونتوریِ واقعی autoload.

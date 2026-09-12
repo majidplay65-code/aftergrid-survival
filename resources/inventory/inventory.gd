@@ -19,6 +19,8 @@ var items: Dictionary[StringName, int] = {}
 
 ## سقف انباشت وقتی کاتالوگ/آیتم مشخص نیست.
 const UNLIMITED_STACK: int = 2147483647
+## سقف مجموع واحدها در کیف (فاز ۲۰) تا تصمیم معنا داشته باشد.
+const MAX_TOTAL_ITEMS: int = 12
 
 
 func _init() -> void:
@@ -42,7 +44,9 @@ func add_item(item_id: StringName, amount: int) -> int:
 	if amount <= 0:
 		return 0
 	var current: int = count_item(item_id)
-	var space: int = _max_stack_for(item_id) - current
+	var stack_space: int = _max_stack_for(item_id) - current
+	var total_space: int = MAX_TOTAL_ITEMS - total_count()
+	var space: int = stack_space if stack_space < total_space else total_space
 	var added: int = amount if amount < space else space
 	if added <= 0:
 		return 0
@@ -95,9 +99,11 @@ func total_count() -> int:
 ## اگر سقفی نباشد (کاتالوگ/آیتم نامشخص یا max_stack غیرمثبت) UNLIMITED_STACK برمی‌گردد.
 func space_for(item_id: StringName) -> int:
 	var max_stack: int = _max_stack_for(item_id)
-	if max_stack == UNLIMITED_STACK:
-		return UNLIMITED_STACK
-	return max_stack - count_item(item_id)
+	var stack_space: int = UNLIMITED_STACK if max_stack == UNLIMITED_STACK else max_stack - count_item(item_id)
+	var total_space: int = MAX_TOTAL_ITEMS - total_count()
+	if stack_space < total_space:
+		return stack_space
+	return total_space
 
 
 ## جایگزینی کامل محتوای اینونتوری با داده‌ی سیو (فاز ۶ — لایه‌ی اتصال).

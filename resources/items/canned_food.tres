@@ -10,3 +10,4 @@ description = "غذای کنسروی؛ گرسنگی را برطرف می‌کن�
 category = 2
 max_stack = 5
 is_consumable = true
+stat_restore_amount = 35.0
