@@ -3,6 +3,55 @@
 قالب این فایل از [Keep a Changelog](https://keepachangelog.com/fa-IR/1.1.0/) و
 شماره‌گذاری از [Semantic Versioning](https://semver.org/lang/fa/) پیروی می‌کند.
 
+## [0.16.0] - 2026-09-12
+
+فاز ۱۵ (Enemy Loot): قراضه روی مرگ دشمن.
+
+### Added
+
+- `LootSpawner` گوش به `EventBus.enemy_died`؛ دراپ `scrap_metal` در محل مرگ.
+- تست headless `tests/enemy_loot_test.gd` (۸ چک).
+
+## [0.15.0] - 2026-09-12
+
+فاز ۱۴ (Melee): ضربه‌ی نزدیک بدون سلاح گرم.
+
+### Added
+
+- `MeleeState`، اکشن `melee` (کلیک چپ / V)، استامینا ۱۲، نویز ۸ متر، آسیب ۱۵.
+- جان دشمن: Shambler ۴۰، Stalker ۲۵، Brute ۷۰؛ مرگ → `enemy_died`.
+- تست headless `tests/melee_combat_test.gd` (۱۳ چک).
+
+## [0.14.0] - 2026-09-12
+
+فاز ۱۳ (Consume): مصرف آب/غذا/دارو از اینونتوری.
+
+### Added
+
+- `ItemData.stat_restore_amount` (آب ۳۰ / غذا ۳۵ / مدکیت ۴۰).
+- `InventoryManager.use_item` + `EventBus.item_consumed`.
+- دکمه «مصرف» فقط برای آیتم‌های مصرفی؛ قراضه Label تنها می‌ماند.
+- تست headless `tests/consume_item_test.gd` (۱۲ چک).
+
+## [0.13.0] - 2026-09-12
+
+فاز ۱۲ (Flashlight Battery): تخلیه و شارژ ژنراتور.
+
+### Added
+
+- تخلیه ۸ واحد/ثانیه؛ شارژ از `EventBus.generator_charge_requested` هنگام روشن‌کردن کلید ژنراتور.
+- نوار باتری HUD؛ سیو `flashlight_battery` با پیش‌فرض ۱۰۰ برای فایل‌های قدیمی.
+- تست headless `tests/flashlight_battery_test.gd` (۱۲ چک).
+
+## [0.12.0] - 2026-09-12
+
+فاز ۱۱ (Stealth Crouch): خزیدن کم‌صدا.
+
+### Added
+
+- `CrouchState`، اکشن `crouch` (C)، سرعت ۱.۶، نویز ۲.۵ متر، دوربین/کپسول نرم.
+- تست headless `tests/stealth_crouch_test.gd` (۱۲ چک).
+
 ## [0.11.0] - 2026-09-12
 
 فاز ۱۰ (Game Feel & Shareable Build): صدا، منو، توقف، FOV، export.
