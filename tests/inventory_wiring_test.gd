@@ -105,7 +105,7 @@ func _check_crafting_wiring() -> void:
 		return
 	_check(crafting.craft(water_recipe, inv_manager.inventory), "ساخت فیلتر آب از طریق autoload موفق است")
 	_check(inv_manager.count_item(&"scrap_metal") == 0, "بعد از ساخت، هر ۲ قراضه مصرف شد")
-	_check(inv_manager.count_item(&"water_bottle") == 1, "بعد از ساخت، ۱ بطری آب تولید شد")
+	_check(inv_manager.count_item(&"water_bottle") == 2, "بعد از ساخت، مجموع آب ۲ شد (۱ برداشته + ۱ ساخته)")
 
 
 ## بخش د — SaveController اینونتوری واقعی را ذخیره و بازیابی می‌کند.
@@ -115,10 +115,10 @@ func _check_save_load_wiring() -> void:
 	if controller == null:
 		return
 	_check(controller.save_now(), "سیو دستی با اینونتوری فعلی موفق است")
-	inv_manager.remove_item(&"water_bottle", 1)
+	inv_manager.remove_item(&"water_bottle", 2)
 	_check(inv_manager.count_item(&"water_bottle") == 0, "اینونتوری بعد از سیو خالی شد")
 	_check(controller.load_now(), "لود دستی موفق است")
-	_check(inv_manager.count_item(&"water_bottle") == 1, "لود، بطری آب ذخیره‌شده را بازیابی کرد")
+	_check(inv_manager.count_item(&"water_bottle") == 2, "لود، دو بطری آب ذخیره‌شده را بازیابی کرد")
 
 
 func _instantiate_pickup(scene_path: String) -> Interactable:

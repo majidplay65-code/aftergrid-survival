@@ -16,8 +16,8 @@ var failures: int = 0
 var frame: int = 0
 var phase: int = 0
 var host: Node3D
-var player: Player
-var enemy: Enemy
+var player: Variant = null
+var enemy: Variant = null
 var wall: StaticBody3D
 
 
@@ -27,12 +27,14 @@ func _initialize() -> void:
 			"دشمن از PhysicsRayQueryParameters3D استفاده می‌کند")
 	_check(_file_contains(CHASE_SCRIPT, "move_along_agent(delta, speed)"),
 			"ChaseState از speed درست استفاده می‌کند نه SPEED")
-	_build_world()
 
 
 func _process(_delta: float) -> bool:
 	frame += 1
-	if phase == 0 and frame >= 8:
+	if phase == 0 and frame >= 3:
+		_build_world()
+		phase = 1
+	elif phase == 1 and frame >= 8:
 		_check_runtime()
 		_finish()
 		return true
@@ -54,11 +56,11 @@ func _build_world() -> void:
 	wall.position = Vector3(0.0, 2.0, 2.5)
 	host.add_child(wall)
 
-	enemy = (load(ENEMY_PATH) as PackedScene).instantiate() as Enemy
+	enemy = load(ENEMY_PATH).instantiate()
 	host.add_child(enemy)
 	enemy.global_position = Vector3(0.0, 1.0, 0.0)
 
-	player = (load(PLAYER_PATH) as PackedScene).instantiate() as Player
+	player = load(PLAYER_PATH).instantiate()
 	host.add_child(player)
 	player.global_position = Vector3(0.0, 1.0, 5.0)
 

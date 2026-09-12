@@ -18,7 +18,7 @@ enum ItemCategory {
 @export var item_category: ItemCategory = ItemCategory.WATER
 @export var amount: int = 1
 @export var stat_restore_amount: float = 25.0
-@export var is_consumable_on_pickup: bool = true
+@export var is_consumable_on_pickup: bool = false
 
 
 func _ready() -> void:

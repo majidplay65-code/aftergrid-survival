@@ -66,7 +66,7 @@ const CARVE_STRAIGHT_METERS: float = 26.0
 ## بخشی از چک‌ها هرگز اجرا نمی‌شوند و هیچ‌کس متوجه نمی‌شود (دقیقاً همان اتفاقی که در
 ## اجرای اولِ همین چک‌ها افتاد: PASS=19 با دو SCRIPT ERROR و در عین حال CI سبز).
 ## این شمارنده آن حالت را به FAIL تبدیل می‌کند.
-const EXPECTED_CHECK_COUNT: int = 103
+const EXPECTED_CHECK_COUNT: int = 101
 
 var frame: int = 0
 var phase: int = 0

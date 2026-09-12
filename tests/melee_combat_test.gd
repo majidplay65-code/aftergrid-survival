@@ -3,9 +3,15 @@
 ##
 ## نحوه‌ی اجرا:
 ##   godot --headless --path . -s res://tests/melee_combat_test.gd
+##
+## نکته: try_melee از global_position/global_transform و گروه «enemies» (که در _ready
+## ثبت می‌شود) استفاده می‌کند؛ در حالت -s این‌ها از نخستین فریم به بعد در دسترس‌اند. برای
+## همین موجودات پیش از فریم‌ها به درخت اضافه و چک‌ها در _process() انجام می‌شوند
+## (الگوی tests/inventory_wiring_test.gd).
 extends SceneTree
 
 const PLAYER_PATH: String = "res://entities/player/player.tscn"
+const PLAYER_SCRIPT: String = "res://entities/player/player.gd"
 const SHAMBLER_PATH: String = "res://entities/enemy/enemy.tscn"
 const STALKER_PATH: String = "res://entities/enemy/enemy_stalker.tscn"
 const BRUTE_PATH: String = "res://entities/enemy/enemy_brute.tscn"
@@ -15,18 +21,43 @@ var checks_run: int = 0
 var failures: int = 0
 var heard_noise: bool = false
 var death_count: int = 0
+var melee_noise_expected: float = 0.0
+var frame: int = 0
+var started: bool = false
+var player: Variant = null
+var shambler: Variant = null
+var stalker: Variant = null
+var brute: Variant = null
 
 
 func _initialize() -> void:
 	_ensure_autoloads()
-	EventBus.noise_emitted.connect(_on_noise)
-	EventBus.enemy_died.connect(_on_died)
-	_run()
-	_finish()
+	var event_bus: Variant = root.get_node_or_null("EventBus")
+	if event_bus != null:
+		event_bus.noise_emitted.connect(_on_noise)
+		event_bus.enemy_died.connect(_on_died)
+	player = load(PLAYER_PATH).instantiate()
+	root.add_child(player)
+	shambler = load(SHAMBLER_PATH).instantiate()
+	stalker = load(STALKER_PATH).instantiate()
+	brute = load(BRUTE_PATH).instantiate()
+	root.add_child(shambler)
+	root.add_child(stalker)
+	root.add_child(brute)
+
+
+func _process(_delta: float) -> bool:
+	frame += 1
+	if not started and frame >= 3:
+		started = true
+		_run()
+		_finish()
+		return true
+	return false
 
 
 func _on_noise(_pos: Vector3, loudness: float) -> void:
-	if absf(loudness - Player.MELEE_NOISE) < 0.01:
+	if absf(loudness - melee_noise_expected) < 0.01:
 		heard_noise = true
 
 
@@ -35,17 +66,11 @@ func _on_died(_pos: Vector3) -> void:
 
 
 func _run() -> void:
-	_check(absf(Player.MELEE_STAMINA_COST - 12.0) < 0.01, "هزینه استامینا ۱۲ است")
-	_check(absf(Player.MELEE_NOISE - 8.0) < 0.01, "نویز ضربه ۸ متر است")
-	var player: Player = (load(PLAYER_PATH) as PackedScene).instantiate() as Player
-	root.add_child(player)
+	var player_script: Variant = load(PLAYER_SCRIPT)
+	melee_noise_expected = float(player_script.MELEE_NOISE)
+	_check(absf(player_script.MELEE_STAMINA_COST - 12.0) < 0.01, "هزینه استامینا ۱۲ است")
+	_check(absf(player_script.MELEE_NOISE - 8.0) < 0.01, "نویز ضربه ۸ متر است")
 	_check(player.get_node_or_null("StateMachine/MeleeState") != null, "MeleeState در ماشین حالت هست")
-	var shambler: Enemy = (load(SHAMBLER_PATH) as PackedScene).instantiate() as Enemy
-	var stalker: Enemy = (load(STALKER_PATH) as PackedScene).instantiate() as Enemy
-	var brute: Enemy = (load(BRUTE_PATH) as PackedScene).instantiate() as Enemy
-	root.add_child(shambler)
-	root.add_child(stalker)
-	root.add_child(brute)
 	_check(absf(shambler.max_health - 40.0) < 0.01, "Shambler جان ۴۰ دارد")
 	_check(absf(stalker.max_health - 25.0) < 0.01, "Stalker جان ۲۵ دارد")
 	_check(absf(brute.max_health - 70.0) < 0.01, "Brute جان ۷۰ دارد")
@@ -62,6 +87,8 @@ func _run() -> void:
 	player.free()
 	if is_instance_valid(shambler):
 		shambler.free()
+	if is_instance_valid(stalker):
+		stalker.free()
 	if is_instance_valid(brute):
 		brute.free()
 

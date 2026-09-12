@@ -3,6 +3,10 @@
 ##
 ## نحوه‌ی اجرا:
 ##   godot --headless --path . -s res://tests/enemy_loot_test.gd
+##
+## نکته: LootSpawner در _ready() به EventBus.enemy_died وصل می‌شود و _ready() در حالت -s
+## فقط در نخستین فریم اجرا می‌شود؛ بنابراین چک‌ها بعد از چند فریم در _process() انجام می‌شوند
+## (الگوی مشترک tests/inventory_wiring_test.gd).
 extends SceneTree
 
 const SPAWNER_PATH: String = "res://core/loot/loot_spawner.gd"
@@ -11,22 +15,34 @@ const EXPECTED_CHECK_COUNT: int = 8
 
 var checks_run: int = 0
 var failures: int = 0
+var frame: int = 0
+var started: bool = false
+var host: Node3D = null
+var spawner: Variant = null
 
 
 func _initialize() -> void:
 	_ensure_autoloads()
-	_run()
-	_finish()
+	host = Node3D.new()
+	host.name = "LootHost"
+	root.add_child(host)
+	spawner = load(SPAWNER_PATH).new()
+	host.add_child(spawner)
+
+
+func _process(_delta: float) -> bool:
+	frame += 1
+	if not started and frame >= 3:
+		started = true
+		_run()
+		_finish()
+		return true
+	return false
 
 
 func _run() -> void:
 	_check(ResourceLoader.exists(SPAWNER_PATH), "اسکریپت LootSpawner موجود است")
-	var host: Node3D = Node3D.new()
-	host.name = "LootHost"
-	root.add_child(host)
-	var spawner: LootSpawner = load(SPAWNER_PATH).new() as LootSpawner
-	host.add_child(spawner)
-	var enemy: Enemy = (load(ENEMY_PATH) as PackedScene).instantiate() as Enemy
+	var enemy: Variant = load(ENEMY_PATH).instantiate()
 	host.add_child(enemy)
 	enemy.global_position = Vector3(12.0, 1.0, 18.0)
 	var before: int = _scrap_count(host)
@@ -42,22 +58,21 @@ func _run() -> void:
 				"لوت روی اسپاون بازیکن نمی‌افتد")
 		_check(drop.global_position.distance_to(Vector3(26.0, 1.0, 0.0)) > 5.0,
 				"لوت روی نقطه‌ی سیو تست نمی‌افتد")
-		if drop is ItemPickup:
-			_check((drop as ItemPickup).item_id == &"scrap_metal", "لوت scrap_metal است")
+		_check(drop.get("item_id") == &"scrap_metal", "لوت scrap_metal است")
 	host.free()
 
 
 func _scrap_count(host: Node) -> int:
 	var count: int = 0
 	for child in host.get_children():
-		if child is ItemPickup and (child as ItemPickup).item_id == &"scrap_metal":
+		if child.get("item_id") == &"scrap_metal":
 			count += 1
 	return count
 
 
 func _first_scrap(host: Node) -> Node3D:
 	for child in host.get_children():
-		if child is ItemPickup and (child as ItemPickup).item_id == &"scrap_metal":
+		if child.get("item_id") == &"scrap_metal":
 			return child as Node3D
 	return null
 

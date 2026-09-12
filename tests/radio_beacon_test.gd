@@ -1,4 +1,8 @@
 ## تست کارکردی headless فاز ۲۷ (رادیو شرق).
+##
+## نکته: global_position رادیو و اینونتوریِ واقعیِ InventoryManager (ساخته‌شده در _ready)
+## در حالت -s فقط از نخستین فریم به بعد در دسترس‌اند. برای همین سطح پیش از فریم‌ها به درخت
+## اضافه و چک‌ها در _process() انجام می‌شوند (الگوی tests/inventory_wiring_test.gd).
 extends SceneTree
 
 const LEVEL_PATH: String = "res://levels/test_level.tscn"
@@ -7,20 +11,36 @@ const EXPECTED_CHECK_COUNT: int = 9
 var checks_run: int = 0
 var failures: int = 0
 var heard_radio: bool = false
+var game_state: Variant = null
+var level: Node = null
+var frame: int = 0
+var started: bool = false
 
 
 func _initialize() -> void:
 	_ensure_autoloads()
-	EventBus.radio_activated.connect(_on_radio)
+	var event_bus: Variant = root.get_node_or_null("EventBus")
+	if event_bus != null:
+		event_bus.radio_activated.connect(_on_radio)
 	var save_manager: Variant = root.get_node_or_null("SaveManager")
 	if save_manager != null and save_manager.has_save_file():
 		save_manager.delete_save_file()
-	GameState.radio_is_on = false
+	game_state = root.get_node_or_null("GameState")
+	if game_state != null:
+		game_state.radio_is_on = false
 	var packed: PackedScene = load(LEVEL_PATH)
-	var level: Node = packed.instantiate()
+	level = packed.instantiate()
 	root.add_child(level)
-	_run(level)
-	_finish()
+
+
+func _process(_delta: float) -> bool:
+	frame += 1
+	if not started and frame >= 3:
+		started = true
+		_run(level)
+		_finish()
+		return true
+	return false
 
 
 func _on_radio() -> void:
@@ -28,9 +48,9 @@ func _on_radio() -> void:
 
 
 func _run(level: Node) -> void:
-	var radio: RadioBeacon = level.get_node_or_null("RadioBeacon") as RadioBeacon
+	var radio: Variant = level.get_node_or_null("RadioBeacon")
 	_check(radio != null, "RadioBeacon در سطح هست")
-	var player: Player = level.get_node_or_null("Player") as Player
+	var player: Variant = level.get_node_or_null("Player")
 	_check(player != null, "بازیکن موجود است")
 	if radio == null or player == null:
 		return
@@ -41,7 +61,7 @@ func _run(level: Node) -> void:
 	inv.add_item(&"scrap_metal", 1)
 	radio.interact(player)
 	_check(heard_radio, "با قراضه radio_activated می‌آید")
-	_check(GameState.radio_is_on, "GameState.radio_is_on روشن است")
+	_check(game_state != null and game_state.radio_is_on, "GameState.radio_is_on روشن است")
 	_check(inv.count_item(&"scrap_metal") == 0, "یک قراضه مصرف شد")
 	heard_radio = false
 	radio.interact(player)

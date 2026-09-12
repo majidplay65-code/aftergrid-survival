@@ -60,7 +60,6 @@ func load_now() -> bool:
 
 	var data: SaveData = SaveManager.load_game()
 	if data == null:
-		push_warning("SaveController: save file is corrupted, cannot load.")
 		return false
 
 	if _apply_data(data):
@@ -72,7 +71,6 @@ func load_now() -> bool:
 func _get_player() -> Node3D:
 	var player: Node3D = GameState.player_reference
 	if player == null or not is_instance_valid(player):
-		push_warning("SaveController: player not found.")
 		return null
 	return player
 

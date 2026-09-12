@@ -1,4 +1,8 @@
 ## تست کارکردی headless فاز ۲۲ (برد شب).
+##
+## نکته: DayCycle ارجاع Environment را در _ready() پیدا می‌کند و HUD پنل شب را در _ready()
+## می‌سازد؛ در حالت -s این‌ها از نخستین فریم به بعد در دسترس‌اند. برای همین سطح پیش از
+## فریم‌ها به درخت اضافه و چک‌ها در _process() انجام می‌شوند (الگوی tests/inventory_wiring_test.gd).
 extends SceneTree
 
 const LEVEL_PATH: String = "res://levels/test_level.tscn"
@@ -7,20 +11,36 @@ const EXPECTED_CHECK_COUNT: int = 9
 var checks_run: int = 0
 var failures: int = 0
 var heard_index: int = -1
+var game_state: Variant = null
+var level: Node = null
+var frame: int = 0
+var started: bool = false
 
 
 func _initialize() -> void:
 	_ensure_autoloads()
-	EventBus.night_survived.connect(_on_survived)
+	var event_bus: Variant = root.get_node_or_null("EventBus")
+	if event_bus != null:
+		event_bus.night_survived.connect(_on_survived)
 	var save_manager: Variant = root.get_node_or_null("SaveManager")
 	if save_manager != null and save_manager.has_save_file():
 		save_manager.delete_save_file()
-	GameState.night_index = 1
+	game_state = root.get_node_or_null("GameState")
+	if game_state != null:
+		game_state.night_index = 1
 	var packed: PackedScene = load(LEVEL_PATH)
-	var level: Node = packed.instantiate()
+	level = packed.instantiate()
 	root.add_child(level)
-	_run(level)
-	_finish()
+
+
+func _process(_delta: float) -> bool:
+	frame += 1
+	if not started and frame >= 3:
+		started = true
+		_run(level)
+		_finish()
+		return true
+	return false
 
 
 func _on_survived(night_index: int) -> void:
@@ -36,8 +56,8 @@ func _run(level: Node) -> void:
 	_check(heard_index == -1, "قبل از سپیده night_survived نیست")
 	cycle.call("set_time_of_day", 0.26)
 	_check(heard_index == 1, "عبور از سپیده night_survived(1) می‌دهد")
-	_check(GameState.night_index == 2, "night_index بعد از شب ۱ به ۲ می‌رسد")
-	var hud: HUD = level.get_node_or_null("HUD") as HUD
+	_check(game_state != null and game_state.night_index == 2, "night_index بعد از شب ۱ به ۲ می‌رسد")
+	var hud: Variant = level.get_node_or_null("HUD")
 	_check(hud != null, "HUD موجود است")
 	if hud != null:
 		_check(hud.survive_panel != null and hud.survive_panel.visible,

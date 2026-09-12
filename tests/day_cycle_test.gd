@@ -1,5 +1,9 @@
 ## تست کارکردی headless فاز ۲۱ (چرخه شب):
 ## WorldClock Resource، DayCycle، تاریکی نیمه‌شب، سیگنال EventBus.
+##
+## نکته: DayCycle در _ready() ارجاع Environment/Sun را پیدا می‌کند و _ready() در حالت -s
+## فقط در نخستین فریم اجرا می‌شود؛ بنابراین چک‌ها بعد از چند فریم در _process() انجام می‌شوند
+## (الگوی مشترک tests/inventory_wiring_test.gd).
 extends SceneTree
 
 const LEVEL_PATH: String = "res://levels/test_level.tscn"
@@ -8,19 +12,32 @@ const EXPECTED_CHECK_COUNT: int = 12
 var checks_run: int = 0
 var failures: int = 0
 var heard_time: float = -1.0
+var frame: int = 0
+var started: bool = false
+var level: Node = null
 
 
 func _initialize() -> void:
 	_ensure_autoloads()
-	EventBus.time_of_day_changed.connect(_on_time)
+	var event_bus: Variant = root.get_node_or_null("EventBus")
+	if event_bus != null:
+		event_bus.time_of_day_changed.connect(_on_time)
 	var save_manager: Variant = root.get_node_or_null("SaveManager")
 	if save_manager != null and save_manager.has_save_file():
 		save_manager.delete_save_file()
 	var packed: PackedScene = load(LEVEL_PATH)
-	var level: Node = packed.instantiate()
+	level = packed.instantiate()
 	root.add_child(level)
-	_run(level)
-	_finish()
+
+
+func _process(_delta: float) -> bool:
+	frame += 1
+	if not started and frame >= 3:
+		started = true
+		_run(level)
+		_finish()
+		return true
+	return false
 
 
 func _on_time(normalized: float) -> void:

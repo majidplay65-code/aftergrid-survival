@@ -3,41 +3,63 @@
 ##
 ## نحوه‌ی اجرا:
 ##   godot --headless --path . -s res://tests/jump_state_test.gd
+##
+## نکته: StateMachine states را در _ready() می‌سازد و start_jump از global_position
+## نویز emit می‌کند؛ در حالت -s این‌ها از نخستین فریم به بعد در دسترس‌اند. برای همین بازیکن
+## پیش از فریم‌ها به درخت اضافه و چک‌ها در _process() انجام می‌شوند
+## (الگوی tests/inventory_wiring_test.gd).
 extends SceneTree
 
 const PLAYER_PATH: String = "res://entities/player/player.tscn"
+const PLAYER_SCRIPT: String = "res://entities/player/player.gd"
 const PROJECT_PATH: String = "res://project.godot"
 const EXPECTED_CHECK_COUNT: int = 11
 
 var checks_run: int = 0
 var failures: int = 0
 var heard_jump_noise: bool = false
+var jump_noise_expected: float = 0.0
+var frame: int = 0
+var started: bool = false
+var player: Variant = null
 
 
 func _initialize() -> void:
 	_ensure_autoloads()
-	EventBus.noise_emitted.connect(_on_noise)
-	_run()
-	_finish()
+	var event_bus: Variant = root.get_node_or_null("EventBus")
+	if event_bus != null:
+		event_bus.noise_emitted.connect(_on_noise)
+	player = load(PLAYER_PATH).instantiate()
+	if player != null:
+		root.add_child(player)
+
+
+func _process(_delta: float) -> bool:
+	frame += 1
+	if not started and frame >= 3:
+		started = true
+		_run()
+		_finish()
+		return true
+	return false
 
 
 func _on_noise(_pos: Vector3, loudness: float) -> void:
-	if absf(loudness - Player.JUMP_NOISE) < 0.01:
+	if absf(loudness - jump_noise_expected) < 0.01:
 		heard_jump_noise = true
 
 
 func _run() -> void:
+	var player_script: Variant = load(PLAYER_SCRIPT)
+	jump_noise_expected = float(player_script.JUMP_NOISE)
 	_check(_file_contains(PROJECT_PATH, "jump="), "اکشن jump در Input Map هست")
-	_check(absf(Player.JUMP_VELOCITY - 4.5) < 0.01, "JUMP_VELOCITY = ۴.۵")
-	_check(absf(Player.JUMP_NOISE - 7.0) < 0.01, "نویز پرش ۷ متر است")
-	_check(absf(Player.LAND_NOISE - 9.0) < 0.01, "نویز فرود ۹ متر است")
-	var packed: PackedScene = load(PLAYER_PATH)
-	var player: Player = packed.instantiate() as Player
+	_check(absf(player_script.JUMP_VELOCITY - 4.5) < 0.01, "JUMP_VELOCITY = ۴.۵")
+	_check(absf(player_script.JUMP_NOISE - 7.0) < 0.01, "نویز پرش ۷ متر است")
+	_check(absf(player_script.LAND_NOISE - 9.0) < 0.01, "نویز فرود ۹ متر است")
 	_check(player != null, "بازیکن instantiate می‌شود")
 	if player == null:
 		return
 	_check(player.get_node_or_null("StateMachine/JumpState") != null, "JumpState در StateMachine هست")
-	root.add_child(player)
 	var sm: StateMachine = player.get_node("StateMachine") as StateMachine
 	_check(sm != null and sm.states.has(&"JumpState"), "StateMachine JumpState را ثبت کرده")
 	player.start_jump()

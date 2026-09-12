@@ -37,18 +37,24 @@ func _initialize() -> void:
 		_finish()
 		return
 	_check_static()
-	_spawn_listener()
+	# توجه: این‌جا enemy نمی‌سازیم؛ ساختش به فریم ۲ در _process موکول شده تا
+	# global_position (که فقط بعد از ورود به درخت معتبر است) خطای
+	# is_inside_tree ندهد.
 
 
 func _process(_delta: float) -> bool:
 	if aborted:
 		return true
 	frame += 1
+	if phase == 0 and frame >= 2 and enemy == null:
+		_spawn_listener()
 	match phase:
 		0:
 			if frame >= 4:
-				# نویز نزدیک: باید Investigate شود (loudness 8، ضریب ۱، فاصله ۰).
-				event_bus.noise_emitted.emit(enemy.global_position, 8.0)
+				# نویز نزدیک: باید Investigate شود (loudness 8، ضریب ۱، فاصله ۳ متر).
+				# فاصله‌ی صفر باعث می‌شد InvestigateState بلافاصله «رسیده» حساب شود
+				# و در اولین فریم فیزیک به PatrolState برگردد.
+				event_bus.noise_emitted.emit(enemy.global_position + Vector3(3.0, 0.0, 0.0), 8.0)
 				phase = 1
 		1:
 			if frame >= 8:

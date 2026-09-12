@@ -27,6 +27,7 @@ func _ready() -> void:
 	prompt_container.visible = false
 	game_over_panel.visible = false
 	_build_pause_menu()
+	_build_night_hud()
 
 	# اتصال به سیگنال‌های اتوبوس رویداد سراسری
 	EventBus.player_stat_changed.connect(_on_player_stat_changed)
@@ -35,6 +36,8 @@ func _ready() -> void:
 	EventBus.item_picked_up.connect(_on_item_picked_up)
 	EventBus.player_died.connect(_on_player_died)
 	EventBus.toast_requested.connect(_on_toast_requested)
+	EventBus.time_of_day_changed.connect(_on_time_of_day_changed)
+	EventBus.night_survived.connect(_on_night_survived)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -146,6 +149,10 @@ func _on_toast_requested(message: String) -> void:
 
 ## سیستم toast مشترک: نمایش یک برچسب کوتاه که بعد از ۲ ثانیه محو می‌شود.
 func _show_toast(text: String, color: Color) -> void:
+	# در حالت headless هیچ viewport/رندر وجود ندارد؛ ساخت tween/label بی‌فایده است و
+	# در تست‌های DoD (بدون گرافیک) نشت/خطا می‌سازد.
+	if DisplayServer.get_name() == "headless":
+		return
 	var label: Label = Label.new()
 	label.text = text
 	label.add_theme_font_size_override("font_size", 14)
