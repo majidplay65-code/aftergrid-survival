@@ -1,27 +1,14 @@
-## تست کارکردی headless فاز ۹ (World Expansion):
-## حیاط صنعتی شرقی (دو انبار + سه کانتینر + سوله)، موانع ناوبری، آیتم‌ها، Enemy4،
-## و شمار رأس/مثلث navmesh کاروشده.
+## تست کارکردی headless فاز ۱۹ (در و فضای داخلی):
+## SafeShop با در Interactable، دو آیتم داخل، مانع ناوبری، navmesh کاروشده.
 ##
 ## نحوه‌ی اجرا (از ریشه‌ی پروژه):
-##   godot --headless --path . -s res://tests/world_expansion_test.gd
-##
-## کد خروجی ۰ = همه‌ی تست‌ها پاس، ۱ = شکست.
+##   godot --headless --path . -s res://tests/interiors_test.gd
 extends SceneTree
 
 const LEVEL_PATH: String = "res://levels/test_level.tscn"
 const NAVMESH_VERTEX_COUNT: int = 394
 const NAVMESH_POLYGON_COUNT: int = 582
-const EXPECTED_CHECK_COUNT: int = 22
-
-const BUILDING_NAMES: Array[String] = [
-	"WarehouseA", "WarehouseB", "Container1", "Container2", "Container3", "Shed",
-]
-const NEW_OBSTACLE_NAMES: Array[String] = [
-	"ObstacleW1", "ObstacleW2", "ObstacleC1", "ObstacleC2", "ObstacleC3", "ObstacleShed",
-]
-const NEW_ITEM_NAMES: Array[String] = [
-	"ScrapMetal2", "WaterBottle3", "CannedFood3", "Medkit2",
-]
+const EXPECTED_CHECK_COUNT: int = 17
 
 var checks_run: int = 0
 var failures: int = 0
@@ -41,18 +28,31 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	for building_name in BUILDING_NAMES:
-		_check(level.get_node_or_null(NodePath(building_name)) != null,
-				"سازه‌ی %s در سطح هست" % building_name)
-	for obstacle_name in NEW_OBSTACLE_NAMES:
-		var obstacle: NavigationObstacle3D = level.get_node_or_null(NodePath(obstacle_name)) as NavigationObstacle3D
-		_check(obstacle != null and obstacle.get_vertices().size() == 4
-				and obstacle.affect_navigation_mesh and obstacle.carve_navigation_mesh,
-				"مانع %s با vertices + carve" % obstacle_name)
-	for item_name in NEW_ITEM_NAMES:
-		_check(level.get_node_or_null(NodePath(item_name)) != null,
-				"آیتم %s در حیاط صنعتی هست" % item_name)
-	_check(level.get_node_or_null("Enemy4") != null, "Enemy4 در حیاط صنعتی هست")
+	var shop: Node3D = level.get_node_or_null("SafeShop") as Node3D
+	_check(shop != null, "SafeShop در سطح هست")
+	if shop == null:
+		return
+	_check(shop.global_position.distance_to(Vector3(-10.0, 0.0, 6.0)) < 0.05,
+			"SafeShop در (-10, 0, 6) است")
+	var door: Door = shop.get_node_or_null("Door") as Door
+	_check(door != null, "در داخل فروشگاه هست")
+	if door != null:
+		_check(not door.is_open, "در ابتدا بسته است")
+		var player: Node3D = level.get_node_or_null("Player") as Node3D
+		_check(player != null, "بازیکن برای تعامل در موجود است")
+		if player != null:
+			door.interact(player)
+			_check(door.is_open, "E در را باز می‌کند")
+			door.interact(player)
+			_check(not door.is_open, "E دوباره در را می‌بندد")
+	_check(shop.get_node_or_null("WaterBottle") != null, "بطری آب داخل فروشگاه هست")
+	_check(shop.get_node_or_null("CannedFood") != null, "کنسرو داخل فروشگاه هست")
+	var obstacle: NavigationObstacle3D = level.get_node_or_null("ObstacleShop") as NavigationObstacle3D
+	_check(obstacle != null, "ObstacleShop در صحنه هست")
+	if obstacle != null:
+		_check(obstacle.get_vertices().size() == 4, "ObstacleShop چهار رأس دارد")
+		_check(obstacle.affect_navigation_mesh and obstacle.carve_navigation_mesh,
+				"ObstacleShop علامت‌های affect + carve را دارد")
 	var region: Node3D = level.get_node_or_null("NavigationRegion") as Node3D
 	_check(region != null, "NavigationRegion در صحنه هست")
 	if region == null:
@@ -97,7 +97,7 @@ func _finish() -> void:
 	_check(checks_run + 1 == EXPECTED_CHECK_COUNT,
 			"همه‌ی %d چک اجرا شد (اجراشده: %d)" % [EXPECTED_CHECK_COUNT, checks_run + 1])
 	if failures == 0:
-		print("ALL TESTS PASSED (world expansion)")
+		print("ALL TESTS PASSED (interiors)")
 		quit(0)
 	else:
 		printerr("%d TEST(S) FAILED" % failures)

@@ -3,6 +3,21 @@
 قالب این فایل از [Keep a Changelog](https://keepachangelog.com/fa-IR/1.1.0/) و
 شماره‌گذاری از [Semantic Versioning](https://semver.org/lang/fa/) پیروی می‌کند.
 
+## [0.20.0] - 2026-09-12
+
+فاز ۱۹ (در و فضای داخلی): فروشگاه قابل‌ورود با در Interactable.
+
+### Added
+
+- `Door` از `Interactable` (E باز/بسته، نویز ۴ متر، لغزش روی لولا).
+- `entities/world/safe_shop.tscn`: سه دیوار + دهانه شرقی، آب و کنسرو داخل، نور ضعیف.
+- `ObstacleShop` + navmesh کاروشده ۳۹۴ رأس / ۵۸۲ مثلث (`tools/regen_navmesh.py`).
+- تست headless `tests/interiors_test.gd` (۱۷ چک).
+
+### Changed
+
+- `save_load_test` ۱۰۳ چک؛ `world_expansion_test` شمار رأس/مثلث به‌روز.
+
 ## [0.19.0] - 2026-09-12
 
 فاز ۱۸ (Line of Sight): تعقیب فقط با پرتو فیزیک آزاد.

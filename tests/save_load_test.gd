@@ -31,13 +31,14 @@ const NAV_PROBE_PHYSICS_FRAMES: int = 60
 ## هم‌ترازِ لبه‌های همان محوطه‌ها (بدون T-junction؛ چون موتور لبه‌ها را فقط وقتی
 ## به هم وصل می‌کند که «هر دو سرِ لبه» یکی باشند) = ۸۶ خانه × ۲ مثلث = ۱۷۲ مثلث
 ## و ۱۳۴ رأس. عدد دقیق، محافظِ رگرسیون است: هر تغییرِ ناخواسته در navmesh را می‌گیرد.
-const NAVMESH_VERTEX_COUNT: int = 341
-const NAVMESH_POLYGON_COUNT: int = 494
+const NAVMESH_VERTEX_COUNT: int = 394
+const NAVMESH_POLYGON_COUNT: int = 582
 
 ## نام ۶ مانع ناوبری (پایه‌ی ساختمان‌ها) در `test_level.tscn`.
 const OBSTACLE_NAMES: Array[String] = ["ObstacleB1", "ObstacleB2", "ObstacleB3",
 		"ObstacleB4", "ObstacleB5", "ObstacleB6",
-		"ObstacleW1", "ObstacleW2", "ObstacleC1", "ObstacleC2", "ObstacleC3", "ObstacleShed"]
+		"ObstacleW1", "ObstacleW2", "ObstacleC1", "ObstacleC2", "ObstacleC3", "ObstacleShed",
+		"ObstacleShop"]
 
 ## نقاطی که بعد از کارو (بریدن محوطه‌ی ساختمان‌ها از navmesh) باید هنوز روی navmesh
 ## باشند: اسپاون بازیکن، نقطه‌ی سیو/لود تست، اسپاون دشمن و ۴ نقطه‌ی گشت دشمن.
@@ -65,7 +66,7 @@ const CARVE_STRAIGHT_METERS: float = 26.0
 ## بخشی از چک‌ها هرگز اجرا نمی‌شوند و هیچ‌کس متوجه نمی‌شود (دقیقاً همان اتفاقی که در
 ## اجرای اولِ همین چک‌ها افتاد: PASS=19 با دو SCRIPT ERROR و در عین حال CI سبز).
 ## این شمارنده آن حالت را به FAIL تبدیل می‌کند.
-const EXPECTED_CHECK_COUNT: int = 98
+const EXPECTED_CHECK_COUNT: int = 103
 
 var frame: int = 0
 var phase: int = 0

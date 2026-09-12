@@ -45,6 +45,8 @@ NEW_FOOTPRINTS: list[tuple[float, float, float, float]] = [
     (32.5, 39.5, 16.3, 19.7),
     # Shed at (30, 22), half (2, 2) + 0.5
     (27.5, 32.5, 19.5, 24.5),
+    # SafeShop at (-10, 6), half (2.5, 2.5) + 0.5
+    (-13.0, -7.0, 3.0, 9.0),
 ]
 
 

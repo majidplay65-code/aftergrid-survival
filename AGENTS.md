@@ -81,7 +81,7 @@ Resource برای داده، Node-based State Machine (core/state_machine/) بر
 
 ## فازبندی فعلی پروژه
 
-فاز 0-18 انجام‌شده (تا Line of Sight). فاز بعدی پیشنهادی مالک: ۱۹ در/فضای داخلی. جزئیات در README.md و docs/ARCHITECT_REPORT.md.
+فاز 0-19 انجام‌شده (تا interiors/door). فاز بعدی پیشنهادی مالک: ۲۰ یک کیف. جزئیات در README.md و docs/ARCHITECT_REPORT.md.
 
 ## فازهای ۷–۱۸ (پیاده‌سازی‌شده در همین برنچ؛ تست دستی کاربر در انتظار)
 
@@ -99,6 +99,7 @@ Resource برای داده، Node-based State Machine (core/state_machine/) بر
 - Jump — `JumpState` (Space؛ خزیدن پرش ندارد)
 - Death — `DeadState` + Game Over + بدون سیو بعد از مرگ
 - Line of Sight — تعقیب فقط اگر پرتو فیزیک تا بازیکن آزاد باشد
+- Interiors / Door — فروشگاه قابل‌ورود + navmesh کاروشده ۳۹۴/۵۸۲
 
 ### «Noise-Based Awareness» — سه اصلاح مستندشده (اجراشده)
 
