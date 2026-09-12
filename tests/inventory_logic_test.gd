@@ -108,14 +108,14 @@ func _test_inventory_resource() -> void:
 	var snapshot: Dictionary = inv.get_items()
 	snapshot[&"water_bottle"] = 99
 	_check(inv.count_item(&"water_bottle") == 1, "get_items کپی می‌دهد نه رفرنس")
-	# سیگنال changed فقط روی تغییر واقعی
+	# سیگنال contents_changed فقط روی تغییر واقعی
 	inv_changed_count = 0
-	inv.changed.connect(_on_inventory_changed)
+	inv.contents_changed.connect(_on_inventory_changed)
 	_check(inv.add_item(&"water_bottle", 5) == 0, "add_item وقتی جا نیست ۰ برمی‌گرداند")
-	_check(inv_changed_count == 0, "changed بدون تغییر واقعی emit نمی‌شود")
+	_check(inv_changed_count == 0, "contents_changed بدون تغییر واقعی emit نمی‌شود")
 	inv.add_item(&"medkit", 1)
 	inv.remove_item(&"medkit", 1)
-	_check(inv_changed_count == 2, "changed روی add/remove واقعی emit می‌شود")
+	_check(inv_changed_count == 2, "contents_changed روی add/remove واقعی emit می‌شود")
 
 
 ## بخش ب — InventoryManager به‌عنوان پل به EventBus.

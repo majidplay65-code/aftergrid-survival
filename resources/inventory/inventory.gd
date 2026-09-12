@@ -6,7 +6,10 @@ class_name Inventory
 extends Resource
 
 ## بعد از هر تغییر واقعی محتوا emit می‌شود (افزودن/حذفِ > ۰).
-signal changed
+## (نام `contents_changed` عمداً انتخاب شد، نه `changed` — چون `Resource` از قبل
+## سیگنالِ داخلیِ `changed` دارد و سایه‌انداختن روی آن، تحلیل عضو را در کلاس‌های
+## بیرونی می‌شکند: «Could not resolve external class member».)
+signal contents_changed
 
 ## کاتالوگ مرجع برای دانستن max_stack هر آیتم؛ اگر null باشد انباشت عملاً نامحدود است.
 var catalog: ItemCatalog = null
@@ -44,7 +47,7 @@ func add_item(item_id: StringName, amount: int) -> int:
 	if added <= 0:
 		return 0
 	items[item_id] = current + added
-	changed.emit()
+	contents_changed.emit()
 	return added
 
 
@@ -62,7 +65,7 @@ func remove_item(item_id: StringName, amount: int) -> int:
 		items.erase(item_id)
 	else:
 		items[item_id] = remaining
-	changed.emit()
+	contents_changed.emit()
 	return removed
 
 

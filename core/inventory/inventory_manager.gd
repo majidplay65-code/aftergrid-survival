@@ -19,7 +19,7 @@ func _ready() -> void:
 	inventory.catalog = catalog
 	EventBus.item_picked_up.connect(_on_item_picked_up)
 	EventBus.item_dropped.connect(_on_item_dropped)
-	inventory.changed.connect(_on_inventory_changed)
+	inventory.contents_changed.connect(_on_inventory_changed)
 
 
 func _on_item_picked_up(item_id: StringName, amount: int) -> void:
