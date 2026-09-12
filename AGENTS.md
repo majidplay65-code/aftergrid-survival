@@ -81,7 +81,7 @@ Resource برای داده، Node-based State Machine (core/state_machine/) بر
 
 ## فازبندی فعلی پروژه
 
-فاز 0-26 انجام‌شده (تا میز ساخت). فاز بعدی پیشنهادی مالک: ۲۷ رادیو شرق. جزئیات در README.md و docs/ARCHITECT_REPORT.md.
+فاز 0-27 انجام‌شده (تا رادیو شرق / پروتوتایپ عمودی). جزئیات در README.md و docs/ARCHITECT_REPORT.md.
 
 ## فازهای ۷–۱۸ (پیاده‌سازی‌شده در همین برنچ؛ تست دستی کاربر در انتظار)
 
@@ -107,6 +107,7 @@ Resource برای داده، Node-based State Machine (core/state_machine/) بر
 - حافظه دشمن — last_seen + Investigate
 - سقوط — fall damage روی JumpState
 - میز ساخت — Workbench + too_far
+- رادیو شرق — RadioBeacon با هزینه قراضه
 
 ### «Noise-Based Awareness» — سه اصلاح مستندشده (اجراشده)
 

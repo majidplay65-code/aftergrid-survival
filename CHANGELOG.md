@@ -3,6 +3,15 @@
 قالب این فایل از [Keep a Changelog](https://keepachangelog.com/fa-IR/1.1.0/) و
 شماره‌گذاری از [Semantic Versioning](https://semver.org/lang/fa/) پیروی می‌کند.
 
+## [0.28.0] - 2026-09-12
+
+فاز ۲۷ (رادیو شرق): دلیل رفتن به حیاط صنعتی.
+
+### Added
+
+- `RadioBeacon` در شرق سوله؛ هزینه ۱ قراضه؛ `EventBus.radio_activated`.
+- تست headless `tests/radio_beacon_test.gd` (۹ چک). بدون سلاح گرم.
+
 ## [0.27.0] - 2026-09-12
 
 فاز ۲۶ (میز ساخت): ساخت با الزام ایستگاه `too_far` می‌دهد.
