@@ -3,6 +3,25 @@
 قالب این فایل از [Keep a Changelog](https://keepachangelog.com/fa-IR/1.1.0/) و
 شماره‌گذاری از [Semantic Versioning](https://semver.org/lang/fa/) پیروی می‌کند.
 
+## [0.18.0] - 2026-09-12
+
+فاز ۱۷ (Death): مرگ واقعی روی StateMachine.
+
+### Added
+
+- `DeadState`؛ قفل پرش/ضربه/تعامل؛ بدون سیو بعد از مرگ.
+- Game Over → `SceneManager.reload_current_scene`.
+- تست headless `tests/player_death_test.gd` (۱۲ چک).
+
+## [0.17.0] - 2026-09-12
+
+فاز ۱۶ (Jump): پرش روی StateMachine.
+
+### Added
+
+- `JumpState`، نویز پرش ۷ متر / فرود ۹ متر؛ خزیدن پرش ندارد.
+- تست headless `tests/jump_state_test.gd` (۱۱ چک).
+
 ## [0.16.0] - 2026-09-12
 
 فاز ۱۵ (Enemy Loot): قراضه روی مرگ دشمن.

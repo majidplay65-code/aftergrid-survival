@@ -11,8 +11,8 @@ config_version=5
 [application]
 
 config/name="Aftergrid"
-config/description="Working title — survival after the grid goes down. Phases 0-15 (city block, survival loop, threat variety, noise, industrial yard, game feel, crouch, battery, consume, melee, loot)."
-config/version="0.16.0"
+config/description="Working title — survival after the grid goes down. Phases 0-17 (… loot, jump, death)."
+config/version="0.18.0"
 run/main_scene="res://ui/menus/main_menu.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"

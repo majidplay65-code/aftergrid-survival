@@ -81,9 +81,9 @@ Resource برای داده، Node-based State Machine (core/state_machine/) بر
 
 ## فازبندی فعلی پروژه
 
-فاز 0-15 انجام‌شده (Setup, Core, Player, Survival Loop, World, Threat, Inventory/Crafting, Threat Variety, Noise-Based Awareness, World Expansion, Game Feel, Stealth Crouch, Flashlight Battery, Consume, Melee, Enemy Loot). فاز بعدی تعریف نشده — منتظر تصمیم مالک ریپو. جزئیات کامل در README.md.
+فاز 0-17 انجام‌شده (… Enemy Loot, Jump, Death). فاز بعدی تعریف نشده — منتظر تصمیم مالک ریپو. جزئیات کامل در README.md.
 
-## فازهای ۷–۱۵ (پیاده‌سازی‌شده در همین برنچ؛ تست دستی کاربر در انتظار)
+## فازهای ۷–۱۷ (پیاده‌سازی‌شده در همین برنچ؛ تست دستی کاربر در انتظار)
 
 مالک ریپو صریحاً ترتیب ۷→۸→۹→۱۰ را اعلام کرد و پیاده شد؛ ۱۱–۱۵ ادامهٔ لایه‌ای همان برنچ است:
 
@@ -96,6 +96,8 @@ Resource برای داده، Node-based State Machine (core/state_machine/) بر
 - Consume — مصرف از اینونتوری
 - Melee — ضربه‌ی نزدیک + جان دشمن (بدون سلاح گرم)
 - Enemy Loot — قراضه روی `enemy_died`
+- Jump — `JumpState` (Space؛ خزیدن پرش ندارد)
+- Death — `DeadState` + Game Over + بدون سیو بعد از مرگ
 
 ### «Noise-Based Awareness» — سه اصلاح مستندشده (اجراشده)
 
