@@ -1,16 +1,16 @@
-## تست کارکردی headless: صدای رویه‌ای «قدم روی آسفالت» (footstep_asphalt.wav)
+## تست کارکردی headless: صدای رویه‌ای «قدم روی فلز» (footstep_metal.wav)
 ## - فایل پروسیجرال موجود است و به‌عنوان AudioStream (WAV) لود می‌شود
-## - نگاشت EventBus در AudioManager: قدم (راه‌رفتن) → صدای آسفالت (تابع خالص/قابل‌تست)
+## - نگاشت EventBus در AudioManager: دویدن (کوبش سخت) → صدای فلز (تابع خالص/قابل‌تست)
 ##
 ## نحوه‌ی اجرا (از ریشه‌ی پروژه):
-##   godot --headless --path . -s res://tests/audio_footstep_asphalt_test.gd
+##   godot --headless --path . -s res://tests/audio_footstep_metal_test.gd
 ##
 ## کد خروجی ۰ = همه‌ی تست‌ها پاس، ۱ = شکست.
 ## نکته: در headless AudioManager اتصال‌های EventBus را نمی‌سازد (درایور صدا نیست)،
 ## بنابراین منطق نگاشت با تابع خالصِ footstep_sound_path تست می‌شود.
 extends SceneTree
 
-const ASPHALT_PATH: String = "res://assets/audio/footstep_asphalt.wav"
+const METAL_PATH: String = "res://assets/audio/footstep_metal.wav"
 
 ## تعداد چک‌هایی که باید در یک اجرای کامل اجرا شوند (محافظِ «خطای خاموشِ API»).
 const EXPECTED_CHECK_COUNT: int = 11
@@ -40,21 +40,21 @@ func _process(_delta: float) -> bool:
 
 
 func _run() -> void:
-	_check(ResourceLoader.exists(ASPHALT_PATH), "footstep_asphalt.wav در پروژه موجود است")
-	var stream: Resource = load(ASPHALT_PATH)
-	_check(stream != null, "footstep_asphalt.wav لود می‌شود")
+	_check(ResourceLoader.exists(METAL_PATH), "footstep_metal.wav در پروژه موجود است")
+	var stream: Resource = load(METAL_PATH)
+	_check(stream != null, "footstep_metal.wav لود می‌شود")
 	_check(stream is AudioStream, "فایل یک AudioStream است")
 	_check(stream is AudioStreamWAV, "فایل از نوع AudioStreamWAV است")
 	_check(am != null, "AudioManager autoload در دسترس است")
 	if am == null:
 		return
-	_check(str(am.FOOTSTEP_ASPHALT) == ASPHALT_PATH, "ثابت FOOTSTEP_ASPHALT به فایل درست اشاره دارد")
-	var walk_path: String = str(am.footstep_sound_path(false))
+	_check(str(am.FOOTSTEP_METAL) == METAL_PATH, "ثابت FOOTSTEP_METAL به فایل درست اشاره دارد")
 	var run_path: String = str(am.footstep_sound_path(true))
-	_check(walk_path == ASPHALT_PATH, "نگاشت: راه‌رفتن → صدای آسفالت")
-	_check(run_path == "res://assets/audio/footstep_metal.wav", "نگاشت: دویدن → صدای فلز")
-	_check(ResourceLoader.exists(walk_path), "مسیر برگشتی راه‌رفتن موجود است")
+	var walk_path: String = str(am.footstep_sound_path(false))
+	_check(run_path == METAL_PATH, "نگاشت: دویدن → صدای فلز")
+	_check(walk_path == "res://assets/audio/footstep_asphalt.wav", "نگاشت: راه‌رفتن → صدای آسفالت")
 	_check(ResourceLoader.exists(run_path), "مسیر برگشتی دویدن موجود است")
+	_check(ResourceLoader.exists(walk_path), "مسیر برگشتی راه‌رفتن موجود است")
 
 
 func _ensure_autoloads() -> void:
@@ -85,7 +85,7 @@ func _finish() -> void:
 	_check(checks_run + 1 == EXPECTED_CHECK_COUNT,
 			"همه‌ی %d چک اجرا شد (اجراشده: %d)" % [EXPECTED_CHECK_COUNT, checks_run + 1])
 	if failures == 0:
-		print("ALL TESTS PASSED (audio footstep asphalt)")
+		print("ALL TESTS PASSED (audio footstep metal)")
 		quit(0)
 	else:
 		printerr("%d TEST(S) FAILED" % failures)

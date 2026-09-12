@@ -198,6 +198,7 @@ def main() -> None:
     _write("footstep_walk.wav", footstep(False))
     _write("footstep_run.wav", footstep(True))
     _write("footstep_asphalt.wav", footstep_asphalt())
+    _write("footstep_metal.wav", footstep_metal())
     _write("craft.wav", craft())
     _write("pickup.wav", pickup())
     _write("ui_click.wav", ui_click())
