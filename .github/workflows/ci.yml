@@ -128,15 +128,47 @@ jobs:
             exit 1
           fi
 
+          # گاردِ ثابت ERROR/WARNING: Godot حتی وقتی SCRIPT ERROR می‌دهد هم exit code صفر
+          # برمی‌گرداند (خطای «Invalid call» برای API ناموجود دقیقاً همین‌طور سه بار در همین
+          # PR خاموش ماند). پس فقط exit code معیار کافی نیست و خروجی هم بررسی می‌شود.
+          error_pattern='SCRIPT ERROR|ERROR:|WARNING:'
+
           failed=0
           for script in "${scripts[@]}"; do
             echo "── ${script}"
+            # خروجی را می‌گیریم تا هم چاپ شود و هم گاردِ زیر رویش کار کند.
+            set +e
+            output="$(godot --headless --path . -s "res://${script}" 2>&1)"
+            status=$?
+            set -e
+            printf '%s\n' "${output}"
+
             # اسکریپت خودش با quit(0)/quit(1) نتیجه را اعلام می‌کند و exit code حفظ می‌شود.
-            godot --headless --path . -s "res://${script}" || failed=1
+            if [ "${status}" -ne 0 ]; then
+              echo "::error::${script} exited with code ${status}"
+              failed=1
+            fi
+
+            # گارد: هر خطِ خطا/هشدارِ موتور (حتی با exit code صفر) مرحله را fail می‌کند.
+            found="$(printf '%s\n' "${output}" | grep -nE "${error_pattern}" || true)"
+            if [ -n "${found}" ]; then
+              echo "::error::Godot wrote ERROR/WARNING lines in ${script} (exit code alone is not enough). Pattern: ${error_pattern}"
+              problems_file="${RUNNER_TEMP:-/tmp}/godot_error_lines.txt"
+              printf '%s\n' "${found}" > "${problems_file}"
+              shown=0
+              while IFS= read -r line; do
+                echo "::error title=Godot ERROR/WARNING::${line}"
+                shown=$((shown + 1))
+                if [ "${shown}" -ge 40 ]; then
+                  break
+                fi
+              done < "${problems_file}"
+              failed=1
+            fi
           done
 
           if [ "${failed}" -ne 0 ]; then
             echo "::error::DoD tests failed"
             exit 1
           fi
-          echo "OK: all DoD tests passed"
+          echo "OK: all DoD tests passed (no SCRIPT ERROR / ERROR: / WARNING: lines)"
