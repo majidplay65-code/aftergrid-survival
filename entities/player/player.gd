@@ -19,6 +19,10 @@ const STAND_CAPSULE_HEIGHT: float = 1.8
 const CROUCH_CAPSULE_HEIGHT: float = 1.2
 const FLASHLIGHT_DRAIN_RATE: float = 8.0
 const MAX_FLASHLIGHT_BATTERY: float = 100.0
+const MELEE_STAMINA_COST: float = 12.0
+const MELEE_NOISE: float = 8.0
+const MELEE_RANGE: float = 2.0
+const MELEE_DAMAGE: float = 15.0
 
 # نرخ مصرف حیاتی در هر ثانیه
 const THIRST_DECAY_RATE: float = 0.25
@@ -168,6 +172,39 @@ func is_run_pressed() -> bool:
 
 func is_crouch_pressed() -> bool:
 	return Input.is_action_pressed(&"crouch")
+
+
+func is_melee_just_pressed() -> bool:
+	return Input.is_action_just_pressed(&"melee")
+
+
+## ضربه‌ی نزدیک: استامینا، نویز ۸ متری، آسیب به دشمنان جلوی بازیکن.
+func try_melee() -> bool:
+	if not stats.consume_stamina(MELEE_STAMINA_COST):
+		EventBus.toast_requested.emit("استقامت کافی نیست")
+		return false
+	EventBus.noise_emitted.emit(global_position, MELEE_NOISE)
+	var forward: Vector3 = -global_transform.basis.z
+	forward.y = 0.0
+	if forward.length() < 0.01:
+		forward = Vector3.FORWARD
+	else:
+		forward = forward.normalized()
+	for node in get_tree().get_nodes_in_group(&"enemies"):
+		if not (node is Enemy):
+			continue
+		var enemy: Enemy = node as Enemy
+		if not is_instance_valid(enemy):
+			continue
+		var to_enemy: Vector3 = enemy.global_position - global_position
+		to_enemy.y = 0.0
+		var distance: float = to_enemy.length()
+		if distance > MELEE_RANGE or distance < 0.01:
+			continue
+		if forward.dot(to_enemy / distance) < 0.25:
+			continue
+		enemy.take_damage(MELEE_DAMAGE)
+	return true
 
 
 func _toggle_flashlight() -> void:

@@ -26,6 +26,11 @@ var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 ## ضریب شنوایی نسبت به loudness سیگنال نویز (Stalker تیزگوش، Brute کم‌حوصله).
 @export var hearing_multiplier: float = 1.0
 
+## جان دشمن (Shambler ۴۰، Stalker ۲۵، Brute ۷۰).
+@export var max_health: float = 40.0
+var health: float = 40.0
+var _is_dead: bool = false
+
 ## ایندکس نقطه‌ی فعلی گشت (توسط PatrolState مدیریت می‌شود).
 var current_patrol_index: int = 0
 
@@ -37,6 +42,8 @@ var investigate_target: Vector3 = Vector3.ZERO
 
 
 func _ready() -> void:
+	health = max_health
+	add_to_group(&"enemies")
 	sight_area.body_entered.connect(_on_sight_body_entered)
 	sight_area.body_exited.connect(_on_sight_body_exited)
 	attack_area.body_entered.connect(_on_attack_body_entered)
@@ -141,6 +148,23 @@ func face_toward(world_point: Vector3) -> void:
 	d.y = 0.0
 	if d.length() > 0.05:
 		rotation.y = atan2(-d.x, -d.z)
+
+
+## آسیب نزدیک از ضربه‌ی بازیکن. در صفر → enemy_died و حذف از صحنه.
+func take_damage(amount: float) -> void:
+	if _is_dead:
+		return
+	health = maxf(health - amount, 0.0)
+	if health <= 0.0:
+		_die()
+
+
+func _die() -> void:
+	if _is_dead:
+		return
+	_is_dead = true
+	EventBus.enemy_died.emit(global_position)
+	queue_free()
 
 
 ## فاصله‌ی افقی (روی صفحه‌ی XZ) تا یک نقطه‌ی جهانی — بدون اثر اختلاف ارتفاع.

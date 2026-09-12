@@ -42,3 +42,5 @@ signal toast_requested(message: String)
 
 ## ژنراتور اضطراری روشن شد — بازیکن چراغ‌قوه را شارژ می‌کند (بدون ارجاع مستقیم).
 signal generator_charge_requested
+## دشمن مرد؛ موقعیت برای لوت. `death_position` تا با Node3D.position تداخل نکند.
+signal enemy_died(death_position: Vector3)

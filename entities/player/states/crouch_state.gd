@@ -14,7 +14,9 @@ func physics_update(delta: float) -> void:
 	player.apply_horizontal_movement(delta, speed)
 	player.stats.regen_stamina(STAMINA_REGEN_RATE * delta)
 
-	if not player.is_crouch_pressed():
+	if player.is_melee_just_pressed() and player.stats.stamina >= Player.MELEE_STAMINA_COST:
+		state_machine.transition_to(&"MeleeState")
+	elif not player.is_crouch_pressed():
 		if player.is_moving():
 			if player.is_run_pressed() and player.stats.stamina > 5.0:
 				state_machine.transition_to(&"RunState")
