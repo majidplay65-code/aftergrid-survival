@@ -223,6 +223,8 @@ func _failure_text(reason: String) -> String:
 			return "دستور نامعتبر است"
 		"no_inventory":
 			return "اینونتوری در دسترس نیست"
+		"too_far":
+			return "نزدیک میز ساخت نیستی"
 		_:
 			return reason
 

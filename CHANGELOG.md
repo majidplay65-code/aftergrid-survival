@@ -3,6 +3,16 @@
 قالب این فایل از [Keep a Changelog](https://keepachangelog.com/fa-IR/1.1.0/) و
 شماره‌گذاری از [Semantic Versioning](https://semver.org/lang/fa/) پیروی می‌کند.
 
+## [0.27.0] - 2026-09-12
+
+فاز ۲۶ (میز ساخت): ساخت با الزام ایستگاه `too_far` می‌دهد.
+
+### Added
+
+- `Workbench` نزدیک ژنراتور، گروه `workbenches`.
+- `CraftingSystem.craft(..., require_station)`؛ دلیل `too_far`.
+- تست headless `tests/workbench_test.gd` (۸ چک). UI موجود ۲۷ چک را عوض نمی‌کند.
+
 ## [0.26.0] - 2026-09-12
 
 فاز ۲۵ (سقوط): فرود سخت آسیب و نویز بیشتر دارد.

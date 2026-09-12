@@ -19,6 +19,8 @@ const FAIL_UNKNOWN_RECIPE: String = "unknown_recipe"
 const FAIL_NO_INVENTORY: String = "no_inventory"
 const FAIL_RESULT_ITEM_UNKNOWN: String = "result_item_unknown"
 const FAIL_INVENTORY_FULL: String = "inventory_full"
+const FAIL_TOO_FAR: String = "too_far"
+const STATION_RANGE: float = 3.0
 
 ## مسیر کاتالوگ واقعی — برای autoload که نمی‌تواند @export از بیرون بگیرد.
 const CATALOG_PATH: String = "res://resources/item_catalog.tres"
@@ -50,12 +52,30 @@ func can_craft(recipe: RecipeData, inventory: Inventory) -> bool:
 
 ## تلاش برای ساخت. در موفقیت true و emit سیگنال item_crafted؛
 ## در شکست false و emit سیگنال craft_failed با دلیل مشخص.
-func craft(recipe: RecipeData, inventory: Inventory) -> bool:
+func is_near_workbench() -> bool:
+	var player: Node3D = GameState.player_reference
+	if player == null or not is_instance_valid(player):
+		return false
+	var tree: SceneTree = player.get_tree()
+	if tree == null:
+		return false
+	for node in tree.get_nodes_in_group(&"workbenches"):
+		if node is Node3D:
+			var bench: Node3D = node as Node3D
+			if player.global_position.distance_to(bench.global_position) <= STATION_RANGE:
+				return true
+	return false
+
+
+func craft(recipe: RecipeData, inventory: Inventory, require_station: bool = false) -> bool:
 	if recipe == null:
 		_emit_failure(null, FAIL_UNKNOWN_RECIPE)
 		return false
 	if inventory == null:
 		_emit_failure(recipe, FAIL_NO_INVENTORY)
+		return false
+	if require_station and not is_near_workbench():
+		_emit_failure(recipe, FAIL_TOO_FAR)
 		return false
 	# ۱) بررسی کامل مواد — بدون هیچ تغییری (پیش‌شرط اتمیک بودن)
 	if not can_craft(recipe, inventory):
