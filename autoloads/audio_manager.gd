@@ -4,8 +4,8 @@
 ## مسیر: res://autoloads/audio_manager.gd
 extends Node
 
-const FOOTSTEP_WALK: String = "res://assets/audio/footstep_walk.wav"
 const FOOTSTEP_RUN: String = "res://assets/audio/footstep_run.wav"
+const FOOTSTEP_ASPHALT: String = "res://assets/audio/footstep_asphalt.wav"
 const CRAFT: String = "res://assets/audio/craft.wav"
 const PICKUP: String = "res://assets/audio/pickup.wav"
 const UI_CLICK: String = "res://assets/audio/ui_click.wav"
@@ -28,10 +28,16 @@ func _ready() -> void:
 	EventBus.game_paused.connect(_on_game_paused)
 
 
+## نگاشت خالصِ سیگنال قدم به مسیر فایل (قابل‌تست در headless):
+## راه رفتن روی سطح آسفالتِ محوطه → صدای قدم آسفالت؛ دویدن → صدای دویدن (نسخه‌ی
+## فعلی؛ با افزودن سطوح جدید این تابع به‌روز می‌شود).
+func footstep_sound_path(is_running: bool) -> String:
+	return FOOTSTEP_RUN if is_running else FOOTSTEP_ASPHALT
+
+
 func _on_footstep_played(is_running: bool) -> void:
-	var path: String = FOOTSTEP_RUN if is_running else FOOTSTEP_WALK
 	var pitch: float = 1.08 if is_running else 0.96
-	_play(path, pitch)
+	_play(footstep_sound_path(is_running), pitch)
 
 
 func _on_item_picked_up(_item_id: StringName, _amount: int) -> void:
