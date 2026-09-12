@@ -3,6 +3,10 @@
 ##
 ## نحوه‌ی اجرا:
 ##   godot --headless --path . -s res://tests/enemy_loot_test.gd
+##
+## نکته: LootSpawner در _ready() به EventBus.enemy_died وصل می‌شود و _ready() در حالت -s
+## فقط در نخستین فریم اجرا می‌شود؛ بنابراین چک‌ها بعد از چند فریم در _process() انجام می‌شوند
+## (الگوی مشترک tests/inventory_wiring_test.gd).
 extends SceneTree
 
 const SPAWNER_PATH: String = "res://core/loot/loot_spawner.gd"
@@ -11,21 +15,33 @@ const EXPECTED_CHECK_COUNT: int = 8
 
 var checks_run: int = 0
 var failures: int = 0
+var frame: int = 0
+var started: bool = false
+var host: Node3D = null
+var spawner: Variant = null
 
 
 func _initialize() -> void:
 	_ensure_autoloads()
-	_run()
-	_finish()
+	host = Node3D.new()
+	host.name = "LootHost"
+	root.add_child(host)
+	spawner = load(SPAWNER_PATH).new()
+	host.add_child(spawner)
+
+
+func _process(_delta: float) -> bool:
+	frame += 1
+	if not started and frame >= 3:
+		started = true
+		_run()
+		_finish()
+		return true
+	return false
 
 
 func _run() -> void:
 	_check(ResourceLoader.exists(SPAWNER_PATH), "اسکریپت LootSpawner موجود است")
-	var host: Node3D = Node3D.new()
-	host.name = "LootHost"
-	root.add_child(host)
-	var spawner: Variant = load(SPAWNER_PATH).new()
-	host.add_child(spawner)
 	var enemy: Variant = load(ENEMY_PATH).instantiate()
 	host.add_child(enemy)
 	enemy.global_position = Vector3(12.0, 1.0, 18.0)

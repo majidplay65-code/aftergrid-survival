@@ -3,6 +3,11 @@
 ##
 ## نحوه‌ی اجرا:
 ##   godot --headless --path . -s res://tests/consume_item_test.gd
+##
+## نکته: autoloadها در حالت -s پیش از _initialize() ثبت می‌شوند ولی _ready() آن‌ها
+## (که InventoryManager در آن اینونتوری واقعی را می‌سازد) فقط در نخستین فریم اجرا می‌شود.
+## برای همین چک‌ها به‌جای _initialize() در _process() و بعد از چند فریم انجام می‌شوند
+## (الگوی مشترک tests/inventory_wiring_test.gd).
 extends SceneTree
 
 const PLAYER_PATH: String = "res://entities/player/player.tscn"
@@ -10,20 +15,39 @@ const EXPECTED_CHECK_COUNT: int = 12
 
 var checks_run: int = 0
 var failures: int = 0
+var frame: int = 0
+var started: bool = false
+var aborted: bool = false
+var inv: Variant = null
+var player: Variant = null
 
 
 func _initialize() -> void:
 	_ensure_autoloads()
-	_run()
-	_finish()
+	inv = root.get_node_or_null("InventoryManager")
+	_check(inv != null and inv.has_method("use_item"), "InventoryManager.use_item موجود است")
+	if inv == null or not inv.has_method("use_item"):
+		aborted = true
+		_finish()
+		return
+	var packed: PackedScene = load(PLAYER_PATH)
+	player = packed.instantiate()
+	root.add_child(player)
+
+
+func _process(_delta: float) -> bool:
+	if aborted:
+		return true
+	frame += 1
+	if not started and frame >= 3:
+		started = true
+		_run()
+		_finish()
+		return true
+	return false
 
 
 func _run() -> void:
-	var inv: Variant = root.get_node_or_null("InventoryManager")
-	_check(inv != null and inv.has_method("use_item"), "InventoryManager.use_item موجود است")
-	var packed: PackedScene = load(PLAYER_PATH)
-	var player: Variant = packed.instantiate()
-	root.add_child(player)
 	_check(inv.add_item(&"water_bottle", 1) == 1, "۱ بطری آب اضافه شد")
 	player.stats.thirst = 10.0
 	_check(inv.use_item(&"water_bottle") == true, "مصرف بطری آب موفق است")
