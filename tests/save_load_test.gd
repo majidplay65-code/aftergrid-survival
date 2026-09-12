@@ -58,8 +58,17 @@ const CARVE_PROBE_WEST: Vector3 = Vector3(-30.0, 0.5, -17.0)
 const CARVE_PROBE_EAST: Vector3 = Vector3(-4.0, 0.5, -17.0)
 const CARVE_STRAIGHT_METERS: float = 26.0
 
+## تعداد چک‌هایی که باید در یک اجرای کامل اجرا شوند (شاملِ خودِ چکِ محافظ).
+## چرا این محافظ لازم است؟ اگر یک تابع به‌خاطر «Invalid call» (API ناموجود در ۴.۷.۲)
+## وسط راه قطع شود، Godot فقط SCRIPT ERROR چاپ می‌کند و exit code صفر می‌ماند؛ آن‌وقت
+## بخشی از چک‌ها هرگز اجرا نمی‌شوند و هیچ‌کس متوجه نمی‌شود (دقیقاً همان اتفاقی که در
+## اجرای اولِ همین چک‌ها افتاد: PASS=19 با دو SCRIPT ERROR و در عین حال CI سبز).
+## این شمارنده آن حالت را به FAIL تبدیل می‌کند.
+const EXPECTED_CHECK_COUNT: int = 66
+
 var frame: int = 0
 var phase: int = 0
+var checks_run: int = 0
 var level: Node = null
 var ready_frame: int = 0
 var failures: int = 0
@@ -403,6 +412,7 @@ func _ensure_autoloads() -> void:
 
 
 func _check(ok: bool, label: String) -> void:
+	checks_run += 1
 	if ok:
 		print("PASS: ", label)
 	else:
@@ -411,6 +421,10 @@ func _check(ok: bool, label: String) -> void:
 
 
 func _finish() -> void:
+	# محافظِ «خطای خاموشِ API»: تعداد چک‌های اجراشده باید دقیقاً برابر مقدار انتظار
+	# باشد (+۱ چون خودِ این چک هم شمرده می‌شود).
+	_check(checks_run + 1 == EXPECTED_CHECK_COUNT,
+			"P0: همه‌ی %d چک اجرا شد (اجراشده: %d)" % [EXPECTED_CHECK_COUNT, checks_run + 1])
 	if failures == 0:
 		print("ALL TESTS PASSED (save/load)")
 		quit(0)
