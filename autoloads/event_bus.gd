@@ -8,7 +8,6 @@ extends Node
 # --- Player ---
 signal player_stat_changed(stat_name: StringName, current_value: float, max_value: float)
 signal player_died
-signal player_respawned
 
 # --- Inventory ---
 signal item_picked_up(item_id: StringName, amount: int)
