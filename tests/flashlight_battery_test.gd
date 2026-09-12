@@ -3,6 +3,10 @@
 ##
 ## نحوه‌ی اجرا:
 ##   godot --headless --path . -s res://tests/flashlight_battery_test.gd
+##
+## نکته: flashlight عضو @onready بازیکن است و فقط بعد از _ready() مقدار می‌گیرد؛ در حالت -s
+## این از نخستین فریم به بعد برقرار می‌شود. برای همین بازیکن پیش از فریم‌ها به درخت اضافه و
+## چک‌ها در _process() انجام می‌شوند (الگوی tests/inventory_wiring_test.gd).
 extends SceneTree
 
 const PLAYER_PATH: String = "res://entities/player/player.tscn"
@@ -13,24 +17,35 @@ const EXPECTED_CHECK_COUNT: int = 11
 
 var checks_run: int = 0
 var failures: int = 0
+var frame: int = 0
+var started: bool = false
+var player: Variant = null
 
 
 func _initialize() -> void:
 	_ensure_autoloads()
-	_run()
-	_finish()
+	player = load(PLAYER_PATH).instantiate()
+	if player != null:
+		root.add_child(player)
+
+
+func _process(_delta: float) -> bool:
+	frame += 1
+	if not started and frame >= 3:
+		started = true
+		_run()
+		_finish()
+		return true
+	return false
 
 
 func _run() -> void:
 	var player_script: Variant = load(PLAYER_SCRIPT)
 	_check(absf(player_script.FLASHLIGHT_DRAIN_RATE - 8.0) < 0.01, "نرخ تخلیه ۸ واحد بر ثانیه است")
 	_check(absf(player_script.MAX_FLASHLIGHT_BATTERY - 100.0) < 0.01, "سقف باتری ۱۰۰ است")
-	var packed: PackedScene = load(PLAYER_PATH)
-	var player: Variant = packed.instantiate()
 	_check(player != null, "بازیکن instantiate می‌شود")
 	if player == null:
 		return
-	root.add_child(player)
 	_check(absf(player.flashlight_battery - 100.0) < 0.01, "باتری اولیه ۱۰۰ است")
 	player.flashlight.visible = true
 	player._update_flashlight_battery(1.0)

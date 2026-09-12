@@ -3,6 +3,10 @@
 ##
 ## نحوه‌ی اجرا (از ریشه‌ی پروژه):
 ##   godot --headless --path . -s res://tests/interiors_test.gd
+##
+## نکته: global_position (فروشگاه و نویز در) فقط بعد از ورود به درخت معتبر است و در حالت -s
+## از نخستین فریم به بعد برقرار می‌شود. برای همین سطح پیش از فریم‌ها به درخت اضافه و چک‌ها
+## در _process() انجام می‌شوند (الگوی tests/inventory_wiring_test.gd).
 extends SceneTree
 
 const LEVEL_PATH: String = "res://levels/test_level.tscn"
@@ -13,6 +17,8 @@ const EXPECTED_CHECK_COUNT: int = 17
 var checks_run: int = 0
 var failures: int = 0
 var level: Node = null
+var frame: int = 0
+var started: bool = false
 
 
 func _initialize() -> void:
@@ -23,8 +29,16 @@ func _initialize() -> void:
 	var packed: PackedScene = load(LEVEL_PATH)
 	level = packed.instantiate()
 	root.add_child(level)
-	_run()
-	_finish()
+
+
+func _process(_delta: float) -> bool:
+	frame += 1
+	if not started and frame >= 3:
+		started = true
+		_run()
+		_finish()
+		return true
+	return false
 
 
 func _run() -> void:

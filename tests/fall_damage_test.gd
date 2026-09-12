@@ -1,4 +1,8 @@
 ## تست کارکردی headless فاز ۲۵ (سقوط).
+##
+## نکته: land_from_jump از global_position نویز emit می‌کند و global_position فقط بعد از
+## ورود به درخت معتبر است؛ در حالت -s این از نخستین فریم به بعد برقرار می‌شود. برای همین
+## چک‌ها در _process() و بعد از چند فریم انجام می‌شوند (الگوی tests/inventory_wiring_test.gd).
 extends SceneTree
 
 const PLAYER_PATH: String = "res://entities/player/player.tscn"
@@ -8,6 +12,9 @@ const EXPECTED_CHECK_COUNT: int = 8
 var checks_run: int = 0
 var failures: int = 0
 var last_noise: float = 0.0
+var frame: int = 0
+var started: bool = false
+var player: Variant = null
 
 
 func _initialize() -> void:
@@ -15,8 +22,19 @@ func _initialize() -> void:
 	var event_bus: Variant = root.get_node_or_null("EventBus")
 	if event_bus != null:
 		event_bus.noise_emitted.connect(_on_noise)
-	_run()
-	_finish()
+	player = load(PLAYER_PATH).instantiate()
+	if player != null:
+		root.add_child(player)
+
+
+func _process(_delta: float) -> bool:
+	frame += 1
+	if not started and frame >= 3:
+		started = true
+		_run()
+		_finish()
+		return true
+	return false
 
 
 func _on_noise(_pos: Vector3, loudness: float) -> void:
@@ -27,11 +45,9 @@ func _run() -> void:
 	var player_script: Variant = load(PLAYER_SCRIPT)
 	_check(absf(player_script.FALL_DAMAGE_SPEED - 12.0) < 0.01, "آستانه سقوط ۱۲ است")
 	_check(absf(player_script.HARD_LAND_NOISE - 14.0) < 0.01, "نویز فرود سخت ۱۴ متر است")
-	var player: Variant = load(PLAYER_PATH).instantiate()
 	_check(player != null, "بازیکن instantiate می‌شود")
 	if player == null:
 		return
-	root.add_child(player)
 	player.stats.health = 80.0
 	player.peak_fall_speed = 5.0
 	player.land_from_jump()
