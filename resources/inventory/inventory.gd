@@ -86,6 +86,15 @@ func total_count() -> int:
 	return total
 
 
+## ظرفیت باقی‌مانده برای افزودن یک آیتم (max_stack - تعداد فعلی)؛
+## اگر سقفی نباشد (کاتالوگ/آیتم نامشخص یا max_stack غیرمثبت) UNLIMITED_STACK برمی‌گردد.
+func space_for(item_id: StringName) -> int:
+	var max_stack: int = _max_stack_for(item_id)
+	if max_stack == UNLIMITED_STACK:
+		return UNLIMITED_STACK
+	return max_stack - count_item(item_id)
+
+
 ## سقف انباشت یک آیتم از کاتالوگ؛ اگر کاتالوگ/آیتم نبود یا max_stack غیرمثبت بود → نامحدود.
 func _max_stack_for(item_id: StringName) -> int:
 	if catalog == null:
