@@ -40,6 +40,7 @@ script = ExtResource("1_enemy")
 patrol_points = Array[Vector3]([Vector3(30, 0, -32), Vector3(38, 0, -32), Vector3(38, 0, -28), Vector3(30, 0, -28)])
 hearing_multiplier = 1.5
 max_health = 25.0
+memory_seconds = 6.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("shape_body")

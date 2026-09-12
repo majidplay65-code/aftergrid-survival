@@ -44,6 +44,10 @@ var player_in_sight_area: bool = false
 
 ## آخرین هدف بررسی نویز (توسط InvestigateState و هندلر سیگنال نویز).
 var investigate_target: Vector3 = Vector3.ZERO
+## آخرین جایی که بازیکن دیده شد (فاز ۲۴). روی موجود است نه Autoload.
+var last_seen_position: Vector3 = Vector3.ZERO
+## تایم‌اوت گشتن بعد از گم‌کردن دید. Stalker بلندتر، Brute کوتاه‌تر.
+@export var memory_seconds: float = 4.0
 
 
 func _ready() -> void:
@@ -89,9 +93,7 @@ func _on_sight_body_entered(body: Node3D) -> void:
 func _on_sight_body_exited(body: Node3D) -> void:
 	if body is Player:
 		player_in_sight_area = false
-		var current_name: StringName = _current_state_name()
-		if current_name == &"ChaseState" or current_name == &"AttackState":
-			state_machine.transition_to(&"PatrolState")
+		lose_visual(body as Node3D)
 
 
 ## اگر بازیکن داخل کره است و دیوار وسط نیست → Chase.
@@ -133,6 +135,19 @@ func has_line_of_sight_to(target: Node3D) -> bool:
 		return true
 	var collider: Variant = result.get("collider", null)
 	return collider == target
+
+
+## گم‌کردن دید: Investigate به آخرین نقطه، نه Patrol فوری.
+func lose_visual(from_body: Node3D = null) -> void:
+	var source: Node3D = from_body
+	if source == null:
+		source = GameState.player_reference
+	if source != null and is_instance_valid(source):
+		last_seen_position = source.global_position
+	investigate_target = last_seen_position
+	var current_name: StringName = _current_state_name()
+	if current_name == &"ChaseState" or current_name == &"AttackState":
+		state_machine.transition_to(&"InvestigateState", {"target": last_seen_position})
 
 
 func _current_state_name() -> StringName:

@@ -3,6 +3,15 @@
 قالب این فایل از [Keep a Changelog](https://keepachangelog.com/fa-IR/1.1.0/) و
 شماره‌گذاری از [Semantic Versioning](https://semver.org/lang/fa/) پیروی می‌کند.
 
+## [0.25.0] - 2026-09-12
+
+فاز ۲۴ (حافظه دشمن): گم‌کردن دید → Investigate نه Patrol فوری.
+
+### Added
+
+- `last_seen_position` و `memory_seconds` روی Enemy (Stalker ۶، Brute ۲.۵).
+- تست headless `tests/enemy_memory_test.gd` (۹ چک).
+
 ## [0.24.0] - 2026-09-12
 
 فاز ۲۳ (پناه): RestSpot داخل فروشگاه.

@@ -27,7 +27,8 @@ func physics_update(delta: float) -> void:
 		return
 	_elapsed += delta
 	enemy.agent.target_position = enemy.investigate_target
-	if enemy.horizontal_distance_to(enemy.investigate_target) < ARRIVE_DISTANCE or _elapsed >= GIVE_UP_SECONDS:
+	var give_up: float = enemy.memory_seconds if enemy.memory_seconds > 0.0 else GIVE_UP_SECONDS
+	if enemy.horizontal_distance_to(enemy.investigate_target) < ARRIVE_DISTANCE or _elapsed >= give_up:
 		state_machine.transition_to(&"PatrolState")
 		return
 	enemy.move_along_agent(delta, speed)
