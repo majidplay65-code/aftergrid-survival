@@ -14,9 +14,9 @@
 [ext_resource type="Script" path="res://core/save/save_controller.gd" id="12_savectrl"]
 [ext_resource type="PackedScene" path="res://entities/enemy/enemy.tscn" id="13_enemy"]
 
-[sub_resource type="NavigationPolygon" id="navpoly"]
+[sub_resource type="NavigationMesh" id="navpoly"]
 vertices = PackedVector3Array(-40, 0, -40, 40, 0, -40, 40, 0, 40, -40, 0, 40)
-polygons = PackedInt32Array(0, 1, 2, 0, 2, 3)
+polygons = [PackedInt32Array(0, 1, 2), PackedInt32Array(0, 2, 3)]
 
 [sub_resource type="BoxShape3D" id="obst_b1"]
 size = Vector3(19, 12, 17)
@@ -1198,7 +1198,7 @@ omni_range = 16.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.6, 0, 12.1)
 
 [node name="NavigationRegion" type="NavigationRegion3D" parent="."]
-navigation_map = SubResource("navpoly")
+navigation_mesh = SubResource("navpoly")
 
 [node name="ObstacleB1" type="NavigationObstacle3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17, 6, -17)
