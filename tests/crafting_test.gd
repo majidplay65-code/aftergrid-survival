@@ -54,6 +54,9 @@ func _setup() -> void:
 	crafting = load("res://core/crafting/crafting_system.gd").new()
 	catalog = ResourceLoader.load(CATALOG_PATH) as ItemCatalog
 	crafting.catalog = catalog
+	# نود به درخت اضافه می‌شود تا در teardown آزاد شود و در خروجی نشت نکند
+	# (الگوی inventory_logic_test — نود بیرون از درخت در ObjectDB می‌ماند).
+	root.add_child(crafting)
 	inventory = _new_inventory()
 	# شمارنده‌ی سیگنال‌ها روی نود واقعی اتوبوس (نه شناسه‌ی سراسری)
 	event_bus.item_crafted.connect(_on_item_crafted)
@@ -213,6 +216,12 @@ func _check(ok: bool, label: String) -> void:
 
 
 func _finish() -> void:
+	# پاکسازی رفرنس‌ها پیش از خروج تا گارد ERROR/WARNING (نشت ریسورس) در CI فعال نشود
+	if crafting != null:
+		crafting.catalog = null
+	catalog = null
+	inventory = null
+	crafting = null
 	# محافظِ «خطای خاموشِ API»: تعداد چک‌های اجراشده باید دقیقاً برابر مقدار انتظار
 	# باشد (+۱ چون خودِ این چک هم شمرده می‌شود).
 	_check(checks_run + 1 == EXPECTED_CHECK_COUNT,
