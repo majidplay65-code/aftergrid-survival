@@ -6,6 +6,7 @@
 extends SceneTree
 
 const PLAYER_PATH: String = "res://entities/player/player.tscn"
+const PLAYER_SCRIPT: String = "res://entities/player/player.gd"
 const SHAMBLER_PATH: String = "res://entities/enemy/enemy.tscn"
 const STALKER_PATH: String = "res://entities/enemy/enemy_stalker.tscn"
 const BRUTE_PATH: String = "res://entities/enemy/enemy_brute.tscn"
@@ -15,18 +16,21 @@ var checks_run: int = 0
 var failures: int = 0
 var heard_noise: bool = false
 var death_count: int = 0
+var melee_noise_expected: float = 0.0
 
 
 func _initialize() -> void:
 	_ensure_autoloads()
-	EventBus.noise_emitted.connect(_on_noise)
-	EventBus.enemy_died.connect(_on_died)
+	var event_bus: Variant = root.get_node_or_null("EventBus")
+	if event_bus != null:
+		event_bus.noise_emitted.connect(_on_noise)
+		event_bus.enemy_died.connect(_on_died)
 	_run()
 	_finish()
 
 
 func _on_noise(_pos: Vector3, loudness: float) -> void:
-	if absf(loudness - Player.MELEE_NOISE) < 0.01:
+	if absf(loudness - melee_noise_expected) < 0.01:
 		heard_noise = true
 
 
@@ -35,14 +39,16 @@ func _on_died(_pos: Vector3) -> void:
 
 
 func _run() -> void:
-	_check(absf(Player.MELEE_STAMINA_COST - 12.0) < 0.01, "هزینه استامینا ۱۲ است")
-	_check(absf(Player.MELEE_NOISE - 8.0) < 0.01, "نویز ضربه ۸ متر است")
-	var player: Player = (load(PLAYER_PATH) as PackedScene).instantiate() as Player
+	var player_script: Variant = load(PLAYER_SCRIPT)
+	melee_noise_expected = float(player_script.MELEE_NOISE)
+	_check(absf(player_script.MELEE_STAMINA_COST - 12.0) < 0.01, "هزینه استامینا ۱۲ است")
+	_check(absf(player_script.MELEE_NOISE - 8.0) < 0.01, "نویز ضربه ۸ متر است")
+	var player: Variant = load(PLAYER_PATH).instantiate()
 	root.add_child(player)
 	_check(player.get_node_or_null("StateMachine/MeleeState") != null, "MeleeState در ماشین حالت هست")
-	var shambler: Enemy = (load(SHAMBLER_PATH) as PackedScene).instantiate() as Enemy
-	var stalker: Enemy = (load(STALKER_PATH) as PackedScene).instantiate() as Enemy
-	var brute: Enemy = (load(BRUTE_PATH) as PackedScene).instantiate() as Enemy
+	var shambler: Variant = load(SHAMBLER_PATH).instantiate()
+	var stalker: Variant = load(STALKER_PATH).instantiate()
+	var brute: Variant = load(BRUTE_PATH).instantiate()
 	root.add_child(shambler)
 	root.add_child(stalker)
 	root.add_child(brute)

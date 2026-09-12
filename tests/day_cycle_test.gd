@@ -12,7 +12,9 @@ var heard_time: float = -1.0
 
 func _initialize() -> void:
 	_ensure_autoloads()
-	EventBus.time_of_day_changed.connect(_on_time)
+	var event_bus: Variant = root.get_node_or_null("EventBus")
+	if event_bus != null:
+		event_bus.time_of_day_changed.connect(_on_time)
 	var save_manager: Variant = root.get_node_or_null("SaveManager")
 	if save_manager != null and save_manager.has_save_file():
 		save_manager.delete_save_file()

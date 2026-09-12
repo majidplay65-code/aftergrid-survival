@@ -19,10 +19,10 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var inv: Node = root.get_node("InventoryManager")
-	_check(inv.has_method("use_item"), "InventoryManager.use_item موجود است")
+	var inv: Variant = root.get_node_or_null("InventoryManager")
+	_check(inv != null and inv.has_method("use_item"), "InventoryManager.use_item موجود است")
 	var packed: PackedScene = load(PLAYER_PATH)
-	var player: Player = packed.instantiate() as Player
+	var player: Variant = packed.instantiate()
 	root.add_child(player)
 	_check(inv.add_item(&"water_bottle", 1) == 1, "۱ بطری آب اضافه شد")
 	player.stats.thirst = 10.0

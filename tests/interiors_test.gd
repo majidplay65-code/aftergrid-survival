@@ -34,7 +34,7 @@ func _run() -> void:
 		return
 	_check(shop.global_position.distance_to(Vector3(-10.0, 0.0, 6.0)) < 0.05,
 			"SafeShop در (-10, 0, 6) است")
-	var door: Door = shop.get_node_or_null("Door") as Door
+	var door: Variant = shop.get_node_or_null("Door")
 	_check(door != null, "در داخل فروشگاه هست")
 	if door != null:
 		_check(not door.is_open, "در ابتدا بسته است")

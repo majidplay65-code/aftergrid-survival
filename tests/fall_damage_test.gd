@@ -2,6 +2,7 @@
 extends SceneTree
 
 const PLAYER_PATH: String = "res://entities/player/player.tscn"
+const PLAYER_SCRIPT: String = "res://entities/player/player.gd"
 const EXPECTED_CHECK_COUNT: int = 8
 
 var checks_run: int = 0
@@ -11,7 +12,9 @@ var last_noise: float = 0.0
 
 func _initialize() -> void:
 	_ensure_autoloads()
-	EventBus.noise_emitted.connect(_on_noise)
+	var event_bus: Variant = root.get_node_or_null("EventBus")
+	if event_bus != null:
+		event_bus.noise_emitted.connect(_on_noise)
 	_run()
 	_finish()
 
@@ -21,9 +24,10 @@ func _on_noise(_pos: Vector3, loudness: float) -> void:
 
 
 func _run() -> void:
-	_check(absf(Player.FALL_DAMAGE_SPEED - 12.0) < 0.01, "آستانه سقوط ۱۲ است")
-	_check(absf(Player.HARD_LAND_NOISE - 14.0) < 0.01, "نویز فرود سخت ۱۴ متر است")
-	var player: Player = load(PLAYER_PATH).instantiate() as Player
+	var player_script: Variant = load(PLAYER_SCRIPT)
+	_check(absf(player_script.FALL_DAMAGE_SPEED - 12.0) < 0.01, "آستانه سقوط ۱۲ است")
+	_check(absf(player_script.HARD_LAND_NOISE - 14.0) < 0.01, "نویز فرود سخت ۱۴ متر است")
+	var player: Variant = load(PLAYER_PATH).instantiate()
 	_check(player != null, "بازیکن instantiate می‌شود")
 	if player == null:
 		return
@@ -32,11 +36,11 @@ func _run() -> void:
 	player.peak_fall_speed = 5.0
 	player.land_from_jump()
 	_check(absf(player.stats.health - 80.0) < 0.01, "فرود معمولی آسیب نمی‌دهد")
-	_check(absf(last_noise - Player.LAND_NOISE) < 0.01, "فرود معمولی نویز ۹ دارد")
+	_check(absf(last_noise - player_script.LAND_NOISE) < 0.01, "فرود معمولی نویز ۹ دارد")
 	player.peak_fall_speed = 14.0
 	player.land_from_jump()
 	_check(player.stats.health < 80.0, "فرود سخت آسیب می‌دهد")
-	_check(absf(last_noise - Player.HARD_LAND_NOISE) < 0.01, "فرود سخت نویز ۱۴ دارد")
+	_check(absf(last_noise - player_script.HARD_LAND_NOISE) < 0.01, "فرود سخت نویز ۱۴ دارد")
 	player.free()
 
 

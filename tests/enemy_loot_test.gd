@@ -24,9 +24,9 @@ func _run() -> void:
 	var host: Node3D = Node3D.new()
 	host.name = "LootHost"
 	root.add_child(host)
-	var spawner: LootSpawner = load(SPAWNER_PATH).new() as LootSpawner
+	var spawner: Variant = load(SPAWNER_PATH).new()
 	host.add_child(spawner)
-	var enemy: Enemy = (load(ENEMY_PATH) as PackedScene).instantiate() as Enemy
+	var enemy: Variant = load(ENEMY_PATH).instantiate()
 	host.add_child(enemy)
 	enemy.global_position = Vector3(12.0, 1.0, 18.0)
 	var before: int = _scrap_count(host)
@@ -42,22 +42,21 @@ func _run() -> void:
 				"لوت روی اسپاون بازیکن نمی‌افتد")
 		_check(drop.global_position.distance_to(Vector3(26.0, 1.0, 0.0)) > 5.0,
 				"لوت روی نقطه‌ی سیو تست نمی‌افتد")
-		if drop is ItemPickup:
-			_check((drop as ItemPickup).item_id == &"scrap_metal", "لوت scrap_metal است")
+		_check(drop.get("item_id") == &"scrap_metal", "لوت scrap_metal است")
 	host.free()
 
 
 func _scrap_count(host: Node) -> int:
 	var count: int = 0
 	for child in host.get_children():
-		if child is ItemPickup and (child as ItemPickup).item_id == &"scrap_metal":
+		if child.get("item_id") == &"scrap_metal":
 			count += 1
 	return count
 
 
 func _first_scrap(host: Node) -> Node3D:
 	for child in host.get_children():
-		if child is ItemPickup and (child as ItemPickup).item_id == &"scrap_metal":
+		if child.get("item_id") == &"scrap_metal":
 			return child as Node3D
 	return null
 

@@ -17,7 +17,7 @@ func _initialize() -> void:
 
 
 func _run() -> void:
-	var enemy: Enemy = load(ENEMY_PATH).instantiate() as Enemy
+	var enemy: Variant = load(ENEMY_PATH).instantiate()
 	_check(enemy != null, "Shambler instantiate می‌شود")
 	if enemy == null:
 		return
@@ -36,10 +36,10 @@ func _run() -> void:
 			"last_seen_position ذخیره می‌شود")
 	_check(sm.current_state != null and StringName(sm.current_state.name) == &"InvestigateState",
 			"گم‌کردن دید → Investigate نه Patrol")
-	var stalker: Enemy = load(STALKER_PATH).instantiate() as Enemy
+	var stalker: Variant = load(STALKER_PATH).instantiate()
 	root.add_child(stalker)
 	_check(stalker.memory_seconds > 4.0, "Stalker حافظه بلندتر است")
-	var brute: Enemy = load(BRUTE_PATH).instantiate() as Enemy
+	var brute: Variant = load(BRUTE_PATH).instantiate()
 	root.add_child(brute)
 	_check(brute.memory_seconds <= 4.0, "Brute حافظه بلندتر از Shambler نیست")
 	enemy.free()

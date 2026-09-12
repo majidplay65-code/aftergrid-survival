@@ -6,33 +6,39 @@
 extends SceneTree
 
 const PLAYER_PATH: String = "res://entities/player/player.tscn"
+const PLAYER_SCRIPT: String = "res://entities/player/player.gd"
 const PROJECT_PATH: String = "res://project.godot"
 const EXPECTED_CHECK_COUNT: int = 11
 
 var checks_run: int = 0
 var failures: int = 0
 var heard_jump_noise: bool = false
+var jump_noise_expected: float = 0.0
 
 
 func _initialize() -> void:
 	_ensure_autoloads()
-	EventBus.noise_emitted.connect(_on_noise)
+	var event_bus: Variant = root.get_node_or_null("EventBus")
+	if event_bus != null:
+		event_bus.noise_emitted.connect(_on_noise)
 	_run()
 	_finish()
 
 
 func _on_noise(_pos: Vector3, loudness: float) -> void:
-	if absf(loudness - Player.JUMP_NOISE) < 0.01:
+	if absf(loudness - jump_noise_expected) < 0.01:
 		heard_jump_noise = true
 
 
 func _run() -> void:
+	var player_script: Variant = load(PLAYER_SCRIPT)
+	jump_noise_expected = float(player_script.JUMP_NOISE)
 	_check(_file_contains(PROJECT_PATH, "jump="), "اکشن jump در Input Map هست")
-	_check(absf(Player.JUMP_VELOCITY - 4.5) < 0.01, "JUMP_VELOCITY = ۴.۵")
-	_check(absf(Player.JUMP_NOISE - 7.0) < 0.01, "نویز پرش ۷ متر است")
-	_check(absf(Player.LAND_NOISE - 9.0) < 0.01, "نویز فرود ۹ متر است")
+	_check(absf(player_script.JUMP_VELOCITY - 4.5) < 0.01, "JUMP_VELOCITY = ۴.۵")
+	_check(absf(player_script.JUMP_NOISE - 7.0) < 0.01, "نویز پرش ۷ متر است")
+	_check(absf(player_script.LAND_NOISE - 9.0) < 0.01, "نویز فرود ۹ متر است")
 	var packed: PackedScene = load(PLAYER_PATH)
-	var player: Player = packed.instantiate() as Player
+	var player: Variant = packed.instantiate()
 	_check(player != null, "بازیکن instantiate می‌شود")
 	if player == null:
 		return

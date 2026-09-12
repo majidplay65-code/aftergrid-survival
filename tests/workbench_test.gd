@@ -11,7 +11,9 @@ var fail_reason: String = ""
 
 func _initialize() -> void:
 	_ensure_autoloads()
-	EventBus.craft_failed.connect(_on_fail)
+	var event_bus: Variant = root.get_node_or_null("EventBus")
+	if event_bus != null:
+		event_bus.craft_failed.connect(_on_fail)
 	var save_manager: Variant = root.get_node_or_null("SaveManager")
 	if save_manager != null and save_manager.has_save_file():
 		save_manager.delete_save_file()

@@ -11,7 +11,9 @@ var heard_rest: bool = false
 
 func _initialize() -> void:
 	_ensure_autoloads()
-	EventBus.rest_requested.connect(_on_rest)
+	var event_bus: Variant = root.get_node_or_null("EventBus")
+	if event_bus != null:
+		event_bus.rest_requested.connect(_on_rest)
 	var save_manager: Variant = root.get_node_or_null("SaveManager")
 	if save_manager != null and save_manager.has_save_file():
 		save_manager.delete_save_file()
@@ -31,9 +33,9 @@ func _run(level: Node) -> void:
 	_check(shop != null, "SafeShop موجود است")
 	if shop == null:
 		return
-	var rest: RestSpot = shop.get_node_or_null("RestSpot") as RestSpot
+	var rest: Variant = shop.get_node_or_null("RestSpot")
 	_check(rest != null, "RestSpot داخل فروشگاه هست")
-	var player: Player = level.get_node_or_null("Player") as Player
+	var player: Variant = level.get_node_or_null("Player")
 	_check(player != null, "بازیکن موجود است")
 	if rest == null or player == null:
 		return

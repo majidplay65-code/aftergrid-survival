@@ -21,10 +21,11 @@ func _initialize() -> void:
 
 
 func _run() -> void:
+	var player_script: Variant = load(PLAYER_SCRIPT)
 	_check(ResourceLoader.exists(PLAYER_PATH), "صحنه‌ی بازیکن موجود است")
 	_check(_file_contains(PROJECT_PATH, "crouch="), "اکشن crouch در Input Map هست")
-	_check(absf(Player.CROUCH_SPEED - 1.6) < 0.01, "CROUCH_SPEED = ۱.۶")
-	_check(Player.CROUCH_SPEED < Player.WALK_SPEED, "خزیدن از راه‌رفتن کندتر است")
+	_check(absf(player_script.CROUCH_SPEED - 1.6) < 0.01, "CROUCH_SPEED = ۱.۶")
+	_check(player_script.CROUCH_SPEED < player_script.WALK_SPEED, "خزیدن از راه‌رفتن کندتر است")
 	_check(_file_contains(PLAYER_SCRIPT, "2.5"), "نویز خزیدن ۲.۵ متر است")
 	var packed: PackedScene = load(PLAYER_PATH)
 	var player: Node = packed.instantiate()

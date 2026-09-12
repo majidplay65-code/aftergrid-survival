@@ -16,7 +16,9 @@ var died_signals: int = 0
 
 func _initialize() -> void:
 	_ensure_autoloads()
-	EventBus.player_died.connect(_on_player_died)
+	var event_bus: Variant = root.get_node_or_null("EventBus")
+	if event_bus != null:
+		event_bus.player_died.connect(_on_player_died)
 	_run()
 	_finish()
 
@@ -26,7 +28,7 @@ func _on_player_died() -> void:
 
 
 func _run() -> void:
-	var player: Player = (load(PLAYER_PATH) as PackedScene).instantiate() as Player
+	var player: Variant = load(PLAYER_PATH).instantiate()
 	_check(player != null, "بازیکن instantiate می‌شود")
 	if player == null:
 		return
@@ -45,11 +47,13 @@ func _run() -> void:
 	_check(absf(player.velocity.y - before_y) < 0.01, "مرده پرش نمی‌کند")
 	player.stats.take_damage(10.0)
 	_check(died_signals == 1, "مرگ تکراری سیگنال دوباره نمی‌فرستد")
-	var hud: HUD = (load(HUD_PATH) as PackedScene).instantiate() as HUD
+	var hud: Variant = load(HUD_PATH).instantiate()
 	root.add_child(hud)
-	EventBus.player_died.emit()
+	var event_bus: Variant = root.get_node_or_null("EventBus")
+	if event_bus != null:
+		event_bus.player_died.emit()
 	_check(hud.game_over_panel.visible == true, "پنل Game Over بعد از مرگ دیده می‌شود")
-	var saver: SaveController = SaveController.new()
+	var saver: Variant = load("res://core/save/save_controller.gd").new()
 	root.add_child(saver)
 	_check(saver.save_now() == false, "سیو بعد از مرگ انجام نمی‌شود")
 	player.free()
