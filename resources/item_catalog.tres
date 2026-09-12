@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="ItemCatalog" load_steps=17 format=3]
+[gd_resource type="Resource" script_class="ItemCatalog" load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://resources/items/item_catalog.gd" id="1"]
 [ext_resource type="Resource" path="res://resources/items/scrap_metal.tres" id="2"]
@@ -16,8 +16,9 @@
 [ext_resource type="Resource" path="res://resources/recipes/craft_air_filter.tres" id="14"]
 [ext_resource type="Resource" path="res://resources/recipes/craft_battery.tres" id="15"]
 [ext_resource type="Resource" path="res://resources/recipes/craft_medkit_pro.tres" id="16"]
+[ext_resource type="Resource" path="res://resources/recipes/craft_double_water_filter.tres" id="17"]
 
 [resource]
 script = ExtResource("1")
 items = [ExtResource("2"), ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("8"), ExtResource("9"), ExtResource("10"), ExtResource("11"), ExtResource("12")]
-recipes = [ExtResource("6"), ExtResource("7"), ExtResource("13"), ExtResource("14"), ExtResource("15"), ExtResource("16")]
+recipes = [ExtResource("6"), ExtResource("7"), ExtResource("13"), ExtResource("14"), ExtResource("15"), ExtResource("16"), ExtResource("17")]

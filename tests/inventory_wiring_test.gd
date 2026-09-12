@@ -77,7 +77,7 @@ func _check_autoload_wiring() -> void:
 	_check(inv_manager.catalog.items.size() == 9, "کاتالوگ autoload نه آیتم دارد")
 	_check(inv_manager.catalog.has_item(&"scrap_metal"), "کاتالوگ autoload قراضه را می‌شناسد")
 	_check(crafting.catalog != null, "CraftingSystem کاتالوگ واقعی را لود کرده")
-	_check(crafting.catalog.recipes.size() == 6, "کاتالوگ autoload شش دستور دارد")
+	_check(crafting.catalog.recipes.size() == 7, "کاتالوگ autoload هفت دستور دارد")
 
 
 ## بخش ب — سیم‌کشی ItemPickup: E به کیف می‌رود، مصرف فوری نیست.
