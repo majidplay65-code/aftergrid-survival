@@ -13,6 +13,8 @@ const JUMP_VELOCITY: float = 4.5
 const AIR_CONTROL_SPEED: float = 3.0
 const JUMP_NOISE: float = 7.0
 const LAND_NOISE: float = 9.0
+const FALL_DAMAGE_SPEED: float = 12.0
+const HARD_LAND_NOISE: float = 14.0
 const MOUSE_SENSITIVITY: float = 0.0025
 const WALK_FOV: float = 75.0
 const RUN_FOV: float = 85.0
@@ -46,6 +48,7 @@ var focused_interactable: Interactable = null
 var _footstep_timer: float = 0.0
 var flashlight_battery: float = MAX_FLASHLIGHT_BATTERY
 var is_dead: bool = false
+var peak_fall_speed: float = 0.0
 
 
 func _ready() -> void:
@@ -196,13 +199,25 @@ func wants_jump() -> bool:
 func start_jump() -> void:
 	if is_dead:
 		return
+	peak_fall_speed = 0.0
 	velocity.y = JUMP_VELOCITY
 	EventBus.noise_emitted.emit(global_position, JUMP_NOISE)
 
 
+func note_fall_speed() -> void:
+	if velocity.y < 0.0:
+		peak_fall_speed = maxf(peak_fall_speed, -velocity.y)
+
+
 func land_from_jump() -> void:
-	EventBus.noise_emitted.emit(global_position, LAND_NOISE)
+	var hard: bool = peak_fall_speed >= FALL_DAMAGE_SPEED
+	var noise: float = HARD_LAND_NOISE if hard else LAND_NOISE
+	if hard:
+		var extra: float = peak_fall_speed - FALL_DAMAGE_SPEED
+		stats.take_damage(extra * 4.0)
+	EventBus.noise_emitted.emit(global_position, noise)
 	EventBus.footstep_played.emit(false)
+	peak_fall_speed = 0.0
 
 
 ## ضربه‌ی نزدیک: استامینا، نویز ۸ متری، آسیب به دشمنان جلوی بازیکن.

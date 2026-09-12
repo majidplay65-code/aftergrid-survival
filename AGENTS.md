@@ -81,7 +81,7 @@ Resource برای داده، Node-based State Machine (core/state_machine/) بر
 
 ## فازبندی فعلی پروژه
 
-فاز 0-24 انجام‌شده (تا حافظه دشمن). فاز بعدی پیشنهادی مالک: ۲۵ سقوط. جزئیات در README.md و docs/ARCHITECT_REPORT.md.
+فاز 0-25 انجام‌شده (تا سقوط). فاز بعدی پیشنهادی مالک: ۲۶ میز ساخت. جزئیات در README.md و docs/ARCHITECT_REPORT.md.
 
 ## فازهای ۷–۱۸ (پیاده‌سازی‌شده در همین برنچ؛ تست دستی کاربر در انتظار)
 
@@ -105,6 +105,7 @@ Resource برای داده، Node-based State Machine (core/state_machine/) بر
 - برد شب — night_survived تا سپیده
 - پناه — RestSpot + rest_requested
 - حافظه دشمن — last_seen + Investigate
+- سقوط — fall damage روی JumpState
 
 ### «Noise-Based Awareness» — سه اصلاح مستندشده (اجراشده)
 

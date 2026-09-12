@@ -3,6 +3,15 @@
 قالب این فایل از [Keep a Changelog](https://keepachangelog.com/fa-IR/1.1.0/) و
 شماره‌گذاری از [Semantic Versioning](https://semver.org/lang/fa/) پیروی می‌کند.
 
+## [0.26.0] - 2026-09-12
+
+فاز ۲۵ (سقوط): فرود سخت آسیب و نویز بیشتر دارد.
+
+### Added
+
+- آستانه ۱۲ m/s؛ نویز فرود سخت ۱۴ متر.
+- تست headless `tests/fall_damage_test.gd` (۸ چک).
+
 ## [0.25.0] - 2026-09-12
 
 فاز ۲۴ (حافظه دشمن): گم‌کردن دید → Investigate نه Patrol فوری.
