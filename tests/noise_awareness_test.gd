@@ -37,13 +37,17 @@ func _initialize() -> void:
 		_finish()
 		return
 	_check_static()
-	_spawn_listener()
+	# توجه: این‌جا enemy نمی‌سازیم؛ ساختش به فریم ۲ در _process موکول شده تا
+	# global_position (که فقط بعد از ورود به درخت معتبر است) خطای
+	# is_inside_tree ندهد.
 
 
 func _process(_delta: float) -> bool:
 	if aborted:
 		return true
 	frame += 1
+	if phase == 0 and frame >= 2 and enemy == null:
+		_spawn_listener()
 	match phase:
 		0:
 			if frame >= 4:

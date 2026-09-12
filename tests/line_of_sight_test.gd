@@ -27,12 +27,14 @@ func _initialize() -> void:
 			"دشمن از PhysicsRayQueryParameters3D استفاده می‌کند")
 	_check(_file_contains(CHASE_SCRIPT, "move_along_agent(delta, speed)"),
 			"ChaseState از speed درست استفاده می‌کند نه SPEED")
-	_build_world()
 
 
 func _process(_delta: float) -> bool:
 	frame += 1
-	if phase == 0 and frame >= 8:
+	if phase == 0 and frame >= 3:
+		_build_world()
+		phase = 1
+	elif phase == 1 and frame >= 8:
 		_check_runtime()
 		_finish()
 		return true

@@ -134,6 +134,7 @@ jobs:
           error_pattern='SCRIPT ERROR|ERROR:|WARNING:'
 
           failed=0
+          summary=""
           for script in "${scripts[@]}"; do
             echo "── ${script}"
             # خروجی را می‌گیریم تا هم چاپ شود و هم گاردِ زیر رویش کار کند.
@@ -146,6 +147,7 @@ jobs:
             # اسکریپت خودش با quit(0)/quit(1) نتیجه را اعلام می‌کند و exit code حفظ می‌شود.
             if [ "${status}" -ne 0 ]; then
               echo "::error::${script} exited with code ${status}"
+              summary="${summary}${summary:+ || }${script}[exit ${status}]"
               failed=1
             fi
 
@@ -153,21 +155,25 @@ jobs:
             found="$(printf '%s\n' "${output}" | grep -nE "${error_pattern}" || true)"
             if [ -n "${found}" ]; then
               echo "::error::Godot wrote ERROR/WARNING lines in ${script} (exit code alone is not enough). Pattern: ${error_pattern}"
-              problems_file="${RUNNER_TEMP:-/tmp}/godot_error_lines.txt"
-              printf '%s\n' "${found}" > "${problems_file}"
-              shown=0
-              while IFS= read -r line; do
-                echo "::error title=Godot ERROR/WARNING::${line}"
-                shown=$((shown + 1))
-                if [ "${shown}" -ge 40 ]; then
-                  break
-                fi
-              done < "${problems_file}"
+              # جمع‌بندی خطوط خطا در یک پیام — چون GitHub در هر step فقط ۱۰ annotation
+              # نشان می‌دهد و پخش‌کردن خط‌به‌خط، جزئیات را پشت سقف پنهان می‌کرد.
+              err_joined="$(printf '%s\n' "${found}" | head -25 | tr '\n' '|')"
+              summary="${summary}${summary:+ || }${script} ERR: ${err_joined}"
               failed=1
+            fi
+
+            # شکستِ assertion ها (خطوط FAIL) هم در جمع‌بندی بیاید؛ الگوی گیت فقط
+            # ERROR/WARNING را می‌بیند و FAIL خاموش می‌ماند.
+            fails="$(printf '%s\n' "${output}" | grep -nE 'FAIL:' || true)"
+            if [ -n "${fails}" ]; then
+              fail_joined="$(printf '%s\n' "${fails}" | head -25 | tr '\n' '|')"
+              summary="${summary}${summary:+ || }${script} FAILS: ${fail_joined}"
             fi
           done
 
           if [ "${failed}" -ne 0 ]; then
+            # یک annotation تکی با همه‌ی جزئیات — همیشه دیده می‌شود.
+            echo "::error title=DoD failure summary::${summary}"
             echo "::error::DoD tests failed"
             exit 1
           fi
