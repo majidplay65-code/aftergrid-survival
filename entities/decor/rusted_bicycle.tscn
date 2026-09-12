@@ -1,0 +1,49 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/rusted_metal.jpg" id="1_metal"]
+
+[sub_resource type="CylinderMesh" id="m_wheel"]
+top_radius = 0.35
+bottom_radius = 0.35
+height = 0.06
+
+[sub_resource type="BoxMesh" id="m_frame"]
+size = Vector3(0.9, 0.08, 0.08)
+
+[sub_resource type="BoxMesh" id="m_seat"]
+size = Vector3(0.25, 0.06, 0.2)
+
+[sub_resource type="BoxMesh" id="m_bar"]
+size = Vector3(0.08, 0.08, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="mat_rust"]
+albedo_texture = ExtResource("1_metal")
+metallic = 0.7
+roughness = 0.95
+
+[node name="RustedBicycle" type="Node3D"]
+
+[node name="WheelFront" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, 0.55, 0.35, 0)
+mesh = SubResource("m_wheel")
+surface_material_override/0 = SubResource("mat_rust")
+
+[node name="WheelRear" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, 1, 0, -1, 0, -0.55, 0.35, 0)
+mesh = SubResource("m_wheel")
+surface_material_override/0 = SubResource("mat_rust")
+
+[node name="Frame" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.9397, 0.342, 0, -0.342, 0.9397, 0, 0.55, 0)
+mesh = SubResource("m_frame")
+surface_material_override/0 = SubResource("mat_rust")
+
+[node name="Seat" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.3, 0.72, 0)
+mesh = SubResource("m_seat")
+surface_material_override/0 = SubResource("mat_rust")
+
+[node name="Handlebar" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.45, 0.7, 0)
+mesh = SubResource("m_bar")
+surface_material_override/0 = SubResource("mat_rust")
