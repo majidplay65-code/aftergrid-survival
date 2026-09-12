@@ -10,6 +10,9 @@ const CROUCH_SPEED: float = 1.6
 const ACCELERATION: float = 10.0
 const FRICTION: float = 12.0
 const JUMP_VELOCITY: float = 4.5
+const AIR_CONTROL_SPEED: float = 3.0
+const JUMP_NOISE: float = 7.0
+const LAND_NOISE: float = 9.0
 const MOUSE_SENSITIVITY: float = 0.0025
 const WALK_FOV: float = 75.0
 const RUN_FOV: float = 85.0
@@ -86,9 +89,6 @@ func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 
-	if Input.is_action_just_pressed(&"jump") and is_on_floor():
-		velocity.y = JUMP_VELOCITY
-
 	# افت تدریجی آب و غذا در طول زمان (گیم‌پلی بقا)
 	stats.decrease_thirst(THIRST_DECAY_RATE * delta)
 	stats.decrease_hunger(HUNGER_DECAY_RATE * delta)
@@ -108,19 +108,20 @@ func get_input_direction() -> Vector3:
 
 
 ## حرکت افقی را با شتاب/اصطکاک به سمت سرعت هدف می‌برد. توسط State ها فراخوانی می‌شود.
-func apply_horizontal_movement(delta: float, target_speed: float) -> void:
+func apply_horizontal_movement(delta: float, target_speed: float, emit_footsteps: bool = true) -> void:
 	var direction: Vector3 = get_input_direction()
 
 	if direction.length() > 0.01:
 		var target_velocity: Vector3 = direction * target_speed
 		velocity.x = move_toward(velocity.x, target_velocity.x, ACCELERATION * delta)
 		velocity.z = move_toward(velocity.z, target_velocity.z, ACCELERATION * delta)
-		if target_speed >= RUN_SPEED:
-			_tick_footstep_noise(delta, 14.0, 0.32, true)
-		elif target_speed >= WALK_SPEED:
-			_tick_footstep_noise(delta, 6.0, 0.48, false)
-		elif target_speed >= CROUCH_SPEED:
-			_tick_footstep_noise(delta, 2.5, 0.7, false)
+		if emit_footsteps:
+			if target_speed >= RUN_SPEED:
+				_tick_footstep_noise(delta, 14.0, 0.32, true)
+			elif target_speed >= WALK_SPEED:
+				_tick_footstep_noise(delta, 6.0, 0.48, false)
+			elif target_speed >= CROUCH_SPEED:
+				_tick_footstep_noise(delta, 2.5, 0.7, false)
 	else:
 		_footstep_timer = 0.0
 		velocity.x = move_toward(velocity.x, 0.0, FRICTION * delta)
@@ -176,6 +177,25 @@ func is_crouch_pressed() -> bool:
 
 func is_melee_just_pressed() -> bool:
 	return Input.is_action_just_pressed(&"melee")
+
+
+func is_jump_just_pressed() -> bool:
+	return Input.is_action_just_pressed(&"jump")
+
+
+## پرش فقط از زمین و وقتی خزیده نیست.
+func wants_jump() -> bool:
+	return is_jump_just_pressed() and is_on_floor() and not is_crouch_pressed()
+
+
+func start_jump() -> void:
+	velocity.y = JUMP_VELOCITY
+	EventBus.noise_emitted.emit(global_position, JUMP_NOISE)
+
+
+func land_from_jump() -> void:
+	EventBus.noise_emitted.emit(global_position, LAND_NOISE)
+	EventBus.footstep_played.emit(false)
 
 
 ## ضربه‌ی نزدیک: استامینا، نویز ۸ متری، آسیب به دشمنان جلوی بازیکن.
