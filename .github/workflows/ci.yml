@@ -147,9 +147,10 @@ jobs:
             printf '%s\n' "${output}" | grep -E 'ERROR|WARNING|^FAIL:' | sort -u | head -40 | while IFS= read -r line; do
               echo "::notice title=DoD problem::${line}"
             done || true
-            printf '%s\n' "${output}" | grep '^PASS:' | grep -vF -e 'در صحنه هست' -e 'محوطه را با vertices' -e 'علامت‌های affect' -e 'ارتفاع ساختمان' -e 'مرکز محوطه‌ی' -e 'نقطه‌ی حیاتی' -e 'پای گشت' | while IFS= read -r line; do
-              echo "::notice title=DoD check::${line}"
-            done
+            evidence="$(printf '%s\n' "${output}" | grep '^PASS:' | grep -F -e 'می‌چرخد' -e 'داخل محوطه' -e 'کارو شده' -e 'همه‌ی' | paste -sd' | ' - | cut -c1-3800)"
+            if [ -n "${evidence}" ]; then
+              echo "::notice title=DoD evidence::${evidence}"
+            fi
             # TEMPDEBUG-END
           done
 
