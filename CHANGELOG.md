@@ -3,6 +3,17 @@
 قالب این فایل از [Keep a Changelog](https://keepachangelog.com/fa-IR/1.1.0/) و
 شماره‌گذاری از [Semantic Versioning](https://semver.org/lang/fa/) پیروی می‌کند.
 
+## [0.22.0] - 2026-09-12
+
+فاز ۲۱ (چرخه شب): زمان Resource و تاریکی محیط.
+
+### Added
+
+- `WorldClock` Resource و `DayCycle` روی سطح تست.
+- `EventBus.time_of_day_changed(normalized)`.
+- نیمه‌شب `ambient_light_energy` زیر ۰.۲؛ باتری چراغ‌قوه اجباری می‌شود.
+- تست headless `tests/day_cycle_test.gd` (۱۲ چک).
+
 ## [0.21.0] - 2026-09-12
 
 فاز ۲۰ (یک کیف): برداشت از دنیا به اینونتوری می‌رود.

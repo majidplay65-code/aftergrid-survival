@@ -44,3 +44,8 @@ signal toast_requested(message: String)
 signal generator_charge_requested
 ## دشمن مرد؛ موقعیت برای لوت. `death_position` تا با Node3D.position تداخل نکند.
 signal enemy_died(death_position: Vector3)
+
+# --- World clock / session ---
+signal time_of_day_changed(normalized: float)
+signal night_survived(night_index: int)
+signal radio_activated

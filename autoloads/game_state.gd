@@ -11,6 +11,9 @@ var is_paused: bool = false:
 
 var current_level_path: String = ""
 var player_reference: Node3D = null
+## شمارهٔ شب جاری (سیوهای قدیم ۱ می‌مانند).
+var night_index: int = 1
+var radio_is_on: bool = false
 
 
 func register_player(player: Node3D) -> void:
