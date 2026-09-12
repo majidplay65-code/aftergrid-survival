@@ -18,7 +18,7 @@ Resource برای داده، Node-based State Machine (core/state_machine/) بر
 
 ## فازبندی فعلی پروژه
 
-فاز 0-5 انجام‌شده (Setup, Core, Player, Survival Loop, World, Threat). فاز بعدی: 6 = Inventory/Crafting. جزئیات کامل در README.md.
+فاز 0-6 انجام‌شده (Setup, Core, Player, Survival Loop, World, Threat, Inventory/Crafting). فاز بعدی تعریف نشده — منتظر تصمیم مالک ریپو. جزئیات کامل در README.md.
 
 ## محدوده
 

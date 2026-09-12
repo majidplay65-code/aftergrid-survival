@@ -3,6 +3,30 @@
 قالب این فایل از [Keep a Changelog](https://keepachangelog.com/fa-IR/1.1.0/) و
 شماره‌گذاری از [Semantic Versioning](https://semver.org/lang/fa/) پیروی می‌کند.
 
+## [0.7.0] - 2026-09-12
+
+فاز ۶ (Inventory/Crafting عمیق): داده → منطق → اتصال → UI، در شش لایه‌ی منطقی.
+
+### Added
+
+- **داده (`resources/items/`):** `ItemData`، `RecipeData` و `ItemCatalog` — مدل داده‌ی آیتم و دستور ساخت.
+- **منطق Inventory (`resources/inventory/` + `core/inventory/`):** `Inventory` (add/remove/stack با سقف max_stack از کاتالوگ) و `InventoryManager` (پل به EventBus؛ autoload).
+- **داده‌ی واقعی (`.tres`):** ۴ آیتم (قراضه/کنسرو/آب/مدکیت) + ۲ دستور (فیلتر آب: ۲ قراضه→آب؛ مدکیت: ۱ کنسرو+۱ قراضه→مدکیت) + `resources/item_catalog.tres`.
+- **منطق Crafting (`core/crafting/`):** `CraftingSystem` (autoload) با `can_craft`/`craft` اتمیک (اول check کامل، بعد commit) + سیگنال‌های `item_crafted`/`craft_failed`.
+- **اتصال:** برداشتن آیتم غیرمصرفی (قراضه) → اینونتوری؛ مصرفی (آب/غذا/دارو) → اثر آماری + toast؛ سیو/لود واقعی اینونتوری (`SaveData.inventory_items`).
+- **UI (`ui/inventory/`):** پنل اینونتوری/ساخت با کلید Tab — فهرست آیتم‌ها (نام واقعی از کاتالوگ) + دکمه‌های ساخت با حالت فعال/غیرفعال + toast موفقیت/شکست.
+- **تست headless:** ۶ فایل `tests/*_test.gd` (داده، منطق، کاتالوگ، ساخت، اتصال، UI) — هر کدام با محافظ «خطای خاموش API».
+
+### Fixed
+
+- سیگنال `Inventory` از `changed` به `contents_changed` (تداخل با سیگنال داخلی `Resource`).
+- حذف `class_name` از InventoryManager/CraftingSystem (تداخل «Class hides an autoload singleton» با autoload همنام).
+
+### Known / در انتظار
+
+- تأیید CI روی Godot 4.7.2 (import + gdparse 4.5.0 + هر ۶ تست) انجام شد؛ تست دستی کاربر هنوز انجام نشده.
+- خارج از محدوده: نوار پیشرفت زمان ساخت، دور انداختن آیتم، پیشرفت بازشدن دستورها.
+
 ## [0.6.2] - 2026-09-12
 
 فیکس فاز ۵: `NavigationObstacle3D`ها هیچ کاری نمی‌کردند و مسیر دشمن از وسط ساختمان‌ها می‌گذشت.
