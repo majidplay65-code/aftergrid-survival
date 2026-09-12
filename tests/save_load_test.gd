@@ -245,9 +245,6 @@ func _check_navigation_mesh() -> void:
 ##   ۲) داخل محوطه‌های مانع هیچ سطحی از navmesh نیست (کارو انجام شده)،
 ##   ۳) نقاط حیاتی بازی هنوز روی navmesh هستند (کارو زیاده‌روی نکرده).
 func _check_navigation_carve(navmesh: NavigationMesh) -> void:
-	var vertices: PackedVector3Array = navmesh.get_vertices()
-	var polygons: Array = navmesh.get_polygons()
-
 	for obstacle_name in OBSTACLE_NAMES:
 		var obstacle: NavigationObstacle3D = level.get_node_or_null(NodePath(obstacle_name)) as NavigationObstacle3D
 		_check(obstacle != null, "P0: مانع %s در صحنه هست" % obstacle_name)
@@ -260,11 +257,11 @@ func _check_navigation_carve(navmesh: NavigationMesh) -> void:
 		_check(obstacle.height >= 4.5,
 				"P0: %s ارتفاع ساختمان را دارد (%.1f متر)" % [obstacle_name, obstacle.height])
 		var footprint: Rect2 = _obstacle_footprint(obstacle)
-		_check(not _navmesh_covers_xz(vertices, polygons, footprint.get_center()),
+		_check(not _navmesh_covers_xz(navmesh, footprint.get_center()),
 				"P0: مرکز محوطه‌ی %s از navmesh کارو شده" % obstacle_name)
 
 	for point in NAV_FREE_POINTS:
-		_check(_navmesh_covers_xz(vertices, polygons, Vector2(point.x, point.z)),
+		_check(_navmesh_covers_xz(navmesh, Vector2(point.x, point.z)),
 				"P0: نقطه‌ی حیاتی (%.0f، %.0f) هنوز روی navmesh است" % [point.x, point.z])
 
 
@@ -289,9 +286,12 @@ func _obstacle_footprint(obstacle: NavigationObstacle3D) -> Rect2:
 
 ## آیا این نقطه‌ی XZ روی یکی از چندضلعی‌های navmesh می‌افتد؟
 ## (چندضلعی‌ها محدب‌اند؛ تست علامتِ ضربِ خارجی برای هر ضلع.)
-func _navmesh_covers_xz(vertices: PackedVector3Array, polygons: Array, point_xz: Vector2) -> bool:
-	for poly_value in polygons:
-		var poly: PackedInt32Array = poly_value
+## توجه: در Godot 4.7.2 متد `NavigationMesh.get_polygons()` وجود ندارد (فقط
+## `get_polygon_count()` و `get_polygon(idx)`) — همان اشتباهی که چکِ زیر می‌گرفت.
+func _navmesh_covers_xz(navmesh: NavigationMesh, point_xz: Vector2) -> bool:
+	var vertices: PackedVector3Array = navmesh.get_vertices()
+	for index in navmesh.get_polygon_count():
+		var poly: PackedInt32Array = navmesh.get_polygon(index)
 		var count: int = poly.size()
 		var positive: int = 0
 		var negative: int = 0
@@ -336,7 +336,13 @@ func _check_enemy_patrols() -> void:
 ## چک: اثباتِ موتوربنیانِ کارو روی navigation map زنده‌ی موتور (نه فقط خواندن ریسورس).
 ## در این لحظه دشمن با همین map واقعاً حرکت کرده، پس map sync شده است.
 func _check_navigation_paths(enemy: Node3D) -> void:
-	var map: RID = enemy.get_navigation_map()
+	# در Godot 4.7.2 نودِ `Node3D` متد `get_navigation_map()` ندارد؛ فقط
+	# `NavigationAgent3D` آن را دارد (و `World3D.get_navigation_map()`).
+	var agent: NavigationAgent3D = enemy.get_node_or_null("NavigationAgent3D") as NavigationAgent3D
+	_check(agent != null, "P0: نود NavigationAgent3D دشمن در دسترس است")
+	if agent == null:
+		return
+	var map: RID = agent.get_navigation_map()
 	_check(map.is_valid(), "P0: navigation map دشمن معتبر است")
 	if not map.is_valid():
 		return
