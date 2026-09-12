@@ -6,9 +6,9 @@
 class_name ChaseState
 extends State
 
-const SPEED: float = 3.2
-
 @export var enemy: Enemy
+## سرعت تعقیب — واریانت‌ها (Stalker/Brute) این را در صحنه override می‌کنند.
+@export var speed: float = 3.2
 
 
 func physics_update(delta: float) -> void:
