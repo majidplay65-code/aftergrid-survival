@@ -1,0 +1,142 @@
+# CI — تنها کار این ورک‌فلو این است که روی هر push و هر PR «سبز/قرمز» نشان بدهد.
+# عمداً هیچ اقدام خودکاری انجام نمی‌شود: بدون approve، بدون merge، بدون comment.
+# دسترسی روی ریپو فقط read است تا این ورک‌فلو از نظر فنی هم نتواند چیزی را تغییر بدهد.
+# تصمیم نهایی درباره‌ی هر PR همیشه دست مالک ریپو است.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+# اجرای قدیمیِ همان برنچ با push جدید لغو می‌شود (فقط برای هدر نرفتن وقت CI).
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # نسخه‌ی pin شده — عمداً «stable»/«latest» نیست تا CI بی‌خبر از ما تغییر نکند.
+  GODOT_VERSION: "4.7.2"
+  # همان ابزار پارس GDScript که در فازهای قبلی پروژه استفاده شده است.
+  GDTOOLKIT_VERSION: "4.5.0"
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  checks:
+    name: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      # طبق تعریف DoD پروژه.
+      # توجه: خودِ موتور Godot 4.7.2 این متغیر محیطی را نمی‌خواند؛ leak check فقط یک
+      # WARN_PRINT روی stderr است و exit code تست را عوض نمی‌کند. این متغیر بی‌اثر ولی
+      # بی‌ضرر است و همان چیزی است که در DoD خواسته شده، پس نگه داشته شده.
+      GODOT_DISABLE_LEAK_CHECKS: "1"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Godot ${{ env.GODOT_VERSION }}
+        # اکشن استاندارد و نگهداری‌شده برای دانلود مطمئن باینری Godot (بدون curl دستی).
+        uses: chickensoft-games/setup-godot@v2.4.2
+        with:
+          # pin دقیق: نسخه باید major.minor.patch باشد — «stable»/«latest» ممنوع.
+          version: ${{ env.GODOT_VERSION }}
+          use-dotnet: false
+          include-templates: false
+          cache: true
+
+      - name: Cache .godot/ (import cache)
+        # کش پوشه‌ی ایمپورت بین اجراها.
+        # در کلید کش عمداً فایل‌های .gd/.tscn نیامده‌اند (وگرنه با هر تغییر کد، کش از دست می‌رفت)؛
+        # فقط چیزی که واقعاً import را می‌سازد (project.godot + assets) در کلید است.
+        # در صورت تغییر assets، خودِ Godot بر اساس md5 دوباره ایمپورت می‌کند.
+        uses: actions/cache@v6
+        with:
+          path: .godot/
+          key: godot-${{ env.GODOT_VERSION }}-${{ runner.os }}-${{ hashFiles('project.godot', 'assets/**') }}
+          restore-keys: |
+            godot-${{ env.GODOT_VERSION }}-${{ runner.os }}-
+
+      # ------------------------------------------------------------------
+      # مرحله ۱ — Import check
+      # ------------------------------------------------------------------
+      - name: 1) import check
+        run: |
+          set -Eeuo pipefail
+
+          # تأیید اینکه باینری واقعاً همان 4.7.2 پین‌شده است (نه نسخه‌ی دیگری).
+          version="$(godot --version)"
+          echo "Godot binary: ${version}"
+          case "${version}" in
+            "${GODOT_VERSION}.stable"*) ;;
+            *)
+              echo "::error::Expected Godot ${GODOT_VERSION}, but got: ${version}"
+              exit 1
+              ;;
+          esac
+
+          # ایمپورت همه‌ی ریسورس‌ها و ساخت .godot/ (همان کشی که بین اجراها ذخیره/بازیابی می‌شود).
+          godot --headless --import --quit
+
+      # ------------------------------------------------------------------
+      # مرحله ۲ — gdparse روی همه‌ی فایل‌های .gd
+      # ------------------------------------------------------------------
+      - name: Setup Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v7
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install gdtoolkit ${{ env.GDTOOLKIT_VERSION }} (gdparse)
+        run: python -m pip install --disable-pip-version-check "gdtoolkit==${GDTOOLKIT_VERSION}"
+
+      - name: 2) gdparse check
+        run: |
+          set -Eeuo pipefail
+
+          mapfile -t files < <(find . -type f -name '*.gd' -not -path './.godot/*' | sort)
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "::error::No .gd file found"
+            exit 1
+          fi
+
+          # نکته: gdparse به‌طور پیش‌فرض «فقط پارس» است — هیچ فایلی را تغییر نمی‌دهد،
+          # هیچ خروجی‌ای روی موفقیت چاپ نمی‌کند و در صورت خطای سینتکس exit code غیرصفر
+          # می‌دهد (تست‌شده با gdtoolkit 4.5.0). فلَگی به نام --check-only وجود ندارد
+          # (نه در 4.5.0 و نه در 4.3.4)؛ فلَگ‌های موجود فقط -p/--pretty و -v/--verbose هستند.
+          echo "gdparse version: $(gdparse --version)"
+          echo "Checking ${#files[@]} .gd file(s) ..."
+          gdparse "${files[@]}"
+          echo "OK: syntax of all ${#files[@]} .gd file(s) is valid"
+
+      # ------------------------------------------------------------------
+      # مرحله ۳ — تست‌های DoD (همان اسکریپت موجودِ headless)
+      # ------------------------------------------------------------------
+      - name: 3) DoD tests
+        run: |
+          set -Eeuo pipefail
+          shopt -s nullglob
+
+          # تست‌های DoD پروژه؛ امروز این الگو فقط فایل tests/save_load_test.gd را برمی‌دارد.
+          scripts=(tests/*_test.gd)
+          if [ "${#scripts[@]}" -eq 0 ]; then
+            echo "::error::No DoD test script found (tests/*_test.gd)"
+            exit 1
+          fi
+
+          failed=0
+          for script in "${scripts[@]}"; do
+            echo "── ${script}"
+            # اسکریپت خودش با quit(0)/quit(1) نتیجه را اعلام می‌کند و exit code حفظ می‌شود.
+            godot --headless --path . -s "res://${script}" || failed=1
+          done
+
+          if [ "${failed}" -ne 0 ]; then
+            echo "::error::DoD tests failed"
+            exit 1
+          fi
+          echo "OK: all DoD tests passed"
