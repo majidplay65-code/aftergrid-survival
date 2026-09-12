@@ -70,8 +70,13 @@ func remove_item(item_id: StringName, amount: int) -> int:
 
 
 ## کپی (نه رفرنس) از محتوای اینونتوری — تا صداکننده نتواند داده‌ی داخلی را دستکاری کند.
+## خروجی یک Dictionary ساده (untyped) است تا سریالایزِ امن در SaveData (ذخیره‌ی .tres)
+## بدون درگیرشدن با Dictionary تایپ‌شده انجام شود.
 func get_items() -> Dictionary:
-	return items.duplicate()
+	var plain: Dictionary = {}
+	for item_id in items:
+		plain[item_id] = items[item_id]
+	return plain
 
 
 func is_empty() -> bool:

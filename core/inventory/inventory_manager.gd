@@ -4,7 +4,11 @@
 ## - به EventBus.item_picked_up / EventBus.item_dropped گوش می‌دهد و محتوا را به‌روز می‌کند.
 ## - بعد از هر تغییر واقعی، EventBus.inventory_changed را emit می‌کند.
 ## (ثبت به‌عنوان Autoload / افزودن به صحنه در لایه‌ی «اتصال» انجام می‌شود، نه اینجا.)
-class_name InventoryManager
+##
+## توجه: این اسکریپت عمداً `class_name` ندارد — چون به‌عنوان Autoload با همین نام
+## (InventoryManager) ثبت می‌شود و در Godot 4 تعریف هم‌زمانِ class_name و autoloadِ
+## همنام خطای «Class hides an autoload singleton» می‌دهد (الگوی موجود: autoloadهای
+## قبلیِ EventBus/GameState/SceneManager/SaveManager هم class_name ندارند).
 extends Node
 
 ## مسیر کاتالوگ واقعی — برای autoload که نمی‌تواند @export از بیرون بگیرد.
