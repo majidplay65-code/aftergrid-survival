@@ -32,8 +32,21 @@ func _on_interact(actor: Node3D) -> void:
 
 	is_interactable = false
 
-	# در صورتی که آیتم مصرفی فوری باشد، اثر روی آمار بازیکن اعمال می‌شود
-	if is_consumable_on_pickup and actor is Player:
+	if is_consumable_on_pickup:
+		# مصرف فوری: اثر آماری + اعلان؛ به اینونتوری نمی‌رود.
+		_consume_on_pickup(actor)
+	else:
+		# آیتم غیرمصرفی: فقط به اینونتوری می‌رود (InventoryManager از طریق EventBus گوش می‌دهد).
+		EventBus.item_picked_up.emit(item_id, amount)
+
+	# حذف شیء از دنیای بازی
+	queue_free()
+
+
+## مصرف فوری آیتم (آب/غذا/دارو) روی آمار بازیکن + اعلان toast مشترک.
+## آیتم مصرفی به اینونتوری اضافه نمی‌شود؛ فقط اثر و اعلان دارد.
+func _consume_on_pickup(actor: Node3D) -> void:
+	if actor is Player:
 		var player: Player = actor as Player
 		match item_category:
 			ItemCategory.WATER:
@@ -42,9 +55,4 @@ func _on_interact(actor: Node3D) -> void:
 				player.stats.eat(stat_restore_amount)
 			ItemCategory.MEDKIT:
 				player.stats.heal(stat_restore_amount)
-
-	# ارسال سیگنال دریافت آیتم به اتوبوس رویداد (برای UI و اینونتوری)
-	EventBus.item_picked_up.emit(item_id, amount)
-
-	# حذف شیء از دنیای بازی
-	queue_free()
+	EventBus.toast_requested.emit("مصرف شد: %s" % item_name)

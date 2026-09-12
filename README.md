@@ -8,7 +8,7 @@
 
 - **نام ریپو:** `aftergrid-survival` (lowercase و kebab-case — استاندارد GitHub و Godot)
 - **موتور:** Godot 4.7
-- **وضعیت فعلی:** فازهای `۰` تا `۴` کامل + سیستم تهدید فاز `۵` پیاده‌سازی و **تأیید**شده (۰.۶.۰؛ فیکس‌ها: ۰.۶.۱/۰.۶.۲) — تأییدشده: CI روی Godot 4.7.2 (تست دستی کاربر هنوز انجام نشده).
+- **وضعیت فعلی:** فازهای `۰` تا `۵` کامل و **تأیید**شده + فاز `۶` (Inventory/Crafting) پیاده‌سازی و **تأییدشده با CI** (۰.۷.۰) — تأییدشده: CI روی Godot 4.7.2؛ تست دستی کاربر هنوز انجام نشده.
 
 ---
 
@@ -22,9 +22,9 @@
 | ۳ | **Survival Loop** — تعامل (E)، برداشتن/مصرف آب و غذا، تخلیه‌ی hunger/thirst، مرگ، HUD، **Save واقعی** | ✅ انجام شد (۰.۵.۰) |
 | ۴ | **World Identity** — بلوک شهری، تکسچرها، اتمسفر گرگ‌ومیش، چراغ‌قوه | ✅ انجام شد (۰.۴.۰) |
 | ۵ | **Threat/Enemy AI** — NavigationRegion + دشمن نمونه (Patrol/Chase/Attack)، Area3D-based، DamageComponent | ✅ انجام شد + تأیید CI (۰.۶.۰؛ فیکس مانع‌های ناوبری: ۰.۶.۲؛ تست دستی کاربر: در انتظار) |
-| ۶ | Inventory/Crafting عمیق | ⬜ بعد از ۵ |
+| ۶ | Inventory/Crafting عمیق — داده، منطق، اتصال، UI | ✅ انجام شد + تأیید CI (۰.۷.۰؛ تست دستی: در انتظار) |
 
-**اولویت بعدی:** فاز ۶ (Inventory/Crafting) — تأیید CI انجام شد؛ تست دستی کاربر هنوز انجام نشده.
+**اولویت بعدی:** تست دستی فاز ۶ توسط کاربر (طبق DoD)؛ فاز بعدی پس از تأیید مالک تعریف می‌شود.
 
 ---
 
@@ -61,6 +61,18 @@
 - [x] `gdparse 4.5.0` روی همه‌ی فایل‌های جدید + وریفای ساختاری صحنه‌ها
 - [x] اجرای واقعی در Godot 4.7 — **تأییدشده: CI روی Godot 4.7.2 (تست دستی کاربر هنوز انجام نشده):** اجرای واقعی headless در CI (GitHub Actions)؛ هر ۶۶ چک پاس می‌شوند و گاردِ ثابتِ CI هر خط `SCRIPT ERROR`/`ERROR:`/`WARNING:` را — حتی با exit code صفر — شکست می‌دهد.
 
+## Definition of Done — فاز ۶ (Inventory/Crafting)
+
+- [x] داده/Resource: `ItemData`، `RecipeData`، `ItemCatalog` (`resources/items/`)
+- [x] منطق Inventory: `Inventory` (add/remove/stack با سقف max_stack از کاتالوگ) + `InventoryManager` (پل به EventBus)
+- [x] داده‌ی واقعی `.tres`: ۴ آیتم (قراضه/کنسرو/آب/مدکیت) + ۲ دستور (فیلتر آب، مدکیت) + `item_catalog.tres`
+- [x] منطق Crafting: `CraftingSystem` با `can_craft`/`craft` اتمیک + سیگنال‌های `item_crafted`/`craft_failed`
+- [x] اتصال: autoloadهای InventoryManager/CraftingSystem؛ برداشتن قراضه → اینونتوری؛ سیو/لود واقعی اینونتوری
+- [x] UI: پنل اینونتوری/ساخت (کلید Tab) — فهرست آیتم‌ها + دکمه‌های ساخت با حالت فعال/غیرفعال
+- [x] تست headless برای هر لایه (۶ فایل `tests/*_test.gd`) + محافظ «خطای خاموش API»
+- [x] تأیید CI روی Godot 4.7.2 (import + gdparse 4.5.0 + تست‌ها، بدون ERROR/WARNING)
+- [ ] تأیید نهایی کاربر: بازکردن پنل با Tab، برداشتن قراضه، ساخت فیلتر آب/مدکیت، سیو/لود اینونتوری
+
 **معیار عبور از هر فاز:** یک نسخه‌ی قابل بازی که کسی بتواند ۵ دقیقه بازی‌اش کند و بگوید «ادامه بده».
 اگر جواب «نه» بود، همان‌جا متوقف می‌شویم — نه بعد از نوشتن هزار خط کد.
 
@@ -95,9 +107,13 @@ aftergrid-survival/
 │   │   └── interactable.gd         ← کلاس پایه‌ی StaticBody3D قابل تعامل
 │   ├── save/
 │   │   └── save_controller.gd      ← وصل‌کردن SaveManager به گیم‌پلی (F5/F8، auto-save ۶۰s، auto-load)
-│   └── state_machine/              ← ماشین حالت Node-based
-│       ├── state.gd                ← کلاس پایه‌ی انتزاعی هر حالت
-│       └── state_machine.gd        ← ثبت فرزندها + جابه‌جایی با transition_to()
+│   ├── state_machine/              ← ماشین حالت Node-based
+│   │   ├── state.gd                ← کلاس پایه‌ی انتزاعی هر حالت
+│   │   └── state_machine.gd        ← ثبت فرزندها + جابه‌جایی با transition_to()
+│   ├── inventory/
+│   │   └── inventory_manager.gd    ← autoload اینونتوری (پل به EventBus؛ افزودن/حذف/stack)
+│   └── crafting/
+│       └── crafting_system.gd      ← autoload ساخت اتمیک (can_craft/craft + سیگنال‌ها)
 ├── entities/
 │   ├── enemy/
 │   │   ├── enemy.tscn              ← صحنه‌ی دشمن نمونه (NavigationAgent3D + ۲ Area3D + Damage)
@@ -123,17 +139,31 @@ aftergrid-survival/
 │       └── power_switch.tscn       ← کلید ژنراتور برق
 ├── resources/
 │   ├── save_data.gd                ← کانتینر داده‌ی خالص برای سیو (بدون منطق)
-│   └── stats/
-│       └── player_stats.gd         ← آمار بازیکن (health/stamina/hunger/thirst) + منطق ایمن تغییر
+│   ├── stats/
+│   │   └── player_stats.gd         ← آمار بازیکن (health/stamina/hunger/thirst) + منطق ایمن تغییر
+│   ├── items/                      ← ItemData/RecipeData/ItemCatalog + .tres آیتم‌ها
+│   ├── inventory/
+│   │   └── inventory.gd            ← Resource منطق add/remove/stack (سقف max_stack)
+│   ├── recipes/                    ← دستورهای ساخت واقعی (.tres)
+│   └── item_catalog.tres           ← کاتالوگ مرجع آیتم‌ها/دستورها
 ├── levels/
 │   └── test_level.tscn             ← بلوک شهری پس از فروپاشی: ساختمان‌ها، تقاطع، آوار،
 │                                     ستون برق، خودروی سوخته، ژنراتور + اشیاء بقا و HUD
 ├── ui/
-│   └── hud/                        ← رابط کاربری درون بازی (HUD)
-│       ├── hud.gd                  ← کنترل نوارها، اعلان تعامل، toast مشترک، صفحه‌ی Game Over
-│       └── hud.tscn                ← نوار جان/استامینا/غذا/آب، کراس‌هیر و پرامپت [E]
+│   ├── hud/                        ← رابط کاربری درون بازی (HUD)
+│   │   ├── hud.gd                  ← کنترل نوارها، اعلان تعامل، toast مشترک، صفحه‌ی Game Over
+│   │   └── hud.tscn                ← نوار جان/استامینا/غذا/آب، کراس‌هیر و پرامپت [E]
+│   └── inventory/                  ← پنل اینونتوری/ساخت (کلید Tab)
+│       ├── inventory_ui.gd         ← ساخت رابط در کد (فهرست + دکمه‌های ساخت)
+│       └── inventory_ui.tscn       ← صحنه‌ی حداقلی (CanvasLayer + اسکریپت)
 └── tests/
-    └── save_load_test.gd           ← تست کارکردی headless برای save/load (godot --headless -s ...)
+    ├── save_load_test.gd           ← تست کارکردی headless برای save/load
+    ├── inventory_data_test.gd      ← داده/Resource (ItemData/RecipeData/ItemCatalog)
+    ├── inventory_logic_test.gd     ← منطق Inventory (add/remove/stack + EventBus)
+    ├── item_catalog_test.gd        ← داده‌ی واقعی .tres + اتصال دستورها
+    ├── crafting_test.gd            ← منطق Crafting اتمیک (موفق/کمبود/پر بودن)
+    ├── inventory_wiring_test.gd    ← اتصال autoload/pickup/save-load انتها‌به‌انتها
+    └── inventory_ui_test.gd        ← UI پنل اینونتوری/ساخت
 ```
 
 ## قراردادها

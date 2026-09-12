@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="RecipeData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/items/recipe_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+recipe_id = &"craft_water_filter"
+recipe_name = "فیلتر آب"
+result_item_id = &"water_bottle"
+result_amount = 1
+ingredients = {
+&"scrap_metal": 2
+}
+craft_time = 1.0

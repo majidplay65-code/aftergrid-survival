@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/items/item_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+item_id = &"canned_food"
+item_name = "کنسرو لوبیا"
+description = "غذای کنسروی؛ گرسنگی را برطرف می‌کند."
+category = 2
+max_stack = 5
+is_consumable = true
