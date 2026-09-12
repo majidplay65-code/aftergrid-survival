@@ -23,11 +23,17 @@ var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 ## نقاط گشت‌زنی از پیش‌تعیین‌شده روی صحنه (در enemy.tscn مقداردهی شده).
 @export var patrol_points: Array[Vector3] = []
 
+## ضریب شنوایی نسبت به loudness سیگنال نویز (Stalker تیزگوش، Brute کم‌حوصله).
+@export var hearing_multiplier: float = 1.0
+
 ## ایندکس نقطه‌ی فعلی گشت (توسط PatrolState مدیریت می‌شود).
 var current_patrol_index: int = 0
 
 ## بازیکن همین الان داخل شعاع حمله است؟ (فقط با سیگنال‌های AttackArea تغییر می‌کند)
 var player_in_attack_area: bool = false
+
+## آخرین هدف بررسی نویز (توسط InvestigateState و هندلر سیگنال نویز).
+var investigate_target: Vector3 = Vector3.ZERO
 
 
 func _ready() -> void:
@@ -35,6 +41,29 @@ func _ready() -> void:
 	sight_area.body_exited.connect(_on_sight_body_exited)
 	attack_area.body_entered.connect(_on_attack_body_entered)
 	attack_area.body_exited.connect(_on_attack_body_exited)
+	EventBus.noise_emitted.connect(_on_noise_emitted)
+
+
+func _exit_tree() -> void:
+	if EventBus.noise_emitted.is_connected(_on_noise_emitted):
+		EventBus.noise_emitted.disconnect(_on_noise_emitted)
+
+
+## شنیدن نویز کاملاً event-driven است: چک فاصله فقط اینجا، صفر polling در _process.
+func _on_noise_emitted(noise_position: Vector3, loudness: float) -> void:
+	var hearing_range: float = loudness * hearing_multiplier
+	if horizontal_distance_to(noise_position) > hearing_range:
+		return
+	var current_name: StringName = &""
+	if state_machine.current_state != null:
+		current_name = StringName(state_machine.current_state.name)
+	if current_name == &"ChaseState" or current_name == &"AttackState":
+		return
+	investigate_target = noise_position
+	if current_name == &"InvestigateState":
+		agent.target_position = noise_position
+		return
+	state_machine.transition_to(&"InvestigateState", {"target": noise_position})
 
 
 ## سیگنال تشخیص: بازیکن وارد شعاع دید شد → تعقیب

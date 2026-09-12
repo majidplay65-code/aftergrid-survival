@@ -85,6 +85,10 @@ func craft(recipe: RecipeData, inventory: Inventory) -> bool:
 		_emit_failure(recipe, FAIL_INVENTORY_FULL)
 		return false
 	EventBus.item_crafted.emit(recipe.recipe_id)
+	# نویز ساخت آیتم (۱۰ متر) — منبع از کنش موجود، نه شلیک.
+	var player: Node3D = GameState.player_reference
+	if player != null and is_instance_valid(player):
+		EventBus.noise_emitted.emit(player.global_position, 10.0)
 	return true
 
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://entities/enemy/enemy.gd" id="1_enemy"]
 [ext_resource type="Script" path="res://core/state_machine/state_machine.gd" id="2_statemachine"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://entities/enemy/states/patrol_state.gd" id="4_patrol"]
 [ext_resource type="Script" path="res://entities/enemy/states/chase_state.gd" id="5_chase"]
 [ext_resource type="Script" path="res://entities/enemy/states/attack_state.gd" id="6_attack"]
+[ext_resource type="Script" path="res://entities/enemy/states/investigate_state.gd" id="7_investigate"]
 
 [sub_resource type="CapsuleShape3D" id="shape_body"]
 radius = 0.5
@@ -37,6 +38,7 @@ emission_energy_multiplier = 2.4
 [node name="Enemy" type="CharacterBody3D"]
 script = ExtResource("1_enemy")
 patrol_points = Array[Vector3]([Vector3(-32, 0, 8), Vector3(-32, 0, 32), Vector3(-8, 0, 32), Vector3(-8, 0, 26)])
+hearing_multiplier = 0.6
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("shape_body")
@@ -97,3 +99,8 @@ speed = 2.3
 [node name="AttackState" type="Node" parent="StateMachine" node_paths=PackedStringArray("enemy")]
 script = ExtResource("6_attack")
 enemy = NodePath("../..")
+
+[node name="InvestigateState" type="Node" parent="StateMachine" node_paths=PackedStringArray("enemy")]
+script = ExtResource("7_investigate")
+enemy = NodePath("../..")
+speed = 1.4

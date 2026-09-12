@@ -25,6 +25,8 @@ const HUNGER_DECAY_RATE: float = 0.12
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var focused_interactable: Interactable = null
+## تایمر فاصله‌ی قدم‌ها برای emit نویز (نه polling تشخیص دشمن).
+var _footstep_timer: float = 0.0
 
 
 func _ready() -> void:
@@ -92,9 +94,22 @@ func apply_horizontal_movement(delta: float, target_speed: float) -> void:
 		var target_velocity: Vector3 = direction * target_speed
 		velocity.x = move_toward(velocity.x, target_velocity.x, ACCELERATION * delta)
 		velocity.z = move_toward(velocity.z, target_velocity.z, ACCELERATION * delta)
+		if target_speed >= RUN_SPEED:
+			_tick_footstep_noise(delta, 14.0, 0.32)
+		elif target_speed >= WALK_SPEED:
+			_tick_footstep_noise(delta, 6.0, 0.48)
 	else:
+		_footstep_timer = 0.0
 		velocity.x = move_toward(velocity.x, 0.0, FRICTION * delta)
 		velocity.z = move_toward(velocity.z, 0.0, FRICTION * delta)
+
+
+## نویز قدم از کنش موجود (راه‌رفتن/دویدن) — بدون فرض شلیک.
+func _tick_footstep_noise(delta: float, loudness: float, interval: float) -> void:
+	_footstep_timer += delta
+	if _footstep_timer >= interval:
+		_footstep_timer = 0.0
+		EventBus.noise_emitted.emit(global_position, loudness)
 
 
 func is_moving() -> bool:

@@ -23,6 +23,9 @@ signal craft_failed(recipe_id: StringName, reason: String)
 signal interactable_focused(interactable_name: String)
 signal interactable_unfocused
 signal interaction_performed(interactable: Node)
+## نویز محیطی (قدم/دویدن/ساخت). پارامتر `noise_position` عمداً `position` نیست
+## تا با Node3D.position تداخل (shadowing) نداشته باشد.
+signal noise_emitted(noise_position: Vector3, loudness: float)
 
 # --- Game Flow ---
 signal game_paused(is_paused: bool)
