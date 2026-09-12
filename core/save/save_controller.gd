@@ -42,6 +42,8 @@ func save_now() -> bool:
 	var player: Node3D = _get_player()
 	if player == null:
 		return false
+	if bool(player.get("is_dead")):
+		return false
 
 	var data: SaveData = _capture_data(player)
 

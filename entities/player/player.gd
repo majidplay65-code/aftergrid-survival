@@ -45,6 +45,7 @@ var focused_interactable: Interactable = null
 ## تایمر فاصله‌ی قدم‌ها برای emit نویز (نه polling تشخیص دشمن).
 var _footstep_timer: float = 0.0
 var flashlight_battery: float = MAX_FLASHLIGHT_BATTERY
+var is_dead: bool = false
 
 
 func _ready() -> void:
@@ -63,7 +64,7 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if GameState.is_paused:
+	if GameState.is_paused or is_dead:
 		return
 
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
@@ -88,6 +89,10 @@ func _unhandled_input(event: InputEvent) -> void:
 func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity.y -= gravity * delta
+
+	if is_dead:
+		move_and_slide()
+		return
 
 	# افت تدریجی آب و غذا در طول زمان (گیم‌پلی بقا)
 	stats.decrease_thirst(THIRST_DECAY_RATE * delta)
@@ -185,10 +190,12 @@ func is_jump_just_pressed() -> bool:
 
 ## پرش فقط از زمین و وقتی خزیده نیست.
 func wants_jump() -> bool:
-	return is_jump_just_pressed() and is_on_floor() and not is_crouch_pressed()
+	return (not is_dead) and is_jump_just_pressed() and is_on_floor() and not is_crouch_pressed()
 
 
 func start_jump() -> void:
+	if is_dead:
+		return
 	velocity.y = JUMP_VELOCITY
 	EventBus.noise_emitted.emit(global_position, JUMP_NOISE)
 
@@ -200,6 +207,8 @@ func land_from_jump() -> void:
 
 ## ضربه‌ی نزدیک: استامینا، نویز ۸ متری، آسیب به دشمنان جلوی بازیکن.
 func try_melee() -> bool:
+	if is_dead:
+		return false
 	if not stats.consume_stamina(MELEE_STAMINA_COST):
 		EventBus.toast_requested.emit("استقامت کافی نیست")
 		return false
@@ -320,4 +329,14 @@ func _on_stat_changed(stat_name: StringName, current_value: float, max_value: fl
 
 
 func _on_died() -> void:
+	if is_dead:
+		return
+	is_dead = true
+	if flashlight != null:
+		flashlight.visible = false
+	if focused_interactable != null:
+		focused_interactable = null
+		EventBus.interactable_unfocused.emit()
+	if state_machine != null:
+		state_machine.transition_to(&"DeadState")
 	EventBus.player_died.emit()

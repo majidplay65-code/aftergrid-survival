@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3]
+[gd_scene load_steps=24 format=3]
 
 [ext_resource type="Script" path="res://entities/player/player.gd" id="1_player"]
 [ext_resource type="Script" path="res://core/state_machine/state_machine.gd" id="2_statemachine"]
@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://entities/player/states/crouch_state.gd" id="6_crouch"]
 [ext_resource type="Script" path="res://entities/player/states/melee_state.gd" id="7_melee"]
 [ext_resource type="Script" path="res://entities/player/states/jump_state.gd" id="8_jump"]
+[ext_resource type="Script" path="res://entities/player/states/dead_state.gd" id="9_dead"]
 
 [sub_resource type="CapsuleShape3D" id="shape_body"]
 radius = 0.4
@@ -175,4 +176,8 @@ player = NodePath("../..")
 
 [node name="JumpState" type="Node" parent="StateMachine" node_paths=PackedStringArray("player")]
 script = ExtResource("8_jump")
+player = NodePath("../..")
+
+[node name="DeadState" type="Node" parent="StateMachine" node_paths=PackedStringArray("player")]
+script = ExtResource("9_dead")
 player = NodePath("../..")
