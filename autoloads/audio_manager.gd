@@ -7,6 +7,7 @@ extends Node
 const FOOTSTEP_ASPHALT: String = "res://assets/audio/footstep_asphalt.wav"
 const FOOTSTEP_METAL: String = "res://assets/audio/footstep_metal.wav"
 const CRAFT: String = "res://assets/audio/craft.wav"
+const DOOR_OPEN: String = "res://assets/audio/door_open.wav"
 const PICKUP: String = "res://assets/audio/pickup.wav"
 const UI_CLICK: String = "res://assets/audio/ui_click.wav"
 const HIT: String = "res://assets/audio/hit.wav"
@@ -22,6 +23,7 @@ func _ready() -> void:
 		return
 	EventBus.footstep_played.connect(_on_footstep_played)
 	EventBus.item_picked_up.connect(_on_item_picked_up)
+	EventBus.interaction_performed.connect(_on_interaction_performed)
 	EventBus.item_crafted.connect(_on_item_crafted)
 	EventBus.player_stat_changed.connect(_on_player_stat_changed)
 	EventBus.player_died.connect(_on_player_died)
@@ -39,8 +41,20 @@ func _on_footstep_played(is_running: bool) -> void:
 	_play(footstep_sound_path(is_running), pitch)
 
 
+## نگاشت خالصِ سیگنال interaction_performed به مسیر فایل (قابل‌تست در headless):
+## تعامل با در → صدای باز/بستن در؛ سایر تعامل‌ها صدا ندارند.
+func interaction_sound_path(interactable: Node) -> String:
+	return DOOR_OPEN if interactable is Door else ""
+
+
 func _on_item_picked_up(_item_id: StringName, _amount: int) -> void:
 	_play(PICKUP, 1.0)
+
+
+func _on_interaction_performed(interactable: Node) -> void:
+	var path: String = interaction_sound_path(interactable)
+	if path != "":
+		_play(path, 1.0)
 
 
 func _on_item_crafted(_recipe_id: StringName) -> void:
