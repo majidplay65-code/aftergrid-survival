@@ -6,12 +6,17 @@ extends CharacterBody3D
 
 const WALK_SPEED: float = 3.5
 const RUN_SPEED: float = 6.5
+const CROUCH_SPEED: float = 1.6
 const ACCELERATION: float = 10.0
 const FRICTION: float = 12.0
 const JUMP_VELOCITY: float = 4.5
 const MOUSE_SENSITIVITY: float = 0.0025
 const WALK_FOV: float = 75.0
 const RUN_FOV: float = 85.0
+const STAND_PIVOT_Y: float = 1.6
+const CROUCH_PIVOT_Y: float = 1.05
+const STAND_CAPSULE_HEIGHT: float = 1.8
+const CROUCH_CAPSULE_HEIGHT: float = 1.2
 
 # نرخ مصرف حیاتی در هر ثانیه
 const THIRST_DECAY_RATE: float = 0.25
@@ -24,6 +29,7 @@ const HUNGER_DECAY_RATE: float = 0.12
 @onready var state_machine: StateMachine = $StateMachine
 @onready var interaction_raycast: RayCast3D = $CameraPivot/Camera3D/InteractionRayCast
 @onready var flashlight: SpotLight3D = $CameraPivot/Camera3D/Flashlight
+@onready var collision_shape: CollisionShape3D = $CollisionShape3D
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var focused_interactable: Interactable = null
@@ -80,6 +86,7 @@ func _physics_process(delta: float) -> void:
 
 	_update_interaction_raycast()
 	_update_run_fov(delta)
+	_update_crouch_pose(delta)
 	move_and_slide()
 
 
@@ -102,6 +109,8 @@ func apply_horizontal_movement(delta: float, target_speed: float) -> void:
 			_tick_footstep_noise(delta, 14.0, 0.32, true)
 		elif target_speed >= WALK_SPEED:
 			_tick_footstep_noise(delta, 6.0, 0.48, false)
+		elif target_speed >= CROUCH_SPEED:
+			_tick_footstep_noise(delta, 2.5, 0.7, false)
 	else:
 		_footstep_timer = 0.0
 		velocity.x = move_toward(velocity.x, 0.0, FRICTION * delta)
@@ -121,8 +130,26 @@ func _tick_footstep_noise(delta: float, loudness: float, interval: float, is_run
 func _update_run_fov(delta: float) -> void:
 	if camera_3d == null:
 		return
-	var target_fov: float = RUN_FOV if is_run_pressed() and is_moving() else WALK_FOV
+	var target_fov: float = RUN_FOV if is_run_pressed() and is_moving() and not is_crouch_pressed() else WALK_FOV
 	camera_3d.fov = lerpf(camera_3d.fov, target_fov, clampf(8.0 * delta, 0.0, 1.0))
+
+
+## دوربین و کپسول برخورد را نرم به حالت خزیده/ایستاده می‌برد.
+func _update_crouch_pose(delta: float) -> void:
+	var crouched: bool = is_crouch_pressed()
+	var target_pivot_y: float = CROUCH_PIVOT_Y if crouched else STAND_PIVOT_Y
+	var target_height: float = CROUCH_CAPSULE_HEIGHT if crouched else STAND_CAPSULE_HEIGHT
+	var t: float = clampf(10.0 * delta, 0.0, 1.0)
+	if camera_pivot != null:
+		var pivot_pos: Vector3 = camera_pivot.position
+		pivot_pos.y = lerpf(pivot_pos.y, target_pivot_y, t)
+		camera_pivot.position = pivot_pos
+	if collision_shape != null and collision_shape.shape is CapsuleShape3D:
+		var capsule: CapsuleShape3D = collision_shape.shape as CapsuleShape3D
+		capsule.height = lerpf(capsule.height, target_height, t)
+		var shape_pos: Vector3 = collision_shape.position
+		shape_pos.y = lerpf(shape_pos.y, (target_height - STAND_CAPSULE_HEIGHT) * 0.5, t)
+		collision_shape.position = shape_pos
 
 
 func is_moving() -> bool:

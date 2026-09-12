@@ -13,7 +13,9 @@ func physics_update(delta: float) -> void:
 
 	var has_stamina: bool = player.stats.consume_stamina(STAMINA_COST_PER_SECOND * delta)
 
-	if not player.is_moving():
+	if player.is_crouch_pressed():
+		state_machine.transition_to(&"CrouchState")
+	elif not player.is_moving():
 		state_machine.transition_to(&"IdleState")
 	elif not player.is_run_pressed() or not has_stamina:
 		state_machine.transition_to(&"WalkState")

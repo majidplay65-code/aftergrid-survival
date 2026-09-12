@@ -5,6 +5,7 @@
 [ext_resource type="Script" path="res://entities/player/states/idle_state.gd" id="3_idle"]
 [ext_resource type="Script" path="res://entities/player/states/walk_state.gd" id="4_walk"]
 [ext_resource type="Script" path="res://entities/player/states/run_state.gd" id="5_run"]
+[ext_resource type="Script" path="res://entities/player/states/crouch_state.gd" id="6_crouch"]
 
 [sub_resource type="CapsuleShape3D" id="shape_body"]
 radius = 0.4
@@ -160,4 +161,8 @@ player = NodePath("../..")
 
 [node name="RunState" type="Node" parent="StateMachine" node_paths=PackedStringArray("player")]
 script = ExtResource("5_run")
+player = NodePath("../..")
+
+[node name="CrouchState" type="Node" parent="StateMachine" node_paths=PackedStringArray("player")]
+script = ExtResource("6_crouch")
 player = NodePath("../..")
