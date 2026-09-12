@@ -18,7 +18,8 @@ item_id = &"medkit"
 item_name = "جعبه کمک‌های اولیه"
 item_category = 3
 stat_restore_amount = 40.0
-prompt_message = "مصرف جعبه کمک‌های اولیه (+40 سلامت)"
+is_consumable_on_pickup = false
+prompt_message = "برداشتن جعبه کمک‌های اولیه"
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.125, 0)

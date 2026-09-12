@@ -33,13 +33,18 @@ func _on_interact(actor: Node3D) -> void:
 	is_interactable = false
 
 	if is_consumable_on_pickup:
-		# مصرف فوری: اثر آماری + اعلان؛ به اینونتوری نمی‌رود.
+		# مسیر قدیمی (فقط اگر صحنه صریحاً true باشد).
 		_consume_on_pickup(actor)
-	else:
-		# آیتم غیرمصرفی: فقط به اینونتوری می‌رود (InventoryManager از طریق EventBus گوش می‌دهد).
-		EventBus.item_picked_up.emit(item_id, amount)
+		queue_free()
+		return
 
-	# حذف شیء از دنیای بازی
+	# یک حقیقت: E = برداشتن به کیف. اگر جا نبود شیء سر جایش می‌ماند.
+	if InventoryManager != null and InventoryManager.inventory != null:
+		if InventoryManager.inventory.space_for(item_id) < amount:
+			is_interactable = true
+			EventBus.toast_requested.emit("کیف پر است")
+			return
+	EventBus.item_picked_up.emit(item_id, amount)
 	queue_free()
 
 
