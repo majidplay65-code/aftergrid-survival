@@ -1,20 +1,20 @@
-## تست کارکردی headless: prop غیرتعاملی «نیمکت» (bench.tscn)
+## تست کارکردی headless: prop غیرتعاملی «سطل زباله دوم» (trash_bin.tscn)
 ## - صحنه‌ی prop بارگذاری می‌شود؛ بدون اسکریپت/منطق (صرفاً بصری)
 ## - در بلوک شهری (test_level.tscn) در محل انتظار instance شده است
 ## - حداقل یک مش دارد و روی زمین (y≈0) قرار گرفته
 ##
 ## نحوه‌ی اجرا (از ریشه‌ی پروژه):
-##   godot --headless --path . -s res://tests/prop_bench_test.gd
+##   godot --headless --path . -s res://tests/prop_trash_bin_test.gd
 ##
 ## کد خروجی ۰ = همه‌ی تست‌ها پاس، ۱ = شکست.
 extends SceneTree
 
-const PROP_PATH: String = "res://entities/decor/bench.tscn"
+const PROP_PATH: String = "res://entities/decor/trash_bin.tscn"
 const LEVEL_PATH: String = "res://levels/test_level.tscn"
-const PROP_NODE_NAME: String = "Bench"
+const PROP_NODE_NAME: String = "TrashBin"
 
 ## تعداد چک‌هایی که باید در یک اجرای کامل اجرا شوند (محافظِ «خطای خاموشِ API»).
-const EXPECTED_CHECK_COUNT: int = 13
+const EXPECTED_CHECK_COUNT: int = 14
 
 var frame: int = 0
 var started: bool = false
@@ -66,7 +66,7 @@ func _ensure_autoloads() -> void:
 
 func _run() -> void:
 	var packed: PackedScene = load(PROP_PATH)
-	_check(packed != null, "bench.tscn لود می‌شود")
+	_check(packed != null, "trash_bin.tscn لود می‌شود")
 	if packed == null:
 		return
 	var prop: Node = packed.instantiate()
@@ -74,7 +74,8 @@ func _run() -> void:
 	var root3d: Node3D = prop as Node3D
 	_check(root3d != null and root3d.get_script() == null, "ریشه‌ی prop اسکریپت ندارد (غیرتعاملی)")
 	_check(_no_script_anywhere(root3d), "هیچ فرزندِ prop اسکریپت ندارد (صرفاً بصری)")
-	_check(_count_meshes(root3d) >= 3, "prop حداقل ۳ مش دارد (نشان + پاها)")
+	_check(_has_solid_collision(root3d), "سطل دارای برخورد جامد (StaticBody3D + شکل) است")
+	_check(_count_meshes(root3d) >= 2, "prop حداقل ۲ مش دارد (بدنه + درپوش)")
 	prop.free()
 
 	var level_packed: PackedScene = load(LEVEL_PATH)
@@ -84,16 +85,27 @@ func _run() -> void:
 	level = level_packed.instantiate()
 	root.add_child(level)
 	var placed: Node = level.get_node_or_null(PROP_NODE_NAME)
-	_check(placed != null, "Bench در بلوک شهری instance شده است")
+	_check(placed != null, "TrashBin در بلوک شهری instance شده است")
 	if placed == null:
 		return
 	_check(placed is Node3D, "instance داخل سطح یک Node3D است")
 	var placed3d: Node3D = placed as Node3D
-	_check(absf(placed3d.global_position.x - 6.0) < 0.01, "Bench در x=6 قرار دارد")
-	_check(absf(placed3d.global_position.z - 14.0) < 0.01, "Bench در z=14 قرار دارد")
-	_check(absf(placed3d.global_position.y - 0.0) < 0.01, "Bench روی زمین (y=0) است")
-	_check(_count_meshes(placed3d) >= 3, "instance داخل سطح مش دارد")
+	_check(absf(placed3d.global_position.x - 11.2) < 0.01, "TrashBin در x=11.2 قرار دارد")
+	_check(absf(placed3d.global_position.z - (-10.4)) < 0.01, "TrashBin در z=-10.4 قرار دارد")
+	_check(absf(placed3d.global_position.y - 0.0) < 0.01, "TrashBin روی زمین (y=0) است")
+	_check(_count_meshes(placed3d) >= 2, "instance داخل سطح مش دارد")
 	level.queue_free()
+
+
+func _has_solid_collision(n: Node) -> bool:
+	if n is StaticBody3D:
+		for child in (n as StaticBody3D).get_children():
+			if child is CollisionShape3D and (child as CollisionShape3D).shape != null:
+				return true
+	for child in n.get_children():
+		if _has_solid_collision(child):
+			return true
+	return false
 
 
 func _no_script_anywhere(n: Node) -> bool:
@@ -129,7 +141,7 @@ func _finish() -> void:
 	_check(checks_run + 1 == EXPECTED_CHECK_COUNT,
 			"همه‌ی %d چک اجرا شد (اجراشده: %d)" % [EXPECTED_CHECK_COUNT, checks_run + 1])
 	if failures == 0:
-		print("ALL TESTS PASSED (prop bench)")
+		print("ALL TESTS PASSED (prop trash bin)")
 		quit(0)
 	else:
 		printerr("%d TEST(S) FAILED" % failures)
