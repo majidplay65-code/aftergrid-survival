@@ -15,4 +15,4 @@ func physics_update(delta: float) -> void:
 	var player: Node3D = GameState.player_reference
 	if player != null and is_instance_valid(player):
 		enemy.agent.target_position = player.global_position
-	enemy.move_along_agent(delta, SPEED)
+	enemy.move_along_agent(delta, speed)

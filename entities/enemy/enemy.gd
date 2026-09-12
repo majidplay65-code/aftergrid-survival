@@ -2,8 +2,8 @@
 ## دشمن نمونه‌ی فاز ۵ (Threat System).
 ## CharacterBody3D با NavigationAgent3D که دقیقاً از الگوی موجود core/state_machine/
 ## (State/StateMachine) استفاده می‌کند.
-## تشخیص بازیکن فقط با سیگنال‌های body_entered/body_exited دو Area3D
-## (شعاع دید + محدوده‌ی حمله) انجام می‌شود — محاسبه‌ی فاصله‌ی خام از بازیکن در _process نیست.
+## ورود به شعاع دید با Area3D است؛ تعقیب فقط اگر PhysicsRay تا بازیکن آزاد باشد
+## (فاز ۱۸ — خط دید). فاصله‌ی خام از بازیکن در _process نیست.
 ##
 ## مسیر: res://entities/enemy/enemy.gd
 class_name Enemy
@@ -11,6 +11,8 @@ extends CharacterBody3D
 
 const ACCELERATION: float = 8.0
 const FRICTION: float = 10.0
+const EYE_HEIGHT: float = 1.1
+const TARGET_CHEST_HEIGHT: float = 1.0
 
 @onready var agent: NavigationAgent3D = $NavigationAgent3D
 @onready var state_machine: StateMachine = $StateMachine
@@ -36,6 +38,9 @@ var current_patrol_index: int = 0
 
 ## بازیکن همین الان داخل شعاع حمله است؟ (فقط با سیگنال‌های AttackArea تغییر می‌کند)
 var player_in_attack_area: bool = false
+
+## بازیکن داخل کرهٔ دید است؟ تعقیب جدا با has_line_of_sight_to تأیید می‌شود.
+var player_in_sight_area: bool = false
 
 ## آخرین هدف بررسی نویز (توسط InvestigateState و هندلر سیگنال نویز).
 var investigate_target: Vector3 = Vector3.ZERO
@@ -73,16 +78,67 @@ func _on_noise_emitted(noise_position: Vector3, loudness: float) -> void:
 	state_machine.transition_to(&"InvestigateState", {"target": noise_position})
 
 
-## سیگنال تشخیص: بازیکن وارد شعاع دید شد → تعقیب
+## سیگنال تشخیص: بازیکن وارد کرهٔ دید شد — تعقیب فقط با خط دید آزاد.
 func _on_sight_body_entered(body: Node3D) -> void:
 	if body is Player:
-		state_machine.transition_to(&"ChaseState")
+		player_in_sight_area = true
+		try_acquire_visual(body)
 
 
-## سیگنال تشخیص: بازیکن از شعاع دید خارج شد → بازگشت به گشت
+## سیگنال تشخیص: بازیکن از کرهٔ دید خارج شد → بازگشت به گشت
 func _on_sight_body_exited(body: Node3D) -> void:
 	if body is Player:
-		state_machine.transition_to(&"PatrolState")
+		player_in_sight_area = false
+		var current_name: StringName = _current_state_name()
+		if current_name == &"ChaseState" or current_name == &"AttackState":
+			state_machine.transition_to(&"PatrolState")
+
+
+## اگر بازیکن داخل کره است و دیوار وسط نیست → Chase.
+func try_spot_player() -> bool:
+	if not player_in_sight_area:
+		return false
+	var player: Node3D = GameState.player_reference
+	if player == null or not is_instance_valid(player):
+		return false
+	return try_acquire_visual(player)
+
+
+func try_acquire_visual(target: Node3D) -> bool:
+	if not has_line_of_sight_to(target):
+		return false
+	var current_name: StringName = _current_state_name()
+	if current_name != &"ChaseState" and current_name != &"AttackState":
+		state_machine.transition_to(&"ChaseState")
+	return true
+
+
+## پرتو فیزیک از چشم دشمن تا سینهٔ هدف. خالی یا برخورد با خودِ هدف = دیده شد.
+func has_line_of_sight_to(target: Node3D) -> bool:
+	if target == null or not is_instance_valid(target):
+		return false
+	var world: World3D = get_world_3d()
+	if world == null:
+		return false
+	var space: PhysicsDirectSpaceState3D = world.direct_space_state
+	if space == null:
+		return false
+	var from_point: Vector3 = global_position + Vector3(0.0, EYE_HEIGHT, 0.0)
+	var to_point: Vector3 = target.global_position + Vector3(0.0, TARGET_CHEST_HEIGHT, 0.0)
+	var query: PhysicsRayQueryParameters3D = PhysicsRayQueryParameters3D.create(from_point, to_point)
+	var excluded: Array[RID] = [get_rid()]
+	query.exclude = excluded
+	var result: Dictionary = space.intersect_ray(query)
+	if result.is_empty():
+		return true
+	var collider: Variant = result.get("collider", null)
+	return collider == target
+
+
+func _current_state_name() -> StringName:
+	if state_machine == null or state_machine.current_state == null:
+		return &""
+	return StringName(state_machine.current_state.name)
 
 
 ## سیگنال تشخیص: بازیکن وارد محدوده‌ی حمله شد → حمله

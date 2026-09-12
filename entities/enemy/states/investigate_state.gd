@@ -23,6 +23,8 @@ func enter(msg: Dictionary = {}) -> void:
 
 
 func physics_update(delta: float) -> void:
+	if enemy.try_spot_player():
+		return
 	_elapsed += delta
 	enemy.agent.target_position = enemy.investigate_target
 	if enemy.horizontal_distance_to(enemy.investigate_target) < ARRIVE_DISTANCE or _elapsed >= GIVE_UP_SECONDS:

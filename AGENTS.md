@@ -81,9 +81,9 @@ Resource برای داده، Node-based State Machine (core/state_machine/) بر
 
 ## فازبندی فعلی پروژه
 
-فاز 0-17 انجام‌شده (… Enemy Loot, Jump, Death). فاز بعدی تعریف نشده — منتظر تصمیم مالک ریپو. جزئیات کامل در README.md.
+فاز 0-18 انجام‌شده (تا Line of Sight). فاز بعدی پیشنهادی مالک: ۱۹ در/فضای داخلی. جزئیات در README.md و docs/ARCHITECT_REPORT.md.
 
-## فازهای ۷–۱۷ (پیاده‌سازی‌شده در همین برنچ؛ تست دستی کاربر در انتظار)
+## فازهای ۷–۱۸ (پیاده‌سازی‌شده در همین برنچ؛ تست دستی کاربر در انتظار)
 
 مالک ریپو صریحاً ترتیب ۷→۸→۹→۱۰ را اعلام کرد و پیاده شد؛ ۱۱–۱۵ ادامهٔ لایه‌ای همان برنچ است:
 
@@ -98,6 +98,7 @@ Resource برای داده، Node-based State Machine (core/state_machine/) بر
 - Enemy Loot — قراضه روی `enemy_died`
 - Jump — `JumpState` (Space؛ خزیدن پرش ندارد)
 - Death — `DeadState` + Game Over + بدون سیو بعد از مرگ
+- Line of Sight — تعقیب فقط اگر پرتو فیزیک تا بازیکن آزاد باشد
 
 ### «Noise-Based Awareness» — سه اصلاح مستندشده (اجراشده)
 

@@ -27,6 +27,8 @@ func enter(_msg: Dictionary = {}) -> void:
 
 
 func physics_update(delta: float) -> void:
+	if enemy.try_spot_player():
+		return
 	if enemy.patrol_points.is_empty():
 		return
 	var point: Vector3 = enemy.patrol_points[enemy.current_patrol_index]

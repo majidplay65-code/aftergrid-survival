@@ -3,6 +3,21 @@
 قالب این فایل از [Keep a Changelog](https://keepachangelog.com/fa-IR/1.1.0/) و
 شماره‌گذاری از [Semantic Versioning](https://semver.org/lang/fa/) پیروی می‌کند.
 
+## [0.19.0] - 2026-09-12
+
+فاز ۱۸ (Line of Sight): تعقیب فقط با پرتو فیزیک آزاد.
+
+### Added
+
+- `has_line_of_sight_to` با `PhysicsRayQueryParameters3D` از چشم دشمن تا سینهٔ بازیکن.
+- Area3D فقط کرهٔ دید است؛ Chase وقتی دیوار وسط باشد شروع نمی‌شود.
+- Patrol/Investigate وقتی بازیکن از گوشه بیرون می‌آید دوباره امتحان می‌کنند.
+- تست headless `tests/line_of_sight_test.gd` (۱۲ چک).
+
+### Fixed
+
+- `ChaseState` از identifier ناموجود `SPEED` به `speed` اصلاح شد (تعقیب در runtime می‌شکست).
+
 ## [0.18.0] - 2026-09-12
 
 فاز ۱۷ (Death): مرگ واقعی روی StateMachine.
