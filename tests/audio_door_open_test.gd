@@ -9,18 +9,22 @@
 ## کد خروجی ۰ = همه‌ی تست‌ها پاس، ۱ = شکست.
 ## نکته: در headless AudioManager اتصال‌های EventBus را نمی‌سازد (درایور صدا نیست)،
 ## بنابراین منطق نگاشت با تابع خالصِ interaction_sound_path تست می‌شود.
+## نکته: نمونه‌ی در از صحنه‌ی واقعی فروشگاه گرفته می‌شود (الگوی tests/interiors_test.gd) —
+## بدون ارجاع کامپایل‌تایم به کلاس Door.
 extends SceneTree
 
 const DOOR_PATH: String = "res://assets/audio/door_open.wav"
+const SHOP_PATH: String = "res://entities/world/safe_shop.tscn"
 
 ## تعداد چک‌هایی که باید در یک اجرای کامل اجرا شوند (محافظِ «خطای خاموشِ API»).
-const EXPECTED_CHECK_COUNT: int = 11
+const EXPECTED_CHECK_COUNT: int = 13
 
 var frame: int = 0
 var started: bool = false
 var checks_run: int = 0
 var failures: int = 0
 var am: Variant = null
+var shop: Node = null
 
 
 func _initialize() -> void:
@@ -50,14 +54,27 @@ func _run() -> void:
 	if am == null:
 		return
 	_check(str(am.DOOR_OPEN) == DOOR_PATH, "ثابت DOOR_OPEN به فایل درست اشاره دارد")
-	var door: Door = Door.new()
-	_check(door is Interactable, "Door از نظر نوع یک Interactable است")
+
+	# نمونه‌ی واقعی در از صحنه‌ی فروشگاه (الگوی interiors_test).
+	var shop_packed: PackedScene = load(SHOP_PATH)
+	_check(shop_packed != null, "صحنه‌ی فروشگاه لود می‌شود")
+	if shop_packed == null:
+		return
+	shop = shop_packed.instantiate()
+	root.add_child(shop)
+	var door: Variant = shop.get_node_or_null("Door")
+	_check(door != null, "نمونه‌ی واقعی در در صحنه‌ی فروشگاه موجود است")
+	if door == null:
+		return
+	var door_script: Script = door.get_script()
+	_check(door_script != null and String(door_script.class_name) == "Door",
+			"اسکریپت در از نظر class_name از نوع Door است")
 	_check(str(am.interaction_sound_path(door)) == DOOR_PATH, "نگاشت: تعامل با Door → صدای در")
 	var other: Node3D = Node3D.new()
 	_check(str(am.interaction_sound_path(other)) == "", "نگاشت: تعامل غیردر → مسیر خالی")
 	_check(ResourceLoader.exists(DOOR_PATH), "مسیر برگشتی در موجود است")
-	door.free()
 	other.free()
+	shop.queue_free()
 
 
 func _ensure_autoloads() -> void:

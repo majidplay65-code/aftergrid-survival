@@ -43,8 +43,15 @@ func _on_footstep_played(is_running: bool) -> void:
 
 ## نگاشت خالصِ سیگنال interaction_performed به مسیر فایل (قابل‌تست در headless):
 ## تعامل با در → صدای باز/بستن در؛ سایر تعامل‌ها صدا ندارند.
+## (بررسی با class_name در زمان اجرا — عمداً بدون وابستگی کامپایل‌تایم به کلاس Door،
+## چون همان الگوی tests/interiors_test.gd است و در حالت -s پایدارتر است.)
 func interaction_sound_path(interactable: Node) -> String:
-	return DOOR_OPEN if interactable is Door else ""
+	if interactable == null:
+		return ""
+	var script: Script = interactable.get_script()
+	if script != null and String(script.class_name) == "Door":
+		return DOOR_OPEN
+	return ""
 
 
 func _on_item_picked_up(_item_id: StringName, _amount: int) -> void:
