@@ -7,7 +7,11 @@
 class_name InventoryManager
 extends Node
 
-## کاتالوگ مرجع آیتم‌ها (برای max_stack). در لایه‌ی بعدی از داده‌ی واقعی (.tres) پر می‌شود.
+## مسیر کاتالوگ واقعی — برای autoload که نمی‌تواند @export از بیرون بگیرد.
+const CATALOG_PATH: String = "res://resources/item_catalog.tres"
+
+## کاتالوگ مرجع آیتم‌ها (برای max_stack)؛ در autoload از CATALOG_PATH لود می‌شود،
+## در تست‌ها از بیرون ست می‌شود.
 @export var catalog: ItemCatalog = null
 
 ## اینونتوریِ تحت مدیریت (در _ready ساخته می‌شود).
@@ -15,11 +19,21 @@ var inventory: Inventory = null
 
 
 func _ready() -> void:
+	if catalog == null:
+		catalog = _load_catalog()
 	inventory = Inventory.new()
 	inventory.catalog = catalog
 	EventBus.item_picked_up.connect(_on_item_picked_up)
 	EventBus.item_dropped.connect(_on_item_dropped)
 	inventory.contents_changed.connect(_on_inventory_changed)
+
+
+## لود کاتالوگ واقعی برای استفاده‌ی autoload (وقتی catalog از بیرون ست نشده باشد).
+func _load_catalog() -> ItemCatalog:
+	var loaded: Resource = load(CATALOG_PATH)
+	if loaded is ItemCatalog:
+		return loaded as ItemCatalog
+	return null
 
 
 func _on_item_picked_up(item_id: StringName, amount: int) -> void:
@@ -62,3 +76,8 @@ func is_empty() -> bool:
 
 func total_count() -> int:
 	return inventory.total_count()
+
+
+## بازیابی کامل اینونتوری از داده‌ی سیو (فاز ۶ — لایه‌ی اتصال). SaveController صدا می‌زند.
+func restore_items(saved_items: Dictionary) -> void:
+	inventory.restore_items(saved_items)

@@ -95,6 +95,23 @@ func space_for(item_id: StringName) -> int:
 	return max_stack - count_item(item_id)
 
 
+## جایگزینی کامل محتوای اینونتوری با داده‌ی سیو (فاز ۶ — لایه‌ی اتصال).
+## مقادیر غیرمثبت حذف و مقدارها به سقف max_stack محدود می‌شوند؛ سپس contents_changed
+## emit می‌شود تا سیستم‌های گوش‌دهنده (UI/EventBus) از بازیابی مطلع شوند.
+func restore_items(saved_items: Dictionary) -> void:
+	var restored: Dictionary[StringName, int] = {}
+	for item_id in saved_items:
+		var amount: int = int(saved_items[item_id])
+		if amount <= 0:
+			continue
+		var max_stack: int = _max_stack_for(item_id)
+		var stored: int = amount if amount < max_stack else max_stack
+		if stored > 0:
+			restored[item_id] = stored
+	items = restored
+	contents_changed.emit()
+
+
 ## سقف انباشت یک آیتم از کاتالوگ؛ اگر کاتالوگ/آیتم نبود یا max_stack غیرمثبت بود → نامحدود.
 func _max_stack_for(item_id: StringName) -> int:
 	if catalog == null:

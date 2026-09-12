@@ -23,6 +23,8 @@ EventBus="*res://autoloads/event_bus.gd"
 GameState="*res://autoloads/game_state.gd"
 SceneManager="*res://autoloads/scene_manager.gd"
 SaveManager="*res://autoloads/save_manager.gd"
+InventoryManager="*res://core/inventory/inventory_manager.gd"
+CraftingSystem="*res://core/crafting/crafting_system.gd"
 
 [display]
 

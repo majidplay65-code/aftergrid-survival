@@ -30,6 +30,10 @@ func _initialize() -> void:
 		_check(false, "P0: نود EventBus در دسترس نیست")
 		_finish()
 		return
+	# (لایه‌ی اتصال) اگر InventoryManager به‌عنوان autoload ثبت شده باشد، برای ایزوله‌ماندن
+	# این تستِ واحدِ کلاس، آن را از درخت برمی‌داریم تا سیگنال‌های item_picked_up/item_dropped
+	# دوبار پردازش نشوند و شمارنده‌های این تست شکسته نشوند.
+	_remove_autoload_if_present(&"InventoryManager")
 	_test_inventory_resource()
 
 
@@ -154,6 +158,15 @@ func _ensure_autoloads() -> void:
 			var node: Node = load(pair[1]).new()
 			node.name = n
 			root.add_child(node)
+
+
+## (لایه‌ی اتصال) اگر نودی با این نام به‌عنوان autoload ثبت شده باشد، آن را از درخت
+## برمی‌دارد تا این تستِ واحد ایزوله بماند و سیگنال‌ها دوبار پردازش نشوند.
+func _remove_autoload_if_present(n: StringName) -> void:
+	var node: Node = root.get_node_or_null(NodePath(n))
+	if node != null:
+		root.remove_child(node)
+		node.free()
 
 
 func _check(ok: bool, label: String) -> void:

@@ -93,9 +93,8 @@ func _capture_data(player: Node3D) -> SaveData:
 	data.max_hunger = stats.max_hunger
 	data.thirst = stats.thirst
 	data.max_thirst = stats.max_thirst
-	# سیستم Inventory در فاز ۶ می‌رسد؛ تا آن زمان این Dictionary خالی ذخیره می‌شود
-	# (فیلد رزرو شده در فرمت سیو است تا نیاز به تغییر فرمت در فاز ۶ نباشد)
-	data.inventory_items = {}
+	# اینونتوری واقعی (فاز ۶): از InventoryManager سراسری خوانده می‌شود.
+	data.inventory_items = InventoryManager.get_items()
 	return data
 
 
@@ -115,6 +114,9 @@ func _apply_data(data: SaveData) -> bool:
 	stats.stamina = data.stamina
 	stats.hunger = data.hunger
 	stats.thirst = data.thirst
+
+	# بازیابی اینونتوری از سیو (فاز ۶)
+	InventoryManager.restore_items(data.inventory_items)
 
 	player.rotation.y = data.player_rotation_y
 	var camera_pivot: Node3D = player.get_node_or_null("CameraPivot")

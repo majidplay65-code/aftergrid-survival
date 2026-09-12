@@ -17,8 +17,20 @@ const FAIL_NO_INVENTORY: String = "no_inventory"
 const FAIL_RESULT_ITEM_UNKNOWN: String = "result_item_unknown"
 const FAIL_INVENTORY_FULL: String = "inventory_full"
 
-## کاتالوگ مرجع برای اعتبارسنجی دستور/خروجی (در لایه‌ی اتصال از کاتالوگ واقعی پر می‌شود).
+## مسیر کاتالوگ واقعی — برای autoload که نمی‌تواند @export از بیرون بگیرد.
+const CATALOG_PATH: String = "res://resources/item_catalog.tres"
+
+## کاتالوگ مرجع برای اعتبارسنجی دستور/خروجی؛ در autoload از CATALOG_PATH لود می‌شود،
+## در تست‌ها از بیرون ست می‌شود.
 @export var catalog: ItemCatalog = null
+
+
+func _ready() -> void:
+	# در حالت autoload کاتالوگ از بیرون ست نمی‌شود؛ از داده‌ی واقعی لودش می‌کنیم.
+	if catalog == null:
+		var loaded: Resource = load(CATALOG_PATH)
+		if loaded is ItemCatalog:
+			catalog = loaded as ItemCatalog
 
 
 ## بررسی فقط‌خواندنی: آیا مواد اولیه‌ی این دستور به‌اندازه‌ی کافی در اینونتوری هست؟
