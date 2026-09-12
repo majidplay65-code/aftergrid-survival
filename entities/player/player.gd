@@ -10,6 +10,8 @@ const ACCELERATION: float = 10.0
 const FRICTION: float = 12.0
 const JUMP_VELOCITY: float = 4.5
 const MOUSE_SENSITIVITY: float = 0.0025
+const WALK_FOV: float = 75.0
+const RUN_FOV: float = 85.0
 
 # نرخ مصرف حیاتی در هر ثانیه
 const THIRST_DECAY_RATE: float = 0.25
@@ -43,15 +45,16 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if GameState.is_paused:
+		return
+
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
 		camera_pivot.rotate_x(-event.relative.y * MOUSE_SENSITIVITY)
 		camera_pivot.rotation.x = clampf(camera_pivot.rotation.x, deg_to_rad(-80.0), deg_to_rad(80.0))
 
-	if event.is_action_pressed(&"ui_cancel"):
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED else Input.MOUSE_MODE_CAPTURED
-
-	# بازگیری موس با کلیک (بعد از رها‌شدن نشانگر با ESC)
+	# ESC را HUD برای منوی توقف می‌گیرد؛ اینجا موس را toggle نمی‌کنیم.
+	# بازگیری موس با کلیک فقط وقتی بازی متوقف نیست.
 	if event is InputEventMouseButton and event.pressed and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
@@ -76,6 +79,7 @@ func _physics_process(delta: float) -> void:
 	stats.decrease_hunger(HUNGER_DECAY_RATE * delta)
 
 	_update_interaction_raycast()
+	_update_run_fov(delta)
 	move_and_slide()
 
 
@@ -95,9 +99,9 @@ func apply_horizontal_movement(delta: float, target_speed: float) -> void:
 		velocity.x = move_toward(velocity.x, target_velocity.x, ACCELERATION * delta)
 		velocity.z = move_toward(velocity.z, target_velocity.z, ACCELERATION * delta)
 		if target_speed >= RUN_SPEED:
-			_tick_footstep_noise(delta, 14.0, 0.32)
+			_tick_footstep_noise(delta, 14.0, 0.32, true)
 		elif target_speed >= WALK_SPEED:
-			_tick_footstep_noise(delta, 6.0, 0.48)
+			_tick_footstep_noise(delta, 6.0, 0.48, false)
 	else:
 		_footstep_timer = 0.0
 		velocity.x = move_toward(velocity.x, 0.0, FRICTION * delta)
@@ -105,11 +109,20 @@ func apply_horizontal_movement(delta: float, target_speed: float) -> void:
 
 
 ## نویز قدم از کنش موجود (راه‌رفتن/دویدن) — بدون فرض شلیک.
-func _tick_footstep_noise(delta: float, loudness: float, interval: float) -> void:
+func _tick_footstep_noise(delta: float, loudness: float, interval: float, is_running: bool) -> void:
 	_footstep_timer += delta
 	if _footstep_timer >= interval:
 		_footstep_timer = 0.0
 		EventBus.noise_emitted.emit(global_position, loudness)
+		EventBus.footstep_played.emit(is_running)
+
+
+## FOV نرم هنگام دویدن (Game Feel).
+func _update_run_fov(delta: float) -> void:
+	if camera_3d == null:
+		return
+	var target_fov: float = RUN_FOV if is_run_pressed() and is_moving() else WALK_FOV
+	camera_3d.fov = lerpf(camera_3d.fov, target_fov, clampf(8.0 * delta, 0.0, 1.0))
 
 
 func is_moving() -> bool:

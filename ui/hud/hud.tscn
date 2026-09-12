@@ -68,6 +68,7 @@ corner_radius_bottom_left = 8
 bg_color = Color(0.1, 0.02, 0.02, 0.9)
 
 [node name="HUD" type="CanvasLayer"]
+process_mode = 3
 script = ExtResource("1_hud")
 
 [node name="Root" type="Control" parent="."]

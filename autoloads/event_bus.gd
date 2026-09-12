@@ -26,6 +26,8 @@ signal interaction_performed(interactable: Node)
 ## نویز محیطی (قدم/دویدن/ساخت). پارامتر `noise_position` عمداً `position` نیست
 ## تا با Node3D.position تداخل (shadowing) نداشته باشد.
 signal noise_emitted(noise_position: Vector3, loudness: float)
+## قدم برای لایه‌ی صدا (AudioManager) — جدا از نویز آگاهی دشمن.
+signal footstep_played(is_running: bool)
 
 # --- Game Flow ---
 signal game_paused(is_paused: bool)

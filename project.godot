@@ -11,9 +11,9 @@ config_version=5
 [application]
 
 config/name="Aftergrid"
-config/description="Working title — survival after the grid goes down. Phases 0-6 done (city block, survival loop, threat AI, inventory & crafting)."
-config/version="0.7.0"
-run/main_scene="res://levels/test_level.tscn"
+config/description="Working title — survival after the grid goes down. Phases 0-10 (city block, survival loop, threat variety, noise awareness, industrial yard, game feel)."
+config/version="0.11.0"
+run/main_scene="res://ui/menus/main_menu.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 
@@ -25,6 +25,7 @@ SceneManager="*res://autoloads/scene_manager.gd"
 SaveManager="*res://autoloads/save_manager.gd"
 InventoryManager="*res://core/inventory/inventory_manager.gd"
 CraftingSystem="*res://core/crafting/crafting_system.gd"
+AudioManager="*res://autoloads/audio_manager.gd"
 
 [display]
 

@@ -15,10 +15,15 @@ extends CanvasLayer
 @onready var notification_container: VBoxContainer = $Root/NotificationContainer
 @onready var game_over_panel: Panel = $Root/GameOverPanel
 
+var pause_panel: Panel
+var _pause_built: bool = false
+
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	prompt_container.visible = false
 	game_over_panel.visible = false
+	_build_pause_menu()
 
 	# اتصال به سیگنال‌های اتوبوس رویداد سراسری
 	EventBus.player_stat_changed.connect(_on_player_stat_changed)
@@ -27,6 +32,76 @@ func _ready() -> void:
 	EventBus.item_picked_up.connect(_on_item_picked_up)
 	EventBus.player_died.connect(_on_player_died)
 	EventBus.toast_requested.connect(_on_toast_requested)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed(&"ui_cancel"):
+		if game_over_panel.visible:
+			return
+		toggle_pause_menu()
+		get_viewport().set_input_as_handled()
+
+
+## باز/بسته‌کردن منوی توقف (ESC). برای تست headless هم قابل‌صدا زدن است.
+func toggle_pause_menu() -> void:
+	if not _pause_built:
+		_build_pause_menu()
+	GameState.toggle_pause()
+	pause_panel.visible = GameState.is_paused
+	if GameState.is_paused:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	else:
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+
+func _build_pause_menu() -> void:
+	if _pause_built:
+		return
+	var root_control: Control = $Root
+	pause_panel = Panel.new()
+	pause_panel.name = "PausePanel"
+	pause_panel.visible = false
+	pause_panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	pause_panel.mouse_filter = Control.MOUSE_FILTER_STOP
+	root_control.add_child(pause_panel)
+
+	var center: CenterContainer = CenterContainer.new()
+	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	pause_panel.add_child(center)
+
+	var box: VBoxContainer = VBoxContainer.new()
+	box.add_theme_constant_override("separation", 12)
+	center.add_child(box)
+
+	var title: Label = Label.new()
+	title.text = "توقف"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.add_child(title)
+
+	var resume_btn: Button = Button.new()
+	resume_btn.name = "ResumeButton"
+	resume_btn.text = "ادامه"
+	resume_btn.pressed.connect(_on_resume_pressed)
+	box.add_child(resume_btn)
+
+	var menu_btn: Button = Button.new()
+	menu_btn.name = "MenuButton"
+	menu_btn.text = "منوی اصلی"
+	menu_btn.pressed.connect(_on_menu_pressed)
+	box.add_child(menu_btn)
+
+	_pause_built = true
+
+
+func _on_resume_pressed() -> void:
+	if GameState.is_paused:
+		toggle_pause_menu()
+
+
+func _on_menu_pressed() -> void:
+	if GameState.is_paused:
+		GameState.is_paused = false
+	SceneManager.go_to_main_menu()
 
 
 func _on_player_stat_changed(stat_name: StringName, current_value: float, max_value: float) -> void:
