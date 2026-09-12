@@ -74,7 +74,7 @@ func _process(_delta: float) -> bool:
 func _check_autoload_wiring() -> void:
 	_check(inv_manager.inventory != null, "InventoryManager autoload اینونتوری را ساخته")
 	_check(inv_manager.catalog != null, "InventoryManager کاتالوگ واقعی را لود کرده")
-	_check(inv_manager.catalog.items.size() == 6, "کاتالوگ autoload شش آیتم دارد")
+	_check(inv_manager.catalog.items.size() == 7, "کاتالوگ autoload هفت آیتم دارد")
 	_check(inv_manager.catalog.has_item(&"scrap_metal"), "کاتالوگ autoload قراضه را می‌شناسد")
 	_check(crafting.catalog != null, "CraftingSystem کاتالوگ واقعی را لود کرده")
 	_check(crafting.catalog.recipes.size() == 2, "کاتالوگ autoload دو دستور دارد")
