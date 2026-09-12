@@ -13,11 +13,17 @@ enum ItemCategory {
 	TOOL
 }
 
+## شناسه یکتای آیتم در کاتالوگ (مثلاً water_bottle)
 @export var item_id: StringName = &"water_bottle"
+## نام نمایشی آیتم در UI و پیام‌ها
 @export var item_name: String = "بطری آب معدنی"
+## دسته‌بندی آیتم برای تعیین اثر هنگام مصرف
 @export var item_category: ItemCategory = ItemCategory.WATER
+## تعداد/میزان آیتم موجود در این برداشت
 @export var amount: int = 1
+## مقدار بازیابی ویژگی‌های بازیکن در صورت مصرف مستقیم
 @export var stat_restore_amount: float = 25.0
+## آیا هنگام برداشتن فوراً مصرف شود (اختیاری؛ پیش‌فرض false)
 @export var is_consumable_on_pickup: bool = false
 
 
@@ -53,11 +59,12 @@ func _on_interact(actor: Node3D) -> void:
 func _consume_on_pickup(actor: Node3D) -> void:
 	if actor is Player:
 		var player: Player = actor as Player
-		match item_category:
-			ItemCategory.WATER:
-				player.stats.drink(stat_restore_amount)
-			ItemCategory.FOOD:
-				player.stats.eat(stat_restore_amount)
-			ItemCategory.MEDKIT:
-				player.stats.heal(stat_restore_amount)
+		if player != null and player.stats != null:
+			match item_category:
+				ItemCategory.WATER:
+					player.stats.drink(stat_restore_amount)
+				ItemCategory.FOOD:
+					player.stats.eat(stat_restore_amount)
+				ItemCategory.MEDKIT:
+					player.stats.heal(stat_restore_amount)
 	EventBus.toast_requested.emit("مصرف شد: %s" % item_name)

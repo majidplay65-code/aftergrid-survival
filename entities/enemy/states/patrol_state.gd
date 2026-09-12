@@ -6,12 +6,15 @@ extends State
 
 const ARRIVE_DISTANCE: float = 0.6
 
+## ارجاع به دشمن والد (ارجاع صادراتی اختیاری/ضروری).
 @export var enemy: Enemy
 ## سرعت گشت — واریانت‌ها (Stalker/Brute) این را در صحنه override می‌کنند.
 @export var speed: float = 2.0
 
 
 func enter(_msg: Dictionary = {}) -> void:
+	if enemy == null or not is_instance_valid(enemy):
+		return
 	if enemy.patrol_points.is_empty():
 		return
 	# از نزدیک‌ترین نقطه شروع کن
@@ -23,16 +26,20 @@ func enter(_msg: Dictionary = {}) -> void:
 			best_distance = d
 			best_index = i
 	enemy.current_patrol_index = best_index
-	enemy.agent.target_position = enemy.patrol_points[best_index]
+	if enemy.agent != null:
+		enemy.agent.target_position = enemy.patrol_points[best_index]
 
 
 func physics_update(delta: float) -> void:
+	if enemy == null or not is_instance_valid(enemy):
+		return
 	if enemy.try_spot_player():
 		return
 	if enemy.patrol_points.is_empty():
 		return
 	var point: Vector3 = enemy.patrol_points[enemy.current_patrol_index]
-	enemy.agent.target_position = point
+	if enemy.agent != null:
+		enemy.agent.target_position = point
 	# رسیدن به «نقطه‌ی مسیر» (نه بازیکن) چک می‌شود
 	if enemy.horizontal_distance_to(point) < ARRIVE_DISTANCE:
 		enemy.current_patrol_index = (enemy.current_patrol_index + 1) % enemy.patrol_points.size()

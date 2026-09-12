@@ -7,14 +7,17 @@
 class_name AttackState
 extends State
 
+## ارجاع به دشمن والد (ارجاع صادراتی اختیاری/ضروری).
 @export var enemy: Enemy
 
 
 func physics_update(delta: float) -> void:
+	if enemy == null or not is_instance_valid(enemy):
+		return
 	var player: Node3D = GameState.player_reference
 	if player == null or not is_instance_valid(player):
 		return
 	enemy.face_toward(player.global_position)
-	if enemy.player_in_attack_area:
+	if enemy.player_in_attack_area and enemy.damage != null:
 		enemy.damage.try_deal_damage(player)
 	enemy.stop_moving(delta)

@@ -4,16 +4,25 @@
 class_name HUD
 extends CanvasLayer
 
+## پنل کانتینر پیام تعامل (گره درون‌برنامه‌ای اختیاری/onready).
 @onready var prompt_container: PanelContainer = $Root/CenterContainer/InteractionPrompt
+## برچسب متن تعامل (گره درون‌برنامه‌ای اختیاری/onready).
 @onready var prompt_label: Label = $Root/CenterContainer/InteractionPrompt/MarginContainer/HBoxContainer/PromptLabel
 
+## نوار جان (گره درون‌برنامه‌ای اختیاری/onready).
 @onready var health_bar: ProgressBar = $Root/MarginContainer/VitalsContainer/HealthBar
+## نوار استامینا (گره درون‌برنامه‌ای اختیاری/onready).
 @onready var stamina_bar: ProgressBar = $Root/MarginContainer/VitalsContainer/StaminaBar
+## نوار گرسنگی (گره درون‌برنامه‌ای اختیاری/onready).
 @onready var hunger_bar: ProgressBar = $Root/MarginContainer/VitalsContainer/HungerBar
+## نوار تشنگی (گره درون‌برنامه‌ای اختیاری/onready).
 @onready var thirst_bar: ProgressBar = $Root/MarginContainer/VitalsContainer/ThirstBar
+## نوار باتری چراغ‌قوه (گره درون‌برنامه‌ای اختیاری/onready).
 @onready var battery_bar: ProgressBar = $Root/MarginContainer/VitalsContainer/BatteryBar
 
+## کانتینر اعلان‌های toast (گره درون‌برنامه‌ای اختیاری/onready).
 @onready var notification_container: VBoxContainer = $Root/NotificationContainer
+## پنل پایان بازی (گره درون‌برنامه‌ای اختیاری/onready).
 @onready var game_over_panel: Panel = $Root/GameOverPanel
 
 var pause_panel: Panel
@@ -24,8 +33,10 @@ var survive_panel: Panel
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	prompt_container.visible = false
-	game_over_panel.visible = false
+	if prompt_container != null:
+		prompt_container.visible = false
+	if game_over_panel != null:
+		game_over_panel.visible = false
 	_build_pause_menu()
 	_build_night_hud()
 
@@ -42,7 +53,7 @@ func _ready() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"ui_cancel"):
-		if game_over_panel.visible:
+		if game_over_panel != null and game_over_panel.visible:
 			return
 		toggle_pause_menu()
 		get_viewport().set_input_as_handled()
@@ -53,7 +64,8 @@ func toggle_pause_menu() -> void:
 	if not _pause_built:
 		_build_pause_menu()
 	GameState.toggle_pause()
-	pause_panel.visible = GameState.is_paused
+	if pause_panel != null:
+		pause_panel.visible = GameState.is_paused
 	if GameState.is_paused:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	else:
@@ -63,7 +75,9 @@ func toggle_pause_menu() -> void:
 func _build_pause_menu() -> void:
 	if _pause_built:
 		return
-	var root_control: Control = $Root
+	var root_control: Control = get_node_or_null("Root") as Control
+	if root_control == null:
+		return
 	pause_panel = Panel.new()
 	pause_panel.name = "PausePanel"
 	pause_panel.visible = false
@@ -131,12 +145,15 @@ func _update_bar(bar: ProgressBar, current_val: float, max_val: float) -> void:
 
 
 func _on_interactable_focused(text: String) -> void:
-	prompt_label.text = text
-	prompt_container.visible = true
+	if prompt_label != null:
+		prompt_label.text = text
+	if prompt_container != null:
+		prompt_container.visible = true
 
 
 func _on_interactable_unfocused() -> void:
-	prompt_container.visible = false
+	if prompt_container != null:
+		prompt_container.visible = false
 
 
 func _on_item_picked_up(item_id: StringName, amount: int) -> void:
@@ -153,6 +170,8 @@ func _show_toast(text: String, color: Color) -> void:
 	# در تست‌های DoD (بدون گرافیک) نشت/خطا می‌سازد.
 	if DisplayServer.get_name() == "headless":
 		return
+	if notification_container == null:
+		return
 	var label: Label = Label.new()
 	label.text = text
 	label.add_theme_font_size_override("font_size", 14)
@@ -167,7 +186,8 @@ func _show_toast(text: String, color: Color) -> void:
 
 
 func _on_player_died() -> void:
-	game_over_panel.visible = true
+	if game_over_panel != null:
+		game_over_panel.visible = true
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
@@ -178,7 +198,9 @@ func _on_restart_button_pressed() -> void:
 
 
 func _build_night_hud() -> void:
-	var root_control: Control = $Root
+	var root_control: Control = get_node_or_null("Root") as Control
+	if root_control == null:
+		return
 	night_label = Label.new()
 	night_label.name = "NightLabel"
 	night_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

@@ -5,15 +5,20 @@ extends State
 
 const STAMINA_COST_PER_SECOND: float = 15.0
 
+## ارجاع به بازیکن والد (ارجاع صادراتی اختیاری/ضروری).
 @export var player: Player
 
 
 func physics_update(delta: float) -> void:
+	if player == null or not is_instance_valid(player):
+		return
 	player.apply_horizontal_movement(delta, Player.RUN_SPEED)
 
-	var has_stamina: bool = player.stats.consume_stamina(STAMINA_COST_PER_SECOND * delta)
+	var has_stamina: bool = false
+	if player.stats != null:
+		has_stamina = player.stats.consume_stamina(STAMINA_COST_PER_SECOND * delta)
 
-	if player.is_melee_just_pressed() and player.stats.stamina >= Player.MELEE_STAMINA_COST:
+	if player.is_melee_just_pressed() and player.stats != null and player.stats.stamina >= Player.MELEE_STAMINA_COST:
 		state_machine.transition_to(&"MeleeState")
 	elif player.wants_jump():
 		state_machine.transition_to(&"JumpState")

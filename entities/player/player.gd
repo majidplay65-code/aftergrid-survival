@@ -33,13 +33,20 @@ const MELEE_DAMAGE: float = 15.0
 const THIRST_DECAY_RATE: float = 0.25
 const HUNGER_DECAY_RATE: float = 0.12
 
+## آمار حیات و ویژگی‌های بقای بازیکن (Resource صادراتی اختیاری/ضروری).
 @export var stats: PlayerStats = PlayerStats.new()
 
+## گره پیوت دوربین.
 @onready var camera_pivot: Node3D = $CameraPivot
+## دوربین سه‌بعدی بازیکن.
 @onready var camera_3d: Camera3D = $CameraPivot/Camera3D
+## ماشین حالت حرکت بازیکن.
 @onready var state_machine: StateMachine = $StateMachine
+## پرتو تعامل با اشیاء محیط.
 @onready var interaction_raycast: RayCast3D = $CameraPivot/Camera3D/InteractionRayCast
+## چراغ‌قوه روی دوربین.
 @onready var flashlight: SpotLight3D = $CameraPivot/Camera3D/Flashlight
+## شکل برخورد کپسولی بازیکن.
 @onready var collision_shape: CollisionShape3D = $CollisionShape3D
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
@@ -54,8 +61,9 @@ var peak_fall_speed: float = 0.0
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	GameState.register_player(self)
-	stats.stat_changed.connect(_on_stat_changed)
-	stats.died.connect(_on_died)
+	if stats != null:
+		stats.stat_changed.connect(_on_stat_changed)
+		stats.died.connect(_on_died)
 	EventBus.generator_charge_requested.connect(_on_generator_charge_requested)
 	EventBus.item_consumed.connect(_on_item_consumed)
 
@@ -72,8 +80,9 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
-		camera_pivot.rotate_x(-event.relative.y * MOUSE_SENSITIVITY)
-		camera_pivot.rotation.x = clampf(camera_pivot.rotation.x, deg_to_rad(-80.0), deg_to_rad(80.0))
+		if camera_pivot != null:
+			camera_pivot.rotate_x(-event.relative.y * MOUSE_SENSITIVITY)
+			camera_pivot.rotation.x = clampf(camera_pivot.rotation.x, deg_to_rad(-80.0), deg_to_rad(80.0))
 
 	# ESC را HUD برای منوی توقف می‌گیرد؛ اینجا موس را toggle نمی‌کنیم.
 	# بازگیری موس با کلیک فقط وقتی بازی متوقف نیست.
@@ -85,7 +94,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		_try_interact()
 
 	# کلید چراغ‌قوه (F) — روشن/خاموش کردن نور دوربین (بدون باتری روشن نمی‌شود)
-	if event.is_action_pressed(&"flashlight") and flashlight != null:
+	if event.is_action_pressed(&"flashlight"):
 		_toggle_flashlight()
 
 
@@ -98,8 +107,9 @@ func _physics_process(delta: float) -> void:
 		return
 
 	# افت تدریجی آب و غذا در طول زمان (گیم‌پلی بقا)
-	stats.decrease_thirst(THIRST_DECAY_RATE * delta)
-	stats.decrease_hunger(HUNGER_DECAY_RATE * delta)
+	if stats != null:
+		stats.decrease_thirst(THIRST_DECAY_RATE * delta)
+		stats.decrease_hunger(HUNGER_DECAY_RATE * delta)
 
 	_update_flashlight_battery(delta)
 	_update_interaction_raycast()
@@ -214,7 +224,8 @@ func land_from_jump() -> void:
 	var noise: float = HARD_LAND_NOISE if hard else LAND_NOISE
 	if hard:
 		var extra: float = peak_fall_speed - FALL_DAMAGE_SPEED
-		stats.take_damage(extra * 4.0)
+		if stats != null:
+			stats.take_damage(extra * 4.0)
 	EventBus.noise_emitted.emit(global_position, noise)
 	EventBus.footstep_played.emit(false)
 	peak_fall_speed = 0.0
@@ -224,7 +235,7 @@ func land_from_jump() -> void:
 func try_melee() -> bool:
 	if is_dead:
 		return false
-	if not stats.consume_stamina(MELEE_STAMINA_COST):
+	if stats == null or not stats.consume_stamina(MELEE_STAMINA_COST):
 		EventBus.toast_requested.emit("استقامت کافی نیست")
 		return false
 	EventBus.noise_emitted.emit(global_position, MELEE_NOISE)
@@ -252,6 +263,8 @@ func try_melee() -> bool:
 
 
 func _toggle_flashlight() -> void:
+	if flashlight == null:
+		return
 	if flashlight.visible:
 		flashlight.visible = false
 		return
@@ -294,13 +307,14 @@ func _on_item_consumed(item_id: StringName) -> void:
 	var item: ItemData = catalog.get_item(item_id)
 	if item == null:
 		return
-	match item.category:
-		ItemData.ItemCategory.WATER:
-			stats.drink(item.stat_restore_amount)
-		ItemData.ItemCategory.FOOD:
-			stats.eat(item.stat_restore_amount)
-		ItemData.ItemCategory.MEDKIT:
-			stats.heal(item.stat_restore_amount)
+	if stats != null:
+		match item.category:
+			ItemData.ItemCategory.WATER:
+				stats.drink(item.stat_restore_amount)
+			ItemData.ItemCategory.FOOD:
+				stats.eat(item.stat_restore_amount)
+			ItemData.ItemCategory.MEDKIT:
+				stats.heal(item.stat_restore_amount)
 	EventBus.toast_requested.emit("مصرف شد: %s" % item.item_name)
 
 
@@ -332,10 +346,11 @@ func _try_interact() -> void:
 
 
 func _emit_initial_stats() -> void:
-	EventBus.player_stat_changed.emit(&"health", stats.health, stats.max_health)
-	EventBus.player_stat_changed.emit(&"stamina", stats.stamina, stats.max_stamina)
-	EventBus.player_stat_changed.emit(&"hunger", stats.hunger, stats.max_hunger)
-	EventBus.player_stat_changed.emit(&"thirst", stats.thirst, stats.max_thirst)
+	if stats != null:
+		EventBus.player_stat_changed.emit(&"health", stats.health, stats.max_health)
+		EventBus.player_stat_changed.emit(&"stamina", stats.stamina, stats.max_stamina)
+		EventBus.player_stat_changed.emit(&"hunger", stats.hunger, stats.max_hunger)
+		EventBus.player_stat_changed.emit(&"thirst", stats.thirst, stats.max_thirst)
 	EventBus.player_stat_changed.emit(&"battery", flashlight_battery, MAX_FLASHLIGHT_BATTERY)
 
 

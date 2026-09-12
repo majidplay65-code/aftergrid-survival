@@ -14,10 +14,15 @@ const FRICTION: float = 10.0
 const EYE_HEIGHT: float = 1.1
 const TARGET_CHEST_HEIGHT: float = 1.0
 
+## عامل ناوبری دشمن (گره درون‌برنامه‌ای اختیاری/onready).
 @onready var agent: NavigationAgent3D = $NavigationAgent3D
+## ماشین حالت دشمن (گره درون‌برنامه‌ای اختیاری/onready).
 @onready var state_machine: StateMachine = $StateMachine
+## مؤلفه آسیب‌رسانی (گره درون‌برنامه‌ای اختیاری/onready).
 @onready var damage: DamageComponent = $Damage
+## ناحیه دید دشمن برای تشخیص بازیکن (گره درون‌برنامه‌ای اختیاری/onready).
 @onready var sight_area: Area3D = $SightArea
+## ناحیه حمله دشمن برای شروع ضربه (گره درون‌برنامه‌ای اختیاری/onready).
 @onready var attack_area: Area3D = $AttackArea
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
@@ -53,10 +58,12 @@ var last_seen_position: Vector3 = Vector3.ZERO
 func _ready() -> void:
 	health = max_health
 	add_to_group(&"enemies")
-	sight_area.body_entered.connect(_on_sight_body_entered)
-	sight_area.body_exited.connect(_on_sight_body_exited)
-	attack_area.body_entered.connect(_on_attack_body_entered)
-	attack_area.body_exited.connect(_on_attack_body_exited)
+	if sight_area != null:
+		sight_area.body_entered.connect(_on_sight_body_entered)
+		sight_area.body_exited.connect(_on_sight_body_exited)
+	if attack_area != null:
+		attack_area.body_entered.connect(_on_attack_body_entered)
+		attack_area.body_exited.connect(_on_attack_body_exited)
 	EventBus.noise_emitted.connect(_on_noise_emitted)
 
 
@@ -71,15 +78,17 @@ func _on_noise_emitted(noise_position: Vector3, loudness: float) -> void:
 	if horizontal_distance_to(noise_position) > hearing_range:
 		return
 	var current_name: StringName = &""
-	if state_machine.current_state != null:
+	if state_machine != null and state_machine.current_state != null:
 		current_name = StringName(state_machine.current_state.name)
 	if current_name == &"ChaseState" or current_name == &"AttackState":
 		return
 	investigate_target = noise_position
 	if current_name == &"InvestigateState":
-		agent.target_position = noise_position
+		if agent != null:
+			agent.target_position = noise_position
 		return
-	state_machine.transition_to(&"InvestigateState", {"target": noise_position})
+	if state_machine != null:
+		state_machine.transition_to(&"InvestigateState", {"target": noise_position})
 
 
 ## سیگنال تشخیص: بازیکن وارد کرهٔ دید شد — تعقیب فقط با خط دید آزاد.
@@ -111,7 +120,8 @@ func try_acquire_visual(target: Node3D) -> bool:
 		return false
 	var current_name: StringName = _current_state_name()
 	if current_name != &"ChaseState" and current_name != &"AttackState":
-		state_machine.transition_to(&"ChaseState")
+		if state_machine != null:
+			state_machine.transition_to(&"ChaseState")
 	return true
 
 
@@ -147,7 +157,8 @@ func lose_visual(from_body: Node3D = null) -> void:
 	investigate_target = last_seen_position
 	var current_name: StringName = _current_state_name()
 	if current_name == &"ChaseState" or current_name == &"AttackState":
-		state_machine.transition_to(&"InvestigateState", {"target": last_seen_position})
+		if state_machine != null:
+			state_machine.transition_to(&"InvestigateState", {"target": last_seen_position})
 
 
 func _current_state_name() -> StringName:
@@ -160,7 +171,8 @@ func _current_state_name() -> StringName:
 func _on_attack_body_entered(body: Node3D) -> void:
 	if body is Player:
 		player_in_attack_area = true
-		state_machine.transition_to(&"AttackState")
+		if state_machine != null:
+			state_machine.transition_to(&"AttackState")
 
 
 ## سیگنال تشخیص: بازیکن از محدوده‌ی حمله خارج شد → ادامه‌ی تعقیب
@@ -168,7 +180,8 @@ func _on_attack_body_exited(body: Node3D) -> void:
 	if body is Player:
 		player_in_attack_area = false
 		# اگر هنوز در شعاع دید است، تعقیب ادامه دارد؛ خروج از دید با سیگنال SightArea مدیریت می‌شود
-		state_machine.transition_to(&"ChaseState")
+		if state_machine != null:
+			state_machine.transition_to(&"ChaseState")
 
 
 ## حرکت روی مسیر NavigationAgent3D با سرعت داده‌شده (توسط State ها فراخوانی می‌شود).
