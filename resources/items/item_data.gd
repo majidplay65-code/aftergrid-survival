@@ -4,8 +4,8 @@
 class_name ItemData
 extends Resource
 
-## دسته‌بندی آیتم. ترتیب و مقادیر عمداً با `ItemPickup.ItemCategory` فعلی یکسان نگه داشته شده
-## تا در لایه‌ی اتصال، این دو enum بدون تغییر مقدار با هم ادغام شوند.
+## دسته‌بندی آیتم — تک منبع حقیقت. `ItemPickup.item_category` مستقیماً از همین
+## enum استفاده می‌کند (enum جدا در ItemPickup حذف شد تا این دو هرگز واگرا نشوند).
 enum ItemCategory {
 	GENERIC,
 	WATER,
