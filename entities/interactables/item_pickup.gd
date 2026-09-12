@@ -3,19 +3,11 @@
 class_name ItemPickup
 extends Interactable
 
-enum ItemCategory {
-	GENERIC,
-	WATER,
-	FOOD,
-	MEDKIT,
-	SCRAP,
-	BATTERY,
-	TOOL
-}
-
+## دسته‌ی آیتم — enum مستقل حذف شد؛ حالا مستقیماً از ItemData.ItemCategory
+## استفاده می‌کند تا این دو enum هرگز از هم واگرا نشوند (طبق بازرسی کیفیت).
 @export var item_id: StringName = &"water_bottle"
 @export var item_name: String = "بطری آب معدنی"
-@export var item_category: ItemCategory = ItemCategory.WATER
+@export var item_category: ItemData.ItemCategory = ItemData.ItemCategory.WATER
 @export var amount: int = 1
 @export var stat_restore_amount: float = 25.0
 @export var is_consumable_on_pickup: bool = false
@@ -54,10 +46,10 @@ func _consume_on_pickup(actor: Node3D) -> void:
 	if actor is Player:
 		var player: Player = actor as Player
 		match item_category:
-			ItemCategory.WATER:
+			ItemData.ItemCategory.WATER:
 				player.stats.drink(stat_restore_amount)
-			ItemCategory.FOOD:
+			ItemData.ItemCategory.FOOD:
 				player.stats.eat(stat_restore_amount)
-			ItemCategory.MEDKIT:
+			ItemData.ItemCategory.MEDKIT:
 				player.stats.heal(stat_restore_amount)
 	EventBus.toast_requested.emit("مصرف شد: %s" % item_name)
