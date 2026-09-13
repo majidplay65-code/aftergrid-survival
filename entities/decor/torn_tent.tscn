@@ -1,0 +1,38 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/concrete_wall.jpg" id="1_tarp"]
+
+[sub_resource type="BoxMesh" id="m_base"]
+size = Vector3(2.4, 0.15, 1.8)
+
+[sub_resource type="BoxMesh" id="m_panel"]
+size = Vector3(1.5, 0.08, 1.9)
+
+[sub_resource type="BoxMesh" id="m_flap"]
+size = Vector3(0.5, 1.0, 0.05)
+
+[sub_resource type="StandardMaterial3D" id="mat_tarp"]
+albedo_texture = ExtResource("1_tarp")
+roughness = 0.9
+
+[node name="TornTent" type="Node3D"]
+
+[node name="Base" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+mesh = SubResource("m_base")
+surface_material_override/0 = SubResource("mat_tarp")
+
+[node name="PanelL" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.8, -0.6, 0, 0.6, 0.8, 0, 0, 0, 1, -0.6, 0.45, 0)
+mesh = SubResource("m_panel")
+surface_material_override/0 = SubResource("mat_tarp")
+
+[node name="PanelR" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.8, 0.6, 0, -0.6, 0.8, 0, 0, 0, 1, 0.6, 0.45, 0)
+mesh = SubResource("m_panel")
+surface_material_override/0 = SubResource("mat_tarp")
+
+[node name="TornFlap" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.9888, -0.1494, 0, 0.1494, 0.9888, 0, 0, 0, 1, -0.9, 0.55, 0.95)
+mesh = SubResource("m_flap")
+surface_material_override/0 = SubResource("mat_tarp")

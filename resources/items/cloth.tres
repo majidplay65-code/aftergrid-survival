@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/items/item_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+item_id = &"cloth"
+item_name = "پارچه"
+description = "پارچه‌ی دست‌دوز؛ ماده‌ی اولیه‌ی ساخت طناب و فیلترها."
+category = 6
+max_stack = 5
+is_consumable = false
+stat_restore_amount = 0.0

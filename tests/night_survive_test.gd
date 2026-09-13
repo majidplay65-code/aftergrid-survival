@@ -6,7 +6,7 @@
 extends SceneTree
 
 const LEVEL_PATH: String = "res://levels/test_level.tscn"
-const EXPECTED_CHECK_COUNT: int = 9
+const EXPECTED_CHECK_COUNT: int = 14
 
 var checks_run: int = 0
 var failures: int = 0
@@ -65,6 +65,25 @@ func _run(level: Node) -> void:
 		_check(hud.night_label != null, "برچسب شب روی HUD هست")
 	var data: SaveData = SaveData.new()
 	_check(data.night_index == 1, "سیو قدیمی night_index پیش‌فرض ۱ دارد")
+	# ── edge-caseها (هرکدام یک باگ بالقوه‌ی مشخص می‌گیرد) ──
+	# (۱) پرش زمان به عقب نباید night_survived بدهد
+	# (باگ: اگر شرط current >= previous حذف شود (مثلاً در بازآرایی به
+	# min/max)، پرش عقب + رسیدن به سپیده progression کاذب می‌دهد — سواستفاده).
+	cycle.call("set_time_of_day", 0.19)
+	_check(heard_index == 1, "Edge: پرش عقب (۰٫۲۶→۰٫۱۹) → night_survived جدید نمی‌دهد")
+	_check(game_state.night_index == 2, "Edge: پرش عقب → night_index تغییر نمی‌کند")
+	# (۲) «شب کوتاه» (previous ≥ ۰٫۲۰) نباید بشمارد
+	# (باگ: حذف گاردِ previous >= 0.20، عبوری ۰٫۲۲→۰٫۲۶ که شبِ واقعی‌ای
+	# پشت سر نگذاشته، را progression می‌شمارد).
+	cycle.call("set_time_of_day", 0.22)
+	cycle.call("set_time_of_day", 0.26)
+	_check(heard_index == 1, "Edge: عبور از ۰٫۲۲ (شب کوتاه) → night_survived نمی‌دهد")
+	# (۳) شب کاملِ دوم: ایندکسِ اعلام‌شده باید شبِ پایان‌یافته باشد، نه شبِ بعد
+	# (باگ: emit با مقدارِ after-increment، برچسب شبِ اشتباه روی HUD/سیو می‌گذارد).
+	cycle.call("set_time_of_day", 0.10)
+	cycle.call("set_time_of_day", 0.26)
+	_check(heard_index == 2, "Edge: شب دوم با ایندکس ۲ اعلام می‌شود (شبِ پایان‌یافته)")
+	_check(game_state.night_index == 3, "Edge: بعد از شب دوم night_index=3")
 
 
 func _ensure_autoloads() -> void:

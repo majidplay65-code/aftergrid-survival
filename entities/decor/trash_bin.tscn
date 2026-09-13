@@ -1,0 +1,37 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/rusted_metal.jpg" id="1_metal"]
+
+[sub_resource type="CylinderMesh" id="m_body"]
+top_radius = 0.35
+bottom_radius = 0.3
+height = 0.8
+
+[sub_resource type="CylinderMesh" id="m_lid"]
+top_radius = 0.38
+bottom_radius = 0.38
+height = 0.06
+
+[sub_resource type="BoxShape3D" id="s_bin"]
+size = Vector3(0.75, 0.85, 0.75)
+
+[sub_resource type="StandardMaterial3D" id="mat_metal"]
+albedo_texture = ExtResource("1_metal")
+metallic = 0.5
+roughness = 0.85
+
+[node name="TrashBin" type="StaticBody3D"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.425, 0)
+shape = SubResource("s_bin")
+
+[node name="Body" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+mesh = SubResource("m_body")
+surface_material_override/0 = SubResource("mat_metal")
+
+[node name="Lid" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.83, 0)
+mesh = SubResource("m_lid")
+surface_material_override/0 = SubResource("mat_metal")

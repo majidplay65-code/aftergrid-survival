@@ -4,15 +4,25 @@
 ## مسیر: res://autoloads/audio_manager.gd
 extends Node
 
-const FOOTSTEP_WALK: String = "res://assets/audio/footstep_walk.wav"
-const FOOTSTEP_RUN: String = "res://assets/audio/footstep_run.wav"
-const CRAFT: String = "res://assets/audio/craft.wav"
+const FOOTSTEP_ASPHALT: String = "res://assets/audio/footstep_asphalt.wav"
+const FOOTSTEP_METAL: String = "res://assets/audio/footstep_metal.wav"
+const CRAFT_SUCCESS: String = "res://assets/audio/craft_success.wav"
+const DOOR_OPEN: String = "res://assets/audio/door_open.wav"
 const PICKUP: String = "res://assets/audio/pickup.wav"
 const UI_CLICK: String = "res://assets/audio/ui_click.wav"
 const HIT: String = "res://assets/audio/hit.wav"
 const PAUSE_WHOOSH: String = "res://assets/audio/pause_whoosh.wav"
+const LOW_HEALTH_WARNING: String = "res://assets/audio/low_health_warn.wav"
+## هشدار جان کم: نسبت جان به حداکثر (فوق‌العاده‌ی «زیر» ۲۰٪).
+const LOW_HEALTH_WARNING_RATIO: float = 0.2
+## فاصله‌ی بین دو هشدار جان کم (میلی‌ثانیه) — ضد اسپم.
+const LOW_HEALTH_WARNING_COOLDOWN_MS: int = 4000
 
 var _last_health: float = 100.0
+## زمان آخرین پخش هشدار جان کم (Time.get_ticks_msec — monotonic طبق مستندات).
+## مقدار اولیه عمداً منفی است تا هشدار نخست بلافاصله بعد از استارت/لودِ سیوِ
+## کم‌جان هم بتواند پخش شود.
+var _last_low_health_warning_ms: int = -LOW_HEALTH_WARNING_COOLDOWN_MS
 
 
 func _ready() -> void:
@@ -22,32 +32,82 @@ func _ready() -> void:
 		return
 	EventBus.footstep_played.connect(_on_footstep_played)
 	EventBus.item_picked_up.connect(_on_item_picked_up)
+	EventBus.interaction_performed.connect(_on_interaction_performed)
 	EventBus.item_crafted.connect(_on_item_crafted)
 	EventBus.player_stat_changed.connect(_on_player_stat_changed)
 	EventBus.player_died.connect(_on_player_died)
 	EventBus.game_paused.connect(_on_game_paused)
 
 
+## نگاشت خالصِ سیگنال قدم به مسیر فایل (قابل‌تست در headless):
+## راه رفتن روی آسفالتِ محوطه → قدم نرم؛ دویدن با کوبش سخت → قدم فلزی.
+func footstep_sound_path(is_running: bool) -> String:
+	return FOOTSTEP_METAL if is_running else FOOTSTEP_ASPHALT
+
+
 func _on_footstep_played(is_running: bool) -> void:
-	var path: String = FOOTSTEP_RUN if is_running else FOOTSTEP_WALK
 	var pitch: float = 1.08 if is_running else 0.96
-	_play(path, pitch)
+	_play(footstep_sound_path(is_running), pitch)
+
+
+## نگاشت خالصِ سیگنال interaction_performed به مسیر فایل (قابل‌تست در headless):
+## تعامل با در → صدای باز/بستن در؛ سایر تعامل‌ها صدا ندارند.
+## (بررسی با class_name در زمان اجرا — عمداً بدون وابستگی کامپایل‌تایم به کلاس Door،
+## چون همان الگوی tests/interiors_test.gd است و در حالت -s پایدارتر است.)
+func interaction_sound_path(interactable: Node) -> String:
+	if interactable == null:
+		return ""
+	var script: Script = interactable.get_script()
+	if script != null and String(script.get_global_name()) == "Door":
+		return DOOR_OPEN
+	return ""
 
 
 func _on_item_picked_up(_item_id: StringName, _amount: int) -> void:
 	_play(PICKUP, 1.0)
 
 
+func _on_interaction_performed(interactable: Node) -> void:
+	var path: String = interaction_sound_path(interactable)
+	if path != "":
+		_play(path, 1.0)
+
+
+## نگاشت خالصِ سیگنال item_crafted به مسیر فایل (قابل‌تست در headless).
+func craft_sound_path() -> String:
+	return CRAFT_SUCCESS
+
+
+## تصمیم خالص و قابل‌تست (headless-safe): آیا حالا باید هشدار جان کم پخش شود؟
+## بله فقط اگر: max معتبر باشد، جان واقعاً زیر آستانه باشد (نه دقیقاً روی آن)
+## و cooldown از آخرین پخش گذشته باشد. زمان آخرین پخش فقط در حالت «بله»
+## به‌روز می‌شود تا stateِ cooldown به اولین پخش موفقِ بعدی برسد.
+func low_health_warning_due(current_value: float, max_value: float, now_ms: int) -> bool:
+	if max_value <= 0.0:
+		return false
+	if current_value < 0.0:
+		return false
+	if current_value >= LOW_HEALTH_WARNING_RATIO * max_value:
+		return false
+	if now_ms - _last_low_health_warning_ms < LOW_HEALTH_WARNING_COOLDOWN_MS:
+		return false
+	_last_low_health_warning_ms = now_ms
+	return true
+
+
 func _on_item_crafted(_recipe_id: StringName) -> void:
-	_play(CRAFT, 1.0)
+	_play(craft_sound_path(), 1.0)
 
 
-func _on_player_stat_changed(stat_name: StringName, current_value: float, _max_value: float) -> void:
+func _on_player_stat_changed(stat_name: StringName, current_value: float, max_value: float) -> void:
 	if stat_name != &"health":
 		return
 	if current_value < _last_health - 0.5:
 		_play(HIT, 1.0)
 	_last_health = current_value
+	# هشدار جان کم: event-driven (بدون polling) + cooldown داخلی.
+	if low_health_warning_due(current_value, max_value, Time.get_ticks_msec()):
+		_play(LOW_HEALTH_WARNING, 1.0)
 
 
 func _on_player_died() -> void:

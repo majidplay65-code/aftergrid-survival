@@ -1,0 +1,39 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/textures/rusted_metal.jpg" id="1_metal"]
+[ext_resource type="Texture2D" path="res://assets/textures/concrete_wall.jpg" id="2_concrete"]
+
+[sub_resource type="BoxMesh" id="m_pole"]
+size = Vector3(0.15, 2.5, 0.15)
+
+[sub_resource type="BoxMesh" id="m_board"]
+size = Vector3(1.5, 0.95, 0.08)
+
+[sub_resource type="BoxMesh" id="m_piece"]
+size = Vector3(0.55, 0.08, 0.4)
+
+[sub_resource type="StandardMaterial3D" id="mat_metal"]
+albedo_texture = ExtResource("1_metal")
+metallic = 0.6
+roughness = 0.85
+
+[sub_resource type="StandardMaterial3D" id="mat_concrete"]
+albedo_texture = ExtResource("2_concrete")
+roughness = 0.95
+
+[node name="BrokenSign" type="Node3D"]
+
+[node name="Pole" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.9928, -0.1197, 0, 0.1197, 0.9928, 0, 0, 0, 1, 0, 1.25, 0)
+mesh = SubResource("m_pole")
+surface_material_override/0 = SubResource("mat_metal")
+
+[node name="Board" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.9394, -0.3429, 0, 0.3429, 0.9394, 0, 0, 0, 1, 0.06, 1.85, 0)
+mesh = SubResource("m_board")
+surface_material_override/0 = SubResource("mat_concrete")
+
+[node name="FallenPiece" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.6216, 0, -0.7833, 0, 1, 0, 0.7833, 0, 0.6216, 0.7, 0.04, 0.45)
+mesh = SubResource("m_piece")
+surface_material_override/0 = SubResource("mat_concrete")

@@ -26,8 +26,8 @@ func _initialize() -> void:
 		return
 	_check(catalog is ItemCatalog, "P0: کاتالوگ از نوع ItemCatalog است")
 	var cat: ItemCatalog = catalog as ItemCatalog
-	_check(cat.items.size() == 4, "P0: کاتالوگ دقیقاً ۴ آیتم دارد")
-	_check(cat.recipes.size() == 2, "P0: کاتالوگ دقیقاً ۲ دستور دارد")
+	_check(cat.items.size() == 9, "P0: کاتالوگ دقیقاً ۹ آیتم دارد")
+	_check(cat.recipes.size() == 7, "P0: کاتالوگ دقیقاً ۷ دستور دارد")
 	_check_item_scrap(cat)
 	_check_item_canned(cat)
 	_check_item_water(cat)
