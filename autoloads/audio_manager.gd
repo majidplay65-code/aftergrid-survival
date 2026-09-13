@@ -6,7 +6,7 @@ extends Node
 
 const FOOTSTEP_ASPHALT: String = "res://assets/audio/footstep_asphalt.wav"
 const FOOTSTEP_METAL: String = "res://assets/audio/footstep_metal.wav"
-const CRAFT: String = "res://assets/audio/craft.wav"
+const CRAFT_SUCCESS: String = "res://assets/audio/craft_success.wav"
 const DOOR_OPEN: String = "res://assets/audio/door_open.wav"
 const PICKUP: String = "res://assets/audio/pickup.wav"
 const UI_CLICK: String = "res://assets/audio/ui_click.wav"
@@ -64,8 +64,13 @@ func _on_interaction_performed(interactable: Node) -> void:
 		_play(path, 1.0)
 
 
+## نگاشت خالصِ سیگنال item_crafted به مسیر فایل (قابل‌تست در headless).
+func craft_sound_path() -> String:
+	return CRAFT_SUCCESS
+
+
 func _on_item_crafted(_recipe_id: StringName) -> void:
-	_play(CRAFT, 1.0)
+	_play(craft_sound_path(), 1.0)
 
 
 func _on_player_stat_changed(stat_name: StringName, current_value: float, _max_value: float) -> void:
