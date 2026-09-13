@@ -7,7 +7,7 @@ extends SceneTree
 
 const PLAYER_PATH: String = "res://entities/player/player.tscn"
 const PLAYER_SCRIPT: String = "res://entities/player/player.gd"
-const EXPECTED_CHECK_COUNT: int = 8
+const EXPECTED_CHECK_COUNT: int = 14
 
 var checks_run: int = 0
 var failures: int = 0
@@ -57,6 +57,36 @@ func _run() -> void:
 	player.land_from_jump()
 	_check(player.stats.health < 80.0, "فرود سخت آسیب می‌دهد")
 	_check(absf(last_noise - player_script.HARD_LAND_NOISE) < 0.01, "فرود سخت نویز ۱۴ دارد")
+	# ── edge-caseها (هرکدام یک باگ بالقوه‌ی مشخص می‌گیرد) ──
+	# (۱) درست روی آستانه: peak=12 → طبقه‌ی «سخت» (نویز ۱۴) اما صفر آسیب
+	# (extra=0). باگ: جابجایی >= به > (یا برعکس) در آستانه‌ی دقیق،
+	# نویز/آسیب را یک‌تا کج می‌کند.
+	player.stats.health = 50.0
+	player.peak_fall_speed = 12.0
+	player.land_from_jump()
+	_check(absf(player.stats.health - 50.0) < 0.01, "Edge: دقیقاً روی آستانه → صفر آسیب")
+	_check(absf(last_noise - player_script.HARD_LAND_NOISE) < 0.01,
+			"Edge: دقیقاً روی آستانه → همچنان فرود سخت (نویز ۱۴)")
+	# (۲) مقیاس‌بندی آسیب: peak=20 → extra=8 → ۳۲ آسیب (نه مقدار ثابت)
+	# (باگ: نادیده‌گرفتنِ extra یا آسیب ثابت، سقوط بسیار بلند را به‌اندازه‌ی
+	# سقوطِ فقط-روی-آستانه آسیب‌زننده می‌کند).
+	player.stats.health = 50.0
+	player.peak_fall_speed = 20.0
+	player.land_from_jump()
+	_check(absf(player.stats.health - 18.0) < 0.01, "Edge: peak=20 → ۳۲ آسیب (مقیاس‌بندی)")
+	# (۳) ریستِ peak_fall_speed بعد از فرود: بدون ریست، فرود معمولیِ بعدی
+	# آسیبِ قبلی را دوباره اعمال می‌کند (افزایش تجمعی سلامت‌گیر).
+	_check(absf(player.peak_fall_speed - 0.0) < 0.001, "Edge: peak_fall_speed بعد از فرود ریست می‌شود")
+	player.peak_fall_speed = 5.0
+	player.land_from_jump()
+	_check(absf(player.stats.health - 18.0) < 0.01, "Edge: فرود معمولی بعد از سخت → آسیب جدید نمی‌دهد")
+	# (۴) مرگ از سقوط باید از همان زنجیره‌ی مرگِ استاندارد بگذرد
+	# (is_dead + سیگنال‌ها)؛ باگ: اگر کد سقوط health را مستقیم بنویسد
+	# به‌جای take_damage، بازیکن می‌میرد ولی DeadState/player_died نمی‌آید.
+	player.stats.health = 5.0
+	player.peak_fall_speed = 20.0
+	player.land_from_jump()
+	_check(player.is_dead == true, "Edge: مرگ از سقوط → زنجیره‌ی مرگ استاندارد")
 	player.free()
 
 

@@ -17,7 +17,7 @@ const PLAYER_SCRIPT: String = "res://entities/player/player.gd"
 const CRAFT_SCRIPT: String = "res://core/crafting/crafting_system.gd"
 const BUS_SCRIPT: String = "res://autoloads/event_bus.gd"
 
-const EXPECTED_CHECK_COUNT: int = 14
+const EXPECTED_CHECK_COUNT: int = 21
 
 var frame: int = 0
 var phase: int = 0
@@ -71,12 +71,83 @@ func _process(_delta: float) -> bool:
 				var far_state: Node = _far_enemy.get_node("StateMachine").current_state
 				_check(far_state != null and StringName(far_state.name) != &"InvestigateState",
 						"نویز دور → گشت باقی می‌ماند")
+				_edge_retarget()
+				phase = 3
+		3:
+			if frame >= 14:
+				_edge_chase()
+				phase = 4
+		4:
+			if frame >= 16:
+				_edge_multiplier()
+				_cleanup_edge_enemies()
 				_finish()
 				return true
 	return false
 
 
 var _far_enemy: Node = null
+var _e_retarget: Node = null
+var _e_chase: Node = null
+var _s_shambler: Node = null
+var _s_stalker: Node = null
+
+
+# ── edge-caseها (هرکدام یک باگ بالقوه‌ی مشخص می‌گیرد) ──
+
+# (۱) نویز جدید حین Investigate باید target را به‌روز کند.
+# باگ: اگر هندلر فقط روی transition_to اتکا می‌کرد، گارد «همان state»ِ
+# StateMachine نویز دوم را می‌بلعید و دشمن تا ابد محلِ قدیمی را بررسی
+# می‌کرد (داده‌ی investigate_target کهنه می‌ماند).
+func _edge_retarget() -> void:
+	_e_retarget = _instantiate_in_tree(ENEMY_PATH, Vector3(20.0, 0.7, 0.0))
+	event_bus.noise_emitted.emit(Vector3(23.0, 0.0, 0.0), 8.0)
+	var sm: StateMachine = _e_retarget.get_node("StateMachine") as StateMachine
+	_check(sm.current_state != null and StringName(sm.current_state.name) == &"InvestigateState",
+			"Edge: نویز اول → InvestigateState")
+	_check(_e_retarget.investigate_target.distance_to(Vector3(23.0, 0.0, 0.0)) < 0.01,
+			"Edge: investigate_target محل نویز اول است")
+	event_bus.noise_emitted.emit(Vector3(26.0, 0.0, 0.0), 8.0)
+	_check(_e_retarget.investigate_target.distance_to(Vector3(26.0, 0.0, 0.0)) < 0.01,
+			"Edge: نویز جدید حین بررسی → target به‌روز می‌شود (هدف کهنه نمی‌ماند)")
+
+
+# (۲) نویز حین Chase نباید تعقیب را بشکند.
+# باگ: اگر نویز یک دشمنِ درحال‌تعقیب را به Investigate می‌راند، هر صدای
+# پاهای بازیکنِ تعقیب‌شده تعقیب را قطع می‌کرد و دشمن هدفش را گم می‌کرد.
+func _edge_chase() -> void:
+	_e_chase = _instantiate_in_tree(ENEMY_PATH, Vector3(30.0, 0.7, 0.0))
+	var sm: StateMachine = _e_chase.get_node("StateMachine") as StateMachine
+	sm.transition_to(&"ChaseState")
+	var target_before: Vector3 = _e_chase.investigate_target
+	event_bus.noise_emitted.emit(Vector3(33.0, 0.0, 0.0), 8.0)
+	_check(sm.current_state != null and StringName(sm.current_state.name) == &"ChaseState",
+			"Edge: نویز نزدیک حین تعقیب → ChaseState باقی می‌ماند")
+	_check(_e_chase.investigate_target == target_before,
+			"Edge: investigate_target توسط نویز حین تعقیب تغییر نمی‌کند")
+
+
+# (۳) ضریب شنوایی باید واقعاً رفتار را عوض کند، نه فقط یک داده‌ی صحنه باشد.
+# باگ: ضریبِ به‌اشتباه اعمال‌شده (تقسیم به‌جای ضرب، یا عملگر معکوس)
+# Stalker را کم‌شنوا‌تر از Shambler می‌کرد — در این فاصله‌ی مرزی
+# (۸ متر، loudness ۶) دقیقاً آشکار می‌شود: Shambler (محدوده ۶) نمی‌شنود،
+# Stalker ×۱٫۵ (محدوده ۹) می‌شنود.
+func _edge_multiplier() -> void:
+	_s_shambler = _instantiate_in_tree(ENEMY_PATH, Vector3(50.0, 0.7, 0.0))
+	_s_stalker = _instantiate_in_tree(STALKER_PATH, Vector3(51.0, 0.7, 0.0))
+	event_bus.noise_emitted.emit(Vector3(58.0, 0.0, 0.0), 6.0)
+	var sh_state: Node = _s_shambler.get_node("StateMachine").current_state
+	var st_state: Node = _s_stalker.get_node("StateMachine").current_state
+	_check(sh_state != null and StringName(sh_state.name) != &"InvestigateState",
+			"Edge: Shambler نویز ۶متریِ فاصله ۸ را نمی‌شنود (محدوده ۶)")
+	_check(st_state != null and StringName(st_state.name) == &"InvestigateState",
+			"Edge: Stalker (×۱٫۵) همان نویز را می‌شنود (محدوده ۹)")
+
+
+func _cleanup_edge_enemies() -> void:
+	for e in [_e_retarget, _e_chase, _s_shambler, _s_stalker]:
+		if e != null:
+			e.free()
 
 
 func _check_static() -> void:

@@ -9,7 +9,7 @@ const PLAYER_PATH: String = "res://entities/player/player.tscn"
 const ENEMY_PATH: String = "res://entities/enemy/enemy.tscn"
 const CHASE_SCRIPT: String = "res://entities/enemy/states/chase_state.gd"
 const ENEMY_SCRIPT: String = "res://entities/enemy/enemy.gd"
-const EXPECTED_CHECK_COUNT: int = 12
+const EXPECTED_CHECK_COUNT: int = 17
 
 var checks_run: int = 0
 var failures: int = 0
@@ -84,6 +84,34 @@ func _check_runtime() -> void:
 	if sm != null and sm.current_state != null:
 		state_name = StringName(sm.current_state.name)
 	_check(state_name == &"ChaseState", "بعد از دیدن آزاد، ChaseState فعال است")
+	# ── edge-caseها (هرکدام یک باگ بالقوه‌ی مشخص می‌گیرد) ──
+	# (۱) دید در فاصله‌ی نزدیک: پرتو باید بدنِ خودِ بازیکن را به‌عنوان collider
+	# پیدا کند (شاخه‌ی collider == target). اگر این شاخه شکسته باشد، دشمن
+	# بازیکنِ نزدیک را نمی‌بیند در حالی‌که از دور «می‌بیند» (چکِ آزادِ بالا
+	# لزوماً این شاخه را نمی‌زند).
+	player.global_position = Vector3(1.2, 1.0, 0.0)
+	_check(enemy.has_line_of_sight_to(player) == true,
+			"فاصله‌ی نزدیک (۱٫۲ متر): برخورد پرتو با بدن بازیکن → دیده می‌شود")
+	# (۲) target آزادشده (freed): guardِ is_instance_valid باید خطا ندهد و
+	# false برگرداند. اگر guard حذف شود، ارجاعِ dangling = SCRIPT ERROR.
+	var dummy_target: Node3D = Node3D.new()
+	host.add_child(dummy_target)
+	dummy_target.global_position = Vector3(4.0, 1.0, 0.0)
+	_check(enemy.has_line_of_sight_to(dummy_target) == true,
+			"target خالی در فضای آزاد → دیده می‌شود")
+	dummy_target.free()
+	_check(enemy.has_line_of_sight_to(dummy_target) == false,
+			"target آزادشده → false بدون کرش")
+	# (۳) player_reference خالی/قدیمی: try_spot_player نباید کرش کند و نباید
+	# بازیکن را ببیند (بعد از مرگ/ثبت‌نشدن بازیکن؛ شکستن guard = تعقیب کاذب
+	# یا کرش روی ارجاعِ dangling).
+	var saved_ref: Node3D = GameState.player_reference
+	GameState.player_reference = null
+	_check(enemy.try_spot_player() == false,
+			"try_spot_player با player_reference=null → false بدون کرش")
+	GameState.player_reference = saved_ref
+	_check(enemy.try_spot_player() == true,
+			"بازگردانی ارجاع → دوباره دیده می‌شود")
 	host.free()
 
 
