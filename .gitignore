@@ -10,6 +10,7 @@ mono_crash.*.json
 # خروجی بیلد و فایل‌های موقت
 /build/
 /export/
+stress_test_results.json
 *.tmp
 
 # سیستم‌عامل / ادیتور

@@ -1,0 +1,349 @@
+WorkerThreadPool: 6 threads, 1 max low-priority.
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+TextServer: Added interface "Dummy"
+TextServer: Added interface "ICU / HarfBuzz / Graphite (Built-in)"
+SDL: Init OK!
+Using "default" pen tablet driver...
+
+TextServer: Primary interface set to: "ICU / HarfBuzz / Graphite (Built-in)".
+CORE API HASH: 2004498165
+EDITOR API HASH: 1696660745
+Loading resource: res://tests/save_load_test.gd remapped: res://tests/save_load_test.gd
+Completed load for: 'res://tests/save_load_test.gd' remapped 'res://tests/save_load_test.gd' at thread -1
+SceneTreeFTI: traversal method DEFAULT
+Loading resource: res://autoloads/event_bus.gd remapped: res://autoloads/event_bus.gd
+Completed load for: 'res://autoloads/event_bus.gd' remapped 'res://autoloads/event_bus.gd' at thread -1
+Loading resource: res://autoloads/game_state.gd remapped: res://autoloads/game_state.gd
+Completed load for: 'res://autoloads/game_state.gd' remapped 'res://autoloads/game_state.gd' at thread -1
+Loading resource: res://autoloads/scene_manager.gd remapped: res://autoloads/scene_manager.gd
+Completed load for: 'res://autoloads/scene_manager.gd' remapped 'res://autoloads/scene_manager.gd' at thread -1
+Loading resource: res://autoloads/save_manager.gd remapped: res://autoloads/save_manager.gd
+Completed load for: 'res://autoloads/save_manager.gd' remapped 'res://autoloads/save_manager.gd' at thread -1
+Loading resource: res://core/inventory/inventory_manager.gd remapped: res://core/inventory/inventory_manager.gd
+Completed load for: 'res://core/inventory/inventory_manager.gd' remapped 'res://core/inventory/inventory_manager.gd' at thread -1
+Loading resource: res://core/crafting/crafting_system.gd remapped: res://core/crafting/crafting_system.gd
+Completed load for: 'res://core/crafting/crafting_system.gd' remapped 'res://core/crafting/crafting_system.gd' at thread -1
+Loading resource: res://autoloads/audio_manager.gd remapped: res://autoloads/audio_manager.gd
+Completed load for: 'res://autoloads/audio_manager.gd' remapped 'res://autoloads/audio_manager.gd' at thread -1
+Loaded system CA certificates
+Loading resource: res://levels/test_level.tscn remapped: res://levels/test_level.tscn
+Loading resource: res://entities/player/player.tscn remapped: res://entities/player/player.tscn
+Loading resource: res://entities/player/player.gd remapped: res://entities/player/player.gd
+Completed load for: 'res://entities/player/player.gd' remapped 'res://entities/player/player.gd' at thread -1
+Loading resource: res://entities/player/states/idle_state.gd remapped: res://entities/player/states/idle_state.gd
+Completed load for: 'res://entities/player/states/idle_state.gd' remapped 'res://entities/player/states/idle_state.gd' at thread -1
+Loading resource: res://entities/player/states/walk_state.gd remapped: res://entities/player/states/walk_state.gd
+Completed load for: 'res://entities/player/states/walk_state.gd' remapped 'res://entities/player/states/walk_state.gd' at thread -1
+Loading resource: res://entities/player/states/run_state.gd remapped: res://entities/player/states/run_state.gd
+Completed load for: 'res://entities/player/states/run_state.gd' remapped 'res://entities/player/states/run_state.gd' at thread -1
+Loading resource: res://entities/player/states/crouch_state.gd remapped: res://entities/player/states/crouch_state.gd
+Completed load for: 'res://entities/player/states/crouch_state.gd' remapped 'res://entities/player/states/crouch_state.gd' at thread -1
+Loading resource: res://entities/player/states/melee_state.gd remapped: res://entities/player/states/melee_state.gd
+Completed load for: 'res://entities/player/states/melee_state.gd' remapped 'res://entities/player/states/melee_state.gd' at thread -1
+Loading resource: res://entities/player/states/jump_state.gd remapped: res://entities/player/states/jump_state.gd
+Completed load for: 'res://entities/player/states/jump_state.gd' remapped 'res://entities/player/states/jump_state.gd' at thread -1
+Loading resource: res://entities/player/states/dead_state.gd remapped: res://entities/player/states/dead_state.gd
+Completed load for: 'res://entities/player/states/dead_state.gd' remapped 'res://entities/player/states/dead_state.gd' at thread -1
+Completed load for: 'res://entities/player/player.tscn' remapped 'res://entities/player/player.tscn' at thread -1
+Loading resource: res://ui/hud/hud.tscn remapped: res://ui/hud/hud.tscn
+Loading resource: res://ui/hud/hud.gd remapped: res://ui/hud/hud.gd
+Completed load for: 'res://ui/hud/hud.gd' remapped 'res://ui/hud/hud.gd' at thread -1
+Completed load for: 'res://ui/hud/hud.tscn' remapped 'res://ui/hud/hud.tscn' at thread -1
+Loading resource: res://entities/interactables/water_bottle.tscn remapped: res://entities/interactables/water_bottle.tscn
+Loading resource: res://entities/interactables/item_pickup.gd remapped: res://entities/interactables/item_pickup.gd
+Completed load for: 'res://entities/interactables/item_pickup.gd' remapped 'res://entities/interactables/item_pickup.gd' at thread -1
+Completed load for: 'res://entities/interactables/water_bottle.tscn' remapped 'res://entities/interactables/water_bottle.tscn' at thread -1
+Loading resource: res://entities/interactables/canned_food.tscn remapped: res://entities/interactables/canned_food.tscn
+Completed load for: 'res://entities/interactables/canned_food.tscn' remapped 'res://entities/interactables/canned_food.tscn' at thread -1
+Loading resource: res://entities/interactables/medkit.tscn remapped: res://entities/interactables/medkit.tscn
+Completed load for: 'res://entities/interactables/medkit.tscn' remapped 'res://entities/interactables/medkit.tscn' at thread -1
+Loading resource: res://entities/interactables/scrap_metal.tscn remapped: res://entities/interactables/scrap_metal.tscn
+Completed load for: 'res://entities/interactables/scrap_metal.tscn' remapped 'res://entities/interactables/scrap_metal.tscn' at thread -1
+Loading resource: res://entities/interactables/power_switch.tscn remapped: res://entities/interactables/power_switch.tscn
+Loading resource: res://entities/interactables/power_switch.gd remapped: res://entities/interactables/power_switch.gd
+Completed load for: 'res://entities/interactables/power_switch.gd' remapped 'res://entities/interactables/power_switch.gd' at thread -1
+Completed load for: 'res://entities/interactables/power_switch.tscn' remapped 'res://entities/interactables/power_switch.tscn' at thread -1
+Loading resource: res://assets/textures/ground_asphalt.jpg remapped: res://assets/textures/ground_asphalt.jpg
+Loading resource: res://.godot/imported/ground_asphalt.jpg-0fcde2fecb74a0955fa0a5438b7bad1b.ctex remapped: res://.godot/imported/ground_asphalt.jpg-0fcde2fecb74a0955fa0a5438b7bad1b.ctex
+Completed load for: 'res://assets/textures/ground_asphalt.jpg' remapped 'res://assets/textures/ground_asphalt.jpg' at thread -1
+Loading resource: res://assets/textures/concrete_wall.jpg remapped: res://assets/textures/concrete_wall.jpg
+Loading resource: res://.godot/imported/concrete_wall.jpg-e8b6cc528f4c2500cac6923cb88871e9.ctex remapped: res://.godot/imported/concrete_wall.jpg-e8b6cc528f4c2500cac6923cb88871e9.ctex
+Completed load for: 'res://assets/textures/concrete_wall.jpg' remapped 'res://assets/textures/concrete_wall.jpg' at thread -1
+Loading resource: res://assets/textures/rusted_metal.jpg remapped: res://assets/textures/rusted_metal.jpg
+Loading resource: res://.godot/imported/rusted_metal.jpg-9924ef43f2cf294b48b96ed83d45a17f.ctex remapped: res://.godot/imported/rusted_metal.jpg-9924ef43f2cf294b48b96ed83d45a17f.ctex
+Completed load for: 'res://assets/textures/rusted_metal.jpg' remapped 'res://assets/textures/rusted_metal.jpg' at thread -1
+Loading resource: res://assets/textures/wood_planks.jpg remapped: res://assets/textures/wood_planks.jpg
+Loading resource: res://.godot/imported/wood_planks.jpg-f13785f8ffb5b59910644bf09ebe61e1.ctex remapped: res://.godot/imported/wood_planks.jpg-f13785f8ffb5b59910644bf09ebe61e1.ctex
+Completed load for: 'res://assets/textures/wood_planks.jpg' remapped 'res://assets/textures/wood_planks.jpg' at thread -1
+Loading resource: res://core/save/save_controller.gd remapped: res://core/save/save_controller.gd
+Completed load for: 'res://core/save/save_controller.gd' remapped 'res://core/save/save_controller.gd' at thread -1
+Loading resource: res://entities/enemy/enemy.tscn remapped: res://entities/enemy/enemy.tscn
+Loading resource: res://entities/enemy/states/patrol_state.gd remapped: res://entities/enemy/states/patrol_state.gd
+Completed load for: 'res://entities/enemy/states/patrol_state.gd' remapped 'res://entities/enemy/states/patrol_state.gd' at thread -1
+Loading resource: res://entities/enemy/states/chase_state.gd remapped: res://entities/enemy/states/chase_state.gd
+Completed load for: 'res://entities/enemy/states/chase_state.gd' remapped 'res://entities/enemy/states/chase_state.gd' at thread -1
+Loading resource: res://entities/enemy/states/attack_state.gd remapped: res://entities/enemy/states/attack_state.gd
+Completed load for: 'res://entities/enemy/states/attack_state.gd' remapped 'res://entities/enemy/states/attack_state.gd' at thread -1
+Loading resource: res://entities/enemy/states/investigate_state.gd remapped: res://entities/enemy/states/investigate_state.gd
+Completed load for: 'res://entities/enemy/states/investigate_state.gd' remapped 'res://entities/enemy/states/investigate_state.gd' at thread -1
+Completed load for: 'res://entities/enemy/enemy.tscn' remapped 'res://entities/enemy/enemy.tscn' at thread -1
+Loading resource: res://ui/inventory/inventory_ui.tscn remapped: res://ui/inventory/inventory_ui.tscn
+Loading resource: res://ui/inventory/inventory_ui.gd remapped: res://ui/inventory/inventory_ui.gd
+Completed load for: 'res://ui/inventory/inventory_ui.gd' remapped 'res://ui/inventory/inventory_ui.gd' at thread -1
+Completed load for: 'res://ui/inventory/inventory_ui.tscn' remapped 'res://ui/inventory/inventory_ui.tscn' at thread -1
+Loading resource: res://entities/enemy/enemy_stalker.tscn remapped: res://entities/enemy/enemy_stalker.tscn
+Completed load for: 'res://entities/enemy/enemy_stalker.tscn' remapped 'res://entities/enemy/enemy_stalker.tscn' at thread -1
+Loading resource: res://entities/enemy/enemy_brute.tscn remapped: res://entities/enemy/enemy_brute.tscn
+Completed load for: 'res://entities/enemy/enemy_brute.tscn' remapped 'res://entities/enemy/enemy_brute.tscn' at thread -1
+Loading resource: res://core/loot/loot_spawner.gd remapped: res://core/loot/loot_spawner.gd
+Completed load for: 'res://core/loot/loot_spawner.gd' remapped 'res://core/loot/loot_spawner.gd' at thread -1
+Loading resource: res://entities/world/safe_shop.tscn remapped: res://entities/world/safe_shop.tscn
+Loading resource: res://entities/interactables/door.gd remapped: res://entities/interactables/door.gd
+Completed load for: 'res://entities/interactables/door.gd' remapped 'res://entities/interactables/door.gd' at thread -1
+Loading resource: res://entities/interactables/rest_spot.tscn remapped: res://entities/interactables/rest_spot.tscn
+Loading resource: res://entities/interactables/rest_spot.gd remapped: res://entities/interactables/rest_spot.gd
+Completed load for: 'res://entities/interactables/rest_spot.gd' remapped 'res://entities/interactables/rest_spot.gd' at thread -1
+Completed load for: 'res://entities/interactables/rest_spot.tscn' remapped 'res://entities/interactables/rest_spot.tscn' at thread -1
+Completed load for: 'res://entities/world/safe_shop.tscn' remapped 'res://entities/world/safe_shop.tscn' at thread -1
+Loading resource: res://core/world/day_cycle.gd remapped: res://core/world/day_cycle.gd
+Completed load for: 'res://core/world/day_cycle.gd' remapped 'res://core/world/day_cycle.gd' at thread -1
+Loading resource: res://entities/interactables/workbench.tscn remapped: res://entities/interactables/workbench.tscn
+Loading resource: res://entities/interactables/workbench.gd remapped: res://entities/interactables/workbench.gd
+Completed load for: 'res://entities/interactables/workbench.gd' remapped 'res://entities/interactables/workbench.gd' at thread -1
+Completed load for: 'res://entities/interactables/workbench.tscn' remapped 'res://entities/interactables/workbench.tscn' at thread -1
+Loading resource: res://entities/interactables/radio_beacon.tscn remapped: res://entities/interactables/radio_beacon.tscn
+Loading resource: res://entities/interactables/radio_beacon.gd remapped: res://entities/interactables/radio_beacon.gd
+Completed load for: 'res://entities/interactables/radio_beacon.gd' remapped 'res://entities/interactables/radio_beacon.gd' at thread -1
+Completed load for: 'res://entities/interactables/radio_beacon.tscn' remapped 'res://entities/interactables/radio_beacon.tscn' at thread -1
+Loading resource: res://entities/decor/broken_sign.tscn remapped: res://entities/decor/broken_sign.tscn
+Completed load for: 'res://entities/decor/broken_sign.tscn' remapped 'res://entities/decor/broken_sign.tscn' at thread -1
+Loading resource: res://entities/decor/bench.tscn remapped: res://entities/decor/bench.tscn
+Completed load for: 'res://entities/decor/bench.tscn' remapped 'res://entities/decor/bench.tscn' at thread -1
+Loading resource: res://entities/decor/trash_bin.tscn remapped: res://entities/decor/trash_bin.tscn
+Completed load for: 'res://entities/decor/trash_bin.tscn' remapped 'res://entities/decor/trash_bin.tscn' at thread -1
+Loading resource: res://entities/decor/rusted_bicycle.tscn remapped: res://entities/decor/rusted_bicycle.tscn
+Completed load for: 'res://entities/decor/rusted_bicycle.tscn' remapped 'res://entities/decor/rusted_bicycle.tscn' at thread -1
+Loading resource: res://entities/decor/torn_tent.tscn remapped: res://entities/decor/torn_tent.tscn
+Completed load for: 'res://entities/decor/torn_tent.tscn' remapped 'res://entities/decor/torn_tent.tscn' at thread -1
+Completed load for: 'res://levels/test_level.tscn' remapped 'res://levels/test_level.tscn' at thread -1
+Loading resource: res://resources/item_catalog.tres remapped: res://resources/item_catalog.tres
+Loading resource: res://resources/items/scrap_metal.tres remapped: res://resources/items/scrap_metal.tres
+Completed load for: 'res://resources/items/scrap_metal.tres' remapped 'res://resources/items/scrap_metal.tres' at thread -1
+Loading resource: res://resources/items/canned_food.tres remapped: res://resources/items/canned_food.tres
+Completed load for: 'res://resources/items/canned_food.tres' remapped 'res://resources/items/canned_food.tres' at thread -1
+Loading resource: res://resources/items/water_bottle.tres remapped: res://resources/items/water_bottle.tres
+Completed load for: 'res://resources/items/water_bottle.tres' remapped 'res://resources/items/water_bottle.tres' at thread -1
+Loading resource: res://resources/items/medkit.tres remapped: res://resources/items/medkit.tres
+Completed load for: 'res://resources/items/medkit.tres' remapped 'res://resources/items/medkit.tres' at thread -1
+Loading resource: res://resources/recipes/craft_water_filter.tres remapped: res://resources/recipes/craft_water_filter.tres
+Completed load for: 'res://resources/recipes/craft_water_filter.tres' remapped 'res://resources/recipes/craft_water_filter.tres' at thread -1
+Loading resource: res://resources/recipes/craft_medkit.tres remapped: res://resources/recipes/craft_medkit.tres
+Completed load for: 'res://resources/recipes/craft_medkit.tres' remapped 'res://resources/recipes/craft_medkit.tres' at thread -1
+Loading resource: res://resources/items/battery.tres remapped: res://resources/items/battery.tres
+Completed load for: 'res://resources/items/battery.tres' remapped 'res://resources/items/battery.tres' at thread -1
+Loading resource: res://resources/items/cloth.tres remapped: res://resources/items/cloth.tres
+Completed load for: 'res://resources/items/cloth.tres' remapped 'res://resources/items/cloth.tres' at thread -1
+Loading resource: res://resources/items/antiseptic.tres remapped: res://resources/items/antiseptic.tres
+Completed load for: 'res://resources/items/antiseptic.tres' remapped 'res://resources/items/antiseptic.tres' at thread -1
+Loading resource: res://resources/items/rope.tres remapped: res://resources/items/rope.tres
+Completed load for: 'res://resources/items/rope.tres' remapped 'res://resources/items/rope.tres' at thread -1
+Loading resource: res://resources/items/air_filter.tres remapped: res://resources/items/air_filter.tres
+Completed load for: 'res://resources/items/air_filter.tres' remapped 'res://resources/items/air_filter.tres' at thread -1
+Loading resource: res://resources/recipes/craft_rope.tres remapped: res://resources/recipes/craft_rope.tres
+Completed load for: 'res://resources/recipes/craft_rope.tres' remapped 'res://resources/recipes/craft_rope.tres' at thread -1
+Loading resource: res://resources/recipes/craft_air_filter.tres remapped: res://resources/recipes/craft_air_filter.tres
+Completed load for: 'res://resources/recipes/craft_air_filter.tres' remapped 'res://resources/recipes/craft_air_filter.tres' at thread -1
+Loading resource: res://resources/recipes/craft_battery.tres remapped: res://resources/recipes/craft_battery.tres
+Completed load for: 'res://resources/recipes/craft_battery.tres' remapped 'res://resources/recipes/craft_battery.tres' at thread -1
+Loading resource: res://resources/recipes/craft_medkit_pro.tres remapped: res://resources/recipes/craft_medkit_pro.tres
+Completed load for: 'res://resources/recipes/craft_medkit_pro.tres' remapped 'res://resources/recipes/craft_medkit_pro.tres' at thread -1
+Loading resource: res://resources/recipes/craft_double_water_filter.tres remapped: res://resources/recipes/craft_double_water_filter.tres
+Completed load for: 'res://resources/recipes/craft_double_water_filter.tres' remapped 'res://resources/recipes/craft_double_water_filter.tres' at thread -1
+Completed load for: 'res://resources/item_catalog.tres' remapped 'res://resources/item_catalog.tres' at thread -1
+PASS: P0: شروع بدون سیو بدون کرش (بازیکن موجود)
+PASS: P0: بدون سیو، بازیکن در پوزیشن پیش‌فرض
+PASS: P0: نود NavigationRegion3D در صحنه هست
+PASS: P0: navigation_mesh روی منطقه ست شده (نه null)
+PASS: P0: navmesh هر 394 رأس را دارد
+PASS: P0: navmesh هر 582 مثلث را دارد
+PASS: P0: مانع ObstacleB1 در صحنه هست
+PASS: P0: ObstacleB1 محوطه را با vertices تعریف کرده (نه shape ناموجود)
+PASS: P0: ObstacleB1 علامت‌های affect + carve را دارد
+PASS: P0: ObstacleB1 ارتفاع ساختمان را دارد (12.0 متر)
+PASS: P0: مرکز محوطه‌ی ObstacleB1 از navmesh کارو شده
+PASS: P0: مانع ObstacleB2 در صحنه هست
+PASS: P0: ObstacleB2 محوطه را با vertices تعریف کرده (نه shape ناموجود)
+PASS: P0: ObstacleB2 علامت‌های affect + carve را دارد
+PASS: P0: ObstacleB2 ارتفاع ساختمان را دارد (8.0 متر)
+PASS: P0: مرکز محوطه‌ی ObstacleB2 از navmesh کارو شده
+PASS: P0: مانع ObstacleB3 در صحنه هست
+PASS: P0: ObstacleB3 محوطه را با vertices تعریف کرده (نه shape ناموجود)
+PASS: P0: ObstacleB3 علامت‌های affect + carve را دارد
+PASS: P0: ObstacleB3 ارتفاع ساختمان را دارد (8.0 متر)
+PASS: P0: مرکز محوطه‌ی ObstacleB3 از navmesh کارو شده
+PASS: P0: مانع ObstacleB4 در صحنه هست
+PASS: P0: ObstacleB4 محوطه را با vertices تعریف کرده (نه shape ناموجود)
+PASS: P0: ObstacleB4 علامت‌های affect + carve را دارد
+PASS: P0: ObstacleB4 ارتفاع ساختمان را دارد (10.0 متر)
+PASS: P0: مرکز محوطه‌ی ObstacleB4 از navmesh کارو شده
+PASS: P0: مانع ObstacleB5 در صحنه هست
+PASS: P0: ObstacleB5 محوطه را با vertices تعریف کرده (نه shape ناموجود)
+PASS: P0: ObstacleB5 علامت‌های affect + carve را دارد
+PASS: P0: ObstacleB5 ارتفاع ساختمان را دارد (4.5 متر)
+PASS: P0: مرکز محوطه‌ی ObstacleB5 از navmesh کارو شده
+PASS: P0: مانع ObstacleB6 در صحنه هست
+PASS: P0: ObstacleB6 محوطه را با vertices تعریف کرده (نه shape ناموجود)
+PASS: P0: ObstacleB6 علامت‌های affect + carve را دارد
+PASS: P0: ObstacleB6 ارتفاع ساختمان را دارد (4.5 متر)
+PASS: P0: مرکز محوطه‌ی ObstacleB6 از navmesh کارو شده
+PASS: P0: مانع ObstacleW1 در صحنه هست
+PASS: P0: ObstacleW1 محوطه را با vertices تعریف کرده (نه shape ناموجود)
+PASS: P0: ObstacleW1 علامت‌های affect + carve را دارد
+PASS: P0: ObstacleW1 ارتفاع ساختمان را دارد (5.0 متر)
+PASS: P0: مرکز محوطه‌ی ObstacleW1 از navmesh کارو شده
+PASS: P0: مانع ObstacleW2 در صحنه هست
+PASS: P0: ObstacleW2 محوطه را با vertices تعریف کرده (نه shape ناموجود)
+PASS: P0: ObstacleW2 علامت‌های affect + carve را دارد
+PASS: P0: ObstacleW2 ارتفاع ساختمان را دارد (5.0 متر)
+PASS: P0: مرکز محوطه‌ی ObstacleW2 از navmesh کارو شده
+PASS: P0: مانع ObstacleC1 در صحنه هست
+PASS: P0: ObstacleC1 محوطه را با vertices تعریف کرده (نه shape ناموجود)
+PASS: P0: ObstacleC1 علامت‌های affect + carve را دارد
+PASS: P0: ObstacleC1 ارتفاع ساختمان را دارد (4.5 متر)
+PASS: P0: مرکز محوطه‌ی ObstacleC1 از navmesh کارو شده
+PASS: P0: مانع ObstacleC2 در صحنه هست
+PASS: P0: ObstacleC2 محوطه را با vertices تعریف کرده (نه shape ناموجود)
+PASS: P0: ObstacleC2 علامت‌های affect + carve را دارد
+PASS: P0: ObstacleC2 ارتفاع ساختمان را دارد (4.5 متر)
+PASS: P0: مرکز محوطه‌ی ObstacleC2 از navmesh کارو شده
+PASS: P0: مانع ObstacleC3 در صحنه هست
+PASS: P0: ObstacleC3 محوطه را با vertices تعریف کرده (نه shape ناموجود)
+PASS: P0: ObstacleC3 علامت‌های affect + carve را دارد
+PASS: P0: ObstacleC3 ارتفاع ساختمان را دارد (4.5 متر)
+PASS: P0: مرکز محوطه‌ی ObstacleC3 از navmesh کارو شده
+PASS: P0: مانع ObstacleShed در صحنه هست
+PASS: P0: ObstacleShed محوطه را با vertices تعریف کرده (نه shape ناموجود)
+PASS: P0: ObstacleShed علامت‌های affect + carve را دارد
+PASS: P0: ObstacleShed ارتفاع ساختمان را دارد (4.5 متر)
+PASS: P0: مرکز محوطه‌ی ObstacleShed از navmesh کارو شده
+PASS: P0: مانع ObstacleShop در صحنه هست
+PASS: P0: ObstacleShop محوطه را با vertices تعریف کرده (نه shape ناموجود)
+PASS: P0: ObstacleShop علامت‌های affect + carve را دارد
+PASS: P0: ObstacleShop ارتفاع ساختمان را دارد (4.5 متر)
+PASS: P0: مرکز محوطه‌ی ObstacleShop از navmesh کارو شده
+PASS: P0: نقطه‌ی حیاتی (0، 7) هنوز روی navmesh است
+PASS: P0: نقطه‌ی حیاتی (26، 0) هنوز روی navmesh است
+PASS: P0: نقطه‌ی حیاتی (-2، -12) هنوز روی navmesh است
+PASS: P0: نقطه‌ی حیاتی (0، -12) هنوز روی navmesh است
+PASS: P0: نقطه‌ی حیاتی (-12، 0) هنوز روی navmesh است
+PASS: P0: نقطه‌ی حیاتی (0، 12) هنوز روی navmesh است
+PASS: P0: نقطه‌ی حیاتی (12، 0) هنوز روی navmesh است
+PASS: P0: نود دشمن در صحنه هست
+PASS: P0: دشمن روی navmesh حرکت کرد (1.83 متر در 60 فریم فیزیک)
+PASS: P0: نود NavigationAgent3D دشمن در دسترس است
+PASS: P0: navigation map دشمن معتبر است
+PASS: P0: مسیر ناوبری بین دو طرف ساختمان پیدا شد (18 نقطه)
+PASS: P0: مسیر دور ساختمان می‌چرخد (37.7 متر > خط مستقیم 26.0 متر)
+PASS: P0: هیچ نقطه‌ی مسیر داخل محوطه‌ی ساختمان‌ها نیست (کارو واقعی است)
+PASS: P0: پای گشت 0→1 بعد از کارو متصل است (11 نقطه)
+PASS: P0: پای گشت 1→2 بعد از کارو متصل است (10 نقطه)
+PASS: P0: پای گشت 2→3 بعد از کارو متصل است (9 نقطه)
+PASS: P0: پای گشت 3→0 بعد از کارو متصل است (18 نقطه)
+PASS: P1: سیو دستی (save_now / F5) موفق
+PASS: P2: فایل سیو روی disk وجود دارد
+Loading resource: user://saves/save_slot_1.tres remapped: user://saves/save_slot_1.tres
+Completed load for: 'user://saves/save_slot_1.tres' remapped 'user://saves/save_slot_1.tres' at thread -1
+PASS: P2: لود دستی (load_now / F8) موفق
+PASS: P2: لود، پوزیشن بازیکن را بازیابی می‌کند
+PASS: P2: لود، yaw بازیکن را بازیابی می‌کند
+PASS: P2: لود، pitch دوربین را بازیابی می‌کند
+PASS: P2: لود، آمار بقا را بازیابی می‌کند
+Loading resource: res://levels/test_level.tscn remapped: res://levels/test_level.tscn
+Loading resource: res://entities/player/player.tscn remapped: res://entities/player/player.tscn
+Completed load for: 'res://entities/player/player.tscn' remapped 'res://entities/player/player.tscn' at thread -1
+Loading resource: res://ui/hud/hud.tscn remapped: res://ui/hud/hud.tscn
+Completed load for: 'res://ui/hud/hud.tscn' remapped 'res://ui/hud/hud.tscn' at thread -1
+Loading resource: res://entities/interactables/water_bottle.tscn remapped: res://entities/interactables/water_bottle.tscn
+Completed load for: 'res://entities/interactables/water_bottle.tscn' remapped 'res://entities/interactables/water_bottle.tscn' at thread -1
+Loading resource: res://entities/interactables/canned_food.tscn remapped: res://entities/interactables/canned_food.tscn
+Completed load for: 'res://entities/interactables/canned_food.tscn' remapped 'res://entities/interactables/canned_food.tscn' at thread -1
+Loading resource: res://entities/interactables/medkit.tscn remapped: res://entities/interactables/medkit.tscn
+Completed load for: 'res://entities/interactables/medkit.tscn' remapped 'res://entities/interactables/medkit.tscn' at thread -1
+Loading resource: res://entities/interactables/scrap_metal.tscn remapped: res://entities/interactables/scrap_metal.tscn
+Completed load for: 'res://entities/interactables/scrap_metal.tscn' remapped 'res://entities/interactables/scrap_metal.tscn' at thread -1
+Loading resource: res://entities/interactables/power_switch.tscn remapped: res://entities/interactables/power_switch.tscn
+Completed load for: 'res://entities/interactables/power_switch.tscn' remapped 'res://entities/interactables/power_switch.tscn' at thread -1
+Loading resource: res://entities/enemy/enemy.tscn remapped: res://entities/enemy/enemy.tscn
+Completed load for: 'res://entities/enemy/enemy.tscn' remapped 'res://entities/enemy/enemy.tscn' at thread -1
+Loading resource: res://ui/inventory/inventory_ui.tscn remapped: res://ui/inventory/inventory_ui.tscn
+Completed load for: 'res://ui/inventory/inventory_ui.tscn' remapped 'res://ui/inventory/inventory_ui.tscn' at thread -1
+Loading resource: res://entities/enemy/enemy_stalker.tscn remapped: res://entities/enemy/enemy_stalker.tscn
+Completed load for: 'res://entities/enemy/enemy_stalker.tscn' remapped 'res://entities/enemy/enemy_stalker.tscn' at thread -1
+Loading resource: res://entities/enemy/enemy_brute.tscn remapped: res://entities/enemy/enemy_brute.tscn
+Completed load for: 'res://entities/enemy/enemy_brute.tscn' remapped 'res://entities/enemy/enemy_brute.tscn' at thread -1
+Loading resource: res://entities/world/safe_shop.tscn remapped: res://entities/world/safe_shop.tscn
+Loading resource: res://entities/interactables/rest_spot.tscn remapped: res://entities/interactables/rest_spot.tscn
+Completed load for: 'res://entities/interactables/rest_spot.tscn' remapped 'res://entities/interactables/rest_spot.tscn' at thread -1
+Completed load for: 'res://entities/world/safe_shop.tscn' remapped 'res://entities/world/safe_shop.tscn' at thread -1
+Loading resource: res://entities/interactables/workbench.tscn remapped: res://entities/interactables/workbench.tscn
+Completed load for: 'res://entities/interactables/workbench.tscn' remapped 'res://entities/interactables/workbench.tscn' at thread -1
+Loading resource: res://entities/interactables/radio_beacon.tscn remapped: res://entities/interactables/radio_beacon.tscn
+Completed load for: 'res://entities/interactables/radio_beacon.tscn' remapped 'res://entities/interactables/radio_beacon.tscn' at thread -1
+Loading resource: res://entities/decor/broken_sign.tscn remapped: res://entities/decor/broken_sign.tscn
+Completed load for: 'res://entities/decor/broken_sign.tscn' remapped 'res://entities/decor/broken_sign.tscn' at thread -1
+Loading resource: res://entities/decor/bench.tscn remapped: res://entities/decor/bench.tscn
+Completed load for: 'res://entities/decor/bench.tscn' remapped 'res://entities/decor/bench.tscn' at thread -1
+Loading resource: res://entities/decor/trash_bin.tscn remapped: res://entities/decor/trash_bin.tscn
+Completed load for: 'res://entities/decor/trash_bin.tscn' remapped 'res://entities/decor/trash_bin.tscn' at thread -1
+Loading resource: res://entities/decor/rusted_bicycle.tscn remapped: res://entities/decor/rusted_bicycle.tscn
+Completed load for: 'res://entities/decor/rusted_bicycle.tscn' remapped 'res://entities/decor/rusted_bicycle.tscn' at thread -1
+Loading resource: res://entities/decor/torn_tent.tscn remapped: res://entities/decor/torn_tent.tscn
+Completed load for: 'res://entities/decor/torn_tent.tscn' remapped 'res://entities/decor/torn_tent.tscn' at thread -1
+Completed load for: 'res://levels/test_level.tscn' remapped 'res://levels/test_level.tscn' at thread -1
+Loading resource: user://saves/save_slot_1.tres remapped: user://saves/save_slot_1.tres
+Completed load for: 'user://saves/save_slot_1.tres' remapped 'user://saves/save_slot_1.tres' at thread -1
+PASS: P4: restart + auto-load: پوزیشن روی بازیکن جدید اعمال شد
+PASS: P4: restart + auto-load: پوزیشن از سیو ادامه می‌یابد
+PASS: P4: restart + auto-load: آمار از سیو ادامه می‌یابد
+Loading resource: user://saves/save_slot_1.tres remapped: user://saves/save_slot_1.tres
+Completed load for: 'user://saves/save_slot_1.tres' remapped 'user://saves/save_slot_1.tres' at thread -1
+Loading resource: user://saves/save_slot_1.tres remapped: user://saves/save_slot_1.tres
+Completed load for: 'user://saves/save_slot_1.tres' remapped 'user://saves/save_slot_1.tres' at thread -1
+Loading resource: user://saves/save_slot_1.tres remapped: user://saves/save_slot_1.tres
+Completed load for: 'user://saves/save_slot_1.tres' remapped 'user://saves/save_slot_1.tres' at thread -1
+Loading resource: user://saves/save_slot_1.tres remapped: user://saves/save_slot_1.tres
+Completed load for: 'user://saves/save_slot_1.tres' remapped 'user://saves/save_slot_1.tres' at thread -1
+Loading resource: user://saves/save_slot_1.tres remapped: user://saves/save_slot_1.tres
+Completed load for: 'user://saves/save_slot_1.tres' remapped 'user://saves/save_slot_1.tres' at thread -1
+Loading resource: user://saves/save_slot_1.tres remapped: user://saves/save_slot_1.tres
+Completed load for: 'user://saves/save_slot_1.tres' remapped 'user://saves/save_slot_1.tres' at thread -1
+Loading resource: user://saves/save_slot_1.tres remapped: user://saves/save_slot_1.tres
+Completed load for: 'user://saves/save_slot_1.tres' remapped 'user://saves/save_slot_1.tres' at thread -1
+Loading resource: user://saves/save_slot_1.tres remapped: user://saves/save_slot_1.tres
+Completed load for: 'user://saves/save_slot_1.tres' remapped 'user://saves/save_slot_1.tres' at thread -1
+Loading resource: user://saves/save_slot_1.tres remapped: user://saves/save_slot_1.tres
+Completed load for: 'user://saves/save_slot_1.tres' remapped 'user://saves/save_slot_1.tres' at thread -1
+Loading resource: user://saves/save_slot_1.tres remapped: user://saves/save_slot_1.tres
+Completed load for: 'user://saves/save_slot_1.tres' remapped 'user://saves/save_slot_1.tres' at thread -1
+Loading resource: user://saves/save_slot_1.tres remapped: user://saves/save_slot_1.tres
+Completed load for: 'user://saves/save_slot_1.tres' remapped 'user://saves/save_slot_1.tres' at thread -1
+Loading resource: user://saves/save_slot_1.tres remapped: user://saves/save_slot_1.tres
+Completed load for: 'user://saves/save_slot_1.tres' remapped 'user://saves/save_slot_1.tres' at thread -1
+Loading resource: user://saves/save_slot_1.tres remapped: user://saves/save_slot_1.tres
+Completed load for: 'user://saves/save_slot_1.tres' remapped 'user://saves/save_slot_1.tres' at thread -1
+Loading resource: user://saves/save_slot_1.tres remapped: user://saves/save_slot_1.tres
+Completed load for: 'user://saves/save_slot_1.tres' remapped 'user://saves/save_slot_1.tres' at thread -1
+Loading resource: user://saves/save_slot_1.tres remapped: user://saves/save_slot_1.tres
+Completed load for: 'user://saves/save_slot_1.tres' remapped 'user://saves/save_slot_1.tres' at thread -1
+Loading resource: user://saves/save_slot_1.tres remapped: user://saves/save_slot_1.tres
+Completed load for: 'user://saves/save_slot_1.tres' remapped 'user://saves/save_slot_1.tres' at thread -1
+Loading resource: user://saves/save_slot_1.tres remapped: user://saves/save_slot_1.tres
+Completed load for: 'user://saves/save_slot_1.tres' remapped 'user://saves/save_slot_1.tres' at thread -1
+Loading resource: user://saves/save_slot_1.tres remapped: user://saves/save_slot_1.tres
+Completed load for: 'user://saves/save_slot_1.tres' remapped 'user://saves/save_slot_1.tres' at thread -1
+PASS: P6: auto-save (Timer) وضعیت جدید را ذخیره کرد
+PASS: P0: همه‌ی 101 چک اجرا شد (اجراشده: 101)
+ALL TESTS PASSED (save/load)
+XR: Clearing primary interface
+XR: Removed interface "Native mobile"
+XR: Removed interface "OpenXR"

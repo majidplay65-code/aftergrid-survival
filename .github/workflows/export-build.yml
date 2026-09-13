@@ -1,0 +1,67 @@
+name: Manual Linux export
+
+on:
+  workflow_dispatch:
+
+jobs:
+  export-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Download Godot 4.7.2
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 \
+            -o /tmp/godot.zip \
+            https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          echo "/tmp/godot/Godot_v4.7.2-stable_linux.x86_64" >> "$GITHUB_PATH"
+          /tmp/godot/Godot_v4.7.2-stable_linux.x86_64 --version
+
+      - name: Install matching export templates
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.local/share/godot/export_templates/4.7.2.stable"
+          curl --fail --location --retry 3 \
+            -o /tmp/templates.tpz \
+            https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_export_templates.tpz
+          unzip -q /tmp/templates.tpz -d "$HOME/.local/share/godot/export_templates/4.7.2.stable"
+          mv "$HOME/.local/share/godot/export_templates/4.7.2.stable/templates/"* \
+            "$HOME/.local/share/godot/export_templates/4.7.2.stable/"
+          rmdir "$HOME/.local/share/godot/export_templates/4.7.2.stable/templates"
+
+      - name: Export Linux build
+        run: |
+          mkdir -p build
+          godot --headless --path . --export-release "Linux" build/aftergrid.x86_64
+
+      - name: Smoke-test exported Linux binary
+        shell: bash
+        run: |
+          set +e
+          timeout --signal=TERM 15s build/aftergrid.x86_64 \
+            --headless --audio-driver Dummy --verbose > build/smoke-test.log 2>&1
+          rc=$?
+          cat build/smoke-test.log
+          # The client intentionally keeps running at the main menu, so timeout
+          # 124 is the expected non-crash termination for this smoke test.
+          if [[ "$rc" -ne 0 && "$rc" -ne 124 ]]; then
+            echo "Exported binary exited unexpectedly with code $rc" >&2
+            exit "$rc"
+          fi
+          grep -q "main_menu" build/smoke-test.log
+          if grep -Eq "ERROR|SCRIPT ERROR|Parse Error|Invalid" build/smoke-test.log; then
+            echo "Exported binary emitted a startup error" >&2
+            exit 1
+          fi
+
+      - name: Upload Linux build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aftergrid-linux-x86_64
+          path: build/aftergrid.x86_64
+          if-no-files-found: error
