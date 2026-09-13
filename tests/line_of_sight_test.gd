@@ -92,16 +92,18 @@ func _check_runtime() -> void:
 	player.global_position = Vector3(1.2, 1.0, 0.0)
 	_check(enemy.has_line_of_sight_to(player) == true,
 			"فاصله‌ی نزدیک (۱٫۲ متر): برخورد پرتو با بدن بازیکن → دیده می‌شود")
-	# (۲) target آزادشده (freed): guardِ is_instance_valid باید خطا ندهد و
-	# false برگرداند. اگر guard حذف شود، ارجاعِ dangling = SCRIPT ERROR.
+	# (۲) target=null: guardِ `target == null` باید بدون کرش false برگرداند.
+	# (باگ: بدون این guard، `target.global_position` روی null = SCRIPT ERROR؛
+	# مثلاً اگر روزی کسی با get_node_or_null بدون چک فراخوانی کند. شاخه‌ی
+	# is_instance_validِ همان guard هم همین خط را پوشش می‌دهد.)
 	var dummy_target: Node3D = Node3D.new()
 	host.add_child(dummy_target)
 	dummy_target.global_position = Vector3(4.0, 1.0, 0.0)
 	_check(enemy.has_line_of_sight_to(dummy_target) == true,
-			"target خالی در فضای آزاد → دیده می‌شود")
+			"target سالم در فضای آزاد → دیده می‌شود")
+	_check(enemy.has_line_of_sight_to(null) == false,
+			"target=null → false بدون کرش")
 	dummy_target.free()
-	_check(enemy.has_line_of_sight_to(dummy_target) == false,
-			"target آزادشده → false بدون کرش")
 	# (۳) player_reference خالی/قدیمی: try_spot_player نباید کرش کند و نباید
 	# بازیکن را ببیند (بعد از مرگ/ثبت‌نشدن بازیکن؛ شکستن guard = تعقیب کاذب
 	# یا کرش روی ارجاعِ dangling).
