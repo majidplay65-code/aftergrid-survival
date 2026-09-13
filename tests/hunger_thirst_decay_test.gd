@@ -42,7 +42,7 @@ func _run() -> void:
 		return
 	_check(absf(stats.hunger - 100.0) < 0.001 and absf(stats.thirst - 100.0) < 0.001,
 			"مقادیر اولیه ۱۰۰/۱۰۰ است")
-	# () گذار از مثبت به صفر: دقیقاً یک آسیب + مقدار clamp روی ۰
+	# (۱) گذار از مثبت به صفر: دقیقاً یک آسیب + مقدار clamp روی ۰
 	stats.decrease_hunger(100.0)
 	_check(absf(stats.hunger - 0.0) < 0.001, "Edge: گرسنگی روی ۰ clamp می‌شود (منفی نمی‌شود)")
 	_check(absf(stats.health - 99.0) < 0.001, "Edge: گذار به صفر → ۱٫۰ آسیب، یک‌بار")
