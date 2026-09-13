@@ -1,14 +1,16 @@
 ## InventoryUI
 ## رابط کاربری اینونتوری و ساخت (فاز ۶ — لایه‌ی UI).
 ## پنل با کلید Tab باز/بسته می‌شود: فهرست اینونتوری + دکمه‌های ساخت (فعال/غیرفعال).
-## رابط در کد ساخته می‌شود (پنل/برچسب/دکمه) تا .tscn حداقلی بماند و قابل تست headless باشد.
+## رابط در کد ساخته می‌شود (پنل/برچسب/دکمه) تا .tscn حداقل بماند و قابل تست headless باشد.
 ## ارتباط با سیستم‌ها فقط از autoloadهای InventoryManager/CraftingSystem و EventBus.
+## پولیش UI: نوار پیشرفت ساخت (تایمینگ UI-side از RecipeData.craft_time؛ پایان با سیگنال واقعی
+## item_crafted/craft_failed) و تولتیپ آیتم (hover + به‌روزرسانی محتوا با سیگنال واقعی inventory_changed).
 class_name InventoryUI
 extends CanvasLayer
 
 const INVENTORY_ACTION: StringName = &"inventory"
 
-## true = پنل باز و ماوس رها.
+## true = پنل باز و موس رها.
 var is_open: bool = false
 
 var background: Control
@@ -16,6 +18,18 @@ var panel: PanelContainer
 var inventory_list: VBoxContainer
 var crafting_list: VBoxContainer
 var recipe_buttons: Dictionary[StringName, Button] = {}
+
+## نوار پیشرفت ساخت (پولیش UI).
+var craft_progress_row: HBoxContainer
+var craft_progress_bar: ProgressBar
+var is_crafting: bool = false
+## tween فعالِ پیشرفت ساخت (برای توقف مطمئن هنگام تکمیل/لغو — بدون callback معلق).
+var _craft_tween: Tween
+
+## تولتیپ آیتم (پولیش UI).
+var item_tooltip: Label
+## آیتمی که موس روی ردیفش است (&"" = هیچ) — برای به‌روزرسانی تولتیپ با inventory_changed.
+var _hovered_item_id: StringName = &""
 
 
 func _ready() -> void:
@@ -36,7 +50,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		set_open(not is_open)
 
 
-## باز/بسته‌کردن پنل + مدیریت ماوس (باز = رها، بسته = قفل برای نگاه دوربین).
+## باز/بسته‌کردن پنل + مدیریت موس (باز = رها، بسته = قفل برای نگاه دوربین).
 ## پس‌زمینه‌ی تمام‌صفحه هنگام باز بودن کلیک‌ها را می‌بلعد تا به بازیکن/دنیا نرسند.
 func set_open(open: bool) -> void:
 	is_open = open
@@ -51,6 +65,7 @@ func set_open(open: bool) -> void:
 func refresh() -> void:
 	_refresh_inventory()
 	_refresh_crafting()
+	_sync_tooltip_with_inventory()
 
 
 ## تلاش برای ساخت یک دستور روی اینونتوریِ واقعی autoload.
@@ -98,12 +113,38 @@ func _build_ui() -> void:
 	inventory_list.add_theme_constant_override("separation", 2)
 	content.add_child(inventory_list)
 
+	# تولتیپ آیتم (پولیش UI) — زیر فهرست، در ابتدا پنهان.
+	item_tooltip = Label.new()
+	item_tooltip.name = "ItemTooltip"
+	item_tooltip.visible = false
+	item_tooltip.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	item_tooltip.add_theme_font_size_override("font_size", 12)
+	item_tooltip.add_theme_color_override("font_color", Color(0.7, 0.75, 0.85))
+	content.add_child(item_tooltip)
+
 	var separator: HSeparator = HSeparator.new()
 	content.add_child(separator)
 
 	var craft_title: Label = Label.new()
 	craft_title.text = "ساخت"
 	content.add_child(craft_title)
+
+	# نوار پیشرفت ساخت (پولیش UI) — بین عنوان «ساخت» و دکمه‌ها، در ابتدا پنهان.
+	craft_progress_row = HBoxContainer.new()
+	craft_progress_row.name = "CraftProgressRow"
+	craft_progress_row.visible = false
+	craft_progress_row.add_theme_constant_override("separation", 8)
+	content.add_child(craft_progress_row)
+
+	var progress_label: Label = Label.new()
+	progress_label.text = "در حال ساخت…"
+	craft_progress_row.add_child(progress_label)
+
+	craft_progress_bar = ProgressBar.new()
+	craft_progress_bar.name = "CraftProgressBar"
+	craft_progress_bar.custom_minimum_size = Vector2(160.0, 12.0)
+	craft_progress_bar.min_value = 0.0
+	craft_progress_row.add_child(craft_progress_bar)
 
 	crafting_list = VBoxContainer.new()
 	crafting_list.add_theme_constant_override("separation", 2)
@@ -128,18 +169,26 @@ func _refresh_inventory() -> void:
 			item = InventoryManager.catalog.get_item(item_id)
 		var label: Label = Label.new()
 		label.text = "%s ×%d" % [_item_name(item_id), int(items[item_id])]
-		# قراضه و غیرمصرفی‌ها فقط Label می‌مانند تا تست UI اولین فرزند را Label ببیند.
+		# مصرفی‌ها HBox(Label + Button) می‌شوند؛ غیرمصرفی‌ها فقط Label.
+		# (تست‌های موجود ساختار «اولین فرزند Label» را انتظار دارند — حفظ شد.)
+		var row: Control = null
 		if item != null and item.is_consumable:
-			var row: HBoxContainer = HBoxContainer.new()
-			row.add_child(label)
+			var box: HBoxContainer = HBoxContainer.new()
+			box.add_child(label)
 			var use_btn: Button = Button.new()
 			use_btn.text = "مصرف"
 			use_btn.focus_mode = Control.FOCUS_NONE
 			use_btn.pressed.connect(_on_use_pressed.bind(item_id))
-			row.add_child(use_btn)
-			inventory_list.add_child(row)
+			box.add_child(use_btn)
+			row = box
 		else:
-			inventory_list.add_child(label)
+			row = label
+		# تولتیپ hover (پولیش UI): ردیف موس را دریافت می‌کند و با ورود/خروج موس
+		# سیگنال‌های واقعی built-in، تولتیپ نمایش/پنهان می‌شود (بدون polling).
+		row.mouse_filter = Control.MOUSE_FILTER_STOP
+		row.mouse_entered.connect(_on_row_hovered.bind(item_id))
+		row.mouse_exited.connect(_on_row_unhovered)
+		inventory_list.add_child(row)
 
 
 func _refresh_crafting() -> void:
@@ -152,14 +201,82 @@ func _refresh_crafting() -> void:
 		var button: Button = Button.new()
 		button.text = _recipe_label(recipe)
 		button.focus_mode = Control.FOCUS_NONE
-		button.disabled = not CraftingSystem.can_craft(recipe, InventoryManager.inventory)
+		# حین انیمیشن پیشرفت ساخت، دکمه‌ها قفل‌اند (ضد ساخت همزمان).
+		button.disabled = is_crafting or not CraftingSystem.can_craft(recipe, InventoryManager.inventory)
 		button.pressed.connect(_on_craft_pressed.bind(recipe))
 		crafting_list.add_child(button)
 		recipe_buttons[recipe.recipe_id] = button
 
 
-func _on_craft_pressed(recipe: RecipeData) -> void:
+## آغاز پیشرفت ساخت (پولیش UI): نوار ظاهر می‌شود و با tween (بدون polling) تا
+## craft_time واقعی دستور پیش می‌رود؛ سپس ساخت به autoload واقعی سپرده می‌شود.
+## پایان نوار با سیگنال واقعی item_crafted (موفقیت) یا craft_failed (شکست) اعلام می‌شود.
+func _start_craft_progress(recipe: RecipeData) -> void:
+	is_crafting = true
+	craft_progress_bar.max_value = maxf(recipe.craft_time, 0.001)
+	craft_progress_bar.value = 0.0
+	craft_progress_row.visible = true
+	# دکمه‌ها را قفل کن (بدون بازسازی — فقط حالت disabled).
+	for recipe_id in recipe_buttons:
+		var button: Button = recipe_buttons[recipe_id]
+		if button != null:
+			button.disabled = true
+
+	if recipe.craft_time <= 0.0:
+		# ساخت فوری: بدون انیمیشن، مستقیم اجرا.
+		_submit_pending_craft(recipe)
+		return
+
+	var tween: Tween = create_tween()
+	_craft_tween = tween
+	tween.tween_method(
+		_set_craft_progress.bind(recipe),
+		0.0,
+		recipe.craft_time,
+		recipe.craft_time
+	)
+	tween.tween_callback(_submit_pending_craft.bind(recipe))
+
+
+## به‌روزرسانی مقدار نوار (callback از tween — بدون _process).
+func _set_craft_progress(elapsed: float, recipe: RecipeData) -> void:
+	if is_crafting:
+		craft_progress_bar.value = elapsed
+
+
+## اجرای واقعی ساخت پس از پایان پیشرفت (همان مسیر موجود craft_recipe).
+func _submit_pending_craft(recipe: RecipeData) -> void:
 	craft_recipe(recipe)
+
+
+## پایان موفق: سیگنال واقعی item_crafted از CraftingSystem — نوار کامل و پنهان می‌شود.
+func _complete_craft_progress() -> void:
+	_kill_craft_tween()
+	is_crafting = false
+	craft_progress_bar.value = craft_progress_bar.max_value
+	craft_progress_row.visible = false
+	refresh()
+
+
+## توقف tween فعال پیشرفت ساخت (اگر باشد) — بدون خطا اگر tween نباشد.
+func _kill_craft_tween() -> void:
+	if _craft_tween != null and is_instance_valid(_craft_tween):
+		_craft_tween.kill()
+	_craft_tween = null
+
+
+## شکست: سیگنال واقعی craft_failed — نوار بی‌درنگ پنهان می‌شود (toast خطا موجود است).
+func _cancel_craft_progress() -> void:
+	_kill_craft_tween()
+	is_crafting = false
+	craft_progress_row.visible = false
+	refresh()
+
+
+func _on_craft_pressed(recipe: RecipeData) -> void:
+	if is_crafting:
+		return
+	_start_craft_progress(recipe)
 
 
 func _on_use_pressed(item_id: StringName) -> void:
@@ -168,14 +285,75 @@ func _on_use_pressed(item_id: StringName) -> void:
 
 func _on_inventory_changed() -> void:
 	refresh()
+	_sync_tooltip_with_inventory()
 
 
 func _on_item_crafted(recipe_id: StringName) -> void:
+	_complete_craft_progress()
 	EventBus.toast_requested.emit("ساخته شد: %s" % _recipe_name(recipe_id))
 
 
 func _on_craft_failed(_recipe_id: StringName, reason: String) -> void:
+	_cancel_craft_progress()
 	EventBus.toast_requested.emit("ساخت ناموفق: %s" % _failure_text(reason))
+
+
+## نمایش تولتیپ با ورود موس به ردیف آیتم (سیگنال built-in — بدون polling).
+func _on_row_hovered(item_id: StringName) -> void:
+	_hovered_item_id = item_id
+	_update_tooltip()
+
+
+## پنهان‌کردن تولتیپ با خروج موس (سیگنال built-in).
+func _on_row_unhovered() -> void:
+	_hovered_item_id = &""
+	_update_tooltip()
+
+
+## متن تولتیپ از داده‌ی واقعی کاتالوگ: «نام — توضیح (تعداد: N)».
+func _update_tooltip() -> void:
+	if item_tooltip == null:
+		return
+	if _hovered_item_id == &"":
+		item_tooltip.visible = false
+		item_tooltip.text = ""
+		return
+	var text: String = _tooltip_text(_hovered_item_id)
+	if text.is_empty():
+		item_tooltip.visible = false
+		item_tooltip.text = ""
+		return
+	item_tooltip.text = text
+	item_tooltip.visible = true
+
+
+## ساخت متن تولتیپ یک آیتم از کاتالوگ واقعی؛ اگر آیتم شناخته نشد "" (بدون تولتیپ).
+func _tooltip_text(item_id: StringName) -> String:
+	var count: int = 0
+	if InventoryManager.inventory != null:
+		count = int(InventoryManager.inventory.count_item(item_id))
+	var catalog: ItemCatalog = InventoryManager.catalog
+	if catalog != null:
+		var item: ItemData = catalog.get_item(item_id)
+		if item != null:
+			var text: String = item.item_name
+			if not item.description.is_empty():
+				text += " — %s" % item.description
+			text += " (تعداد: %d)" % count
+			return text
+	return ""
+
+
+## همگام‌سازی تولتیپ با سیگنال واقعی inventory_changed:
+## اگر آیتمِ زیر موس هنوز موجود است متن/تعداد به‌روز می‌شود، وگرنه تولتیپ پنهان می‌شود.
+func _sync_tooltip_with_inventory() -> void:
+	if _hovered_item_id == &"":
+		return
+	if InventoryManager.inventory != null and int(InventoryManager.inventory.count_item(_hovered_item_id)) > 0:
+		_update_tooltip()
+	else:
+		_hovered_item_id = &""
+		_update_tooltip()
 
 
 ## نام نمایشی یک آیتم از کاتالوگ واقعی؛ اگر نبود، شناسه به‌صورت متنی.

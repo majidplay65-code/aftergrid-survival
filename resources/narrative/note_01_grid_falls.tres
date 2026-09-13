@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="NarrativeNote" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/narrative/narrative_note.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+note_id = &"note_grid_falls"
+title = "روز سقوط شبکه"
+body = "چهارشنبه بود و پری‌سوئیچ‌ها یکی‌یکی خاموش شدند. مهندس‌ها گفتند شش ساعت دیگر برمی‌گردد. شش ساعت شد شش روز، شش روز شد این‌جا. صدای ژنراتور دفتر آمد تا شب دوم؛ بعد از آن فقط صدای باران روی سقف فلزی بود. اگر این برگه را پیدا کردی، یعنی تو هم مانده‌ای. اول آب را تأمین کن، بعد فکر کردن را."
+order_index = 1
+location_hint = "دفتر مخابرات — طبقه‌ی همکف، روی میز اپراتور"

@@ -1,6 +1,7 @@
 ## HUD
 ## رابط کاربری بازی Aftergrid.
-## نمایش آمار بقا (جان، استامینا، گرسنگی، تشنگی)، نشانه‌گیر، اعلان تعامل [E]، و پیام‌های آیتم‌ها.
+## نمایش آمار بقای (جان، استامینا، گرسنگی، تشنگی)، نشانگر، اعلام تعامل [E]، و پیام‌های آیتم‌ها.
+## پولیش UI: toast با fade-in/out، افکت رهاکردن آیتم (item_dropped)، و جهت‌نمای صدا (NoiseIndicator).
 class_name HUD
 extends CanvasLayer
 
@@ -21,6 +22,16 @@ var _pause_built: bool = false
 var night_label: Label
 var survive_panel: Panel
 
+## جهت‌نمای صدا (پولیش UI) — در کد ساخته می‌شود تا hud.tscn حداقل بماند (الگوی پروژه).
+var noise_indicator: NoiseIndicator
+
+## مدت نمایش toast قبل از شروع محو شدن (ثانیه).
+const TOAST_HOLD_SECONDS: float = 1.8
+## مدت fade-in ابتدای toast (ثانیه).
+const TOAST_FADE_IN_SECONDS: float = 0.2
+## مدت محو شدن پایانی toast (ثانیه).
+const TOAST_FADE_OUT_SECONDS: float = 0.5
+
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -28,16 +39,28 @@ func _ready() -> void:
 	game_over_panel.visible = false
 	_build_pause_menu()
 	_build_night_hud()
+	_build_noise_indicator()
 
-	# اتصال به سیگنال‌های اتوبوس رویداد سراسری
+	# اتصال به سیگنال‌های اوتوبوس رویداد سراسری
 	EventBus.player_stat_changed.connect(_on_player_stat_changed)
 	EventBus.interactable_focused.connect(_on_interactable_focused)
 	EventBus.interactable_unfocused.connect(_on_interactable_unfocused)
 	EventBus.item_picked_up.connect(_on_item_picked_up)
+	EventBus.item_dropped.connect(_on_item_dropped)
 	EventBus.player_died.connect(_on_player_died)
 	EventBus.toast_requested.connect(_on_toast_requested)
 	EventBus.time_of_day_changed.connect(_on_time_of_day_changed)
 	EventBus.night_survived.connect(_on_night_survived)
+
+
+## ساخت جهت‌نمای صدا به‌عنوان فرزند Root؛ خودش به EventBus.noise_emitted گوش می‌دهد.
+func _build_noise_indicator() -> void:
+	if noise_indicator != null and is_instance_valid(noise_indicator):
+		return
+	noise_indicator = NoiseIndicator.new()
+	noise_indicator.name = "NoiseIndicator"
+	var root_control: Control = $Root
+	root_control.add_child(noise_indicator)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -48,7 +71,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
-## باز/بسته‌کردن منوی توقف (ESC). برای تست headless هم قابل‌صدا زدن است.
+## باز/بسته‌کردن منوی توقف (ESC). برای تست headless هم قابل‌زدن است.
 func toggle_pause_menu() -> void:
 	if not _pause_built:
 		_build_pause_menu()
@@ -107,7 +130,7 @@ func _on_resume_pressed() -> void:
 func _on_menu_pressed() -> void:
 	if GameState.is_paused:
 		GameState.is_paused = false
-	SceneManager.go_to_main_menu()
+		SceneManager.go_to_main_menu()
 
 
 func _on_player_stat_changed(stat_name: StringName, current_value: float, max_value: float) -> void:
@@ -143,27 +166,46 @@ func _on_item_picked_up(item_id: StringName, amount: int) -> void:
 	_show_toast("+%d %s" % [amount, str(item_id).replace("_", " ")], Color(0.3, 1.0, 0.4))
 
 
+## افکت UI رهاکردن آیتم (پولیش UI): یک toast قرمز‌فام «-N آیتم» نمایش می‌دهد.
+## کاملاً event-driven از سیگنال واقعی EventBus.item_dropped.
+func _on_item_dropped(item_id: StringName, amount: int) -> void:
+	_show_toast("-%d %s" % [amount, str(item_id).replace("_", " ")], Color(1.0, 0.45, 0.35))
+
+
 func _on_toast_requested(message: String) -> void:
 	_show_toast(message, Color(0.6, 0.8, 1.0))
 
 
-## سیستم toast مشترک: نمایش یک برچسب کوتاه که بعد از ۲ ثانیه محو می‌شود.
+## سیستم toast مشترک: نمایش یک برچسب کوتاه با fade-in، مکث، و fade-out.
+## در حالت headless برچسب ساخته می‌شود (قابل‌تست با سیگنال واقعی) ولی tween صرفاً گرافیکی است؛
+## حذف برچسب در headless با SceneTreeTimer انجام می‌شود تا نشتی رخ ندهد.
 func _show_toast(text: String, color: Color) -> void:
-	# در حالت headless هیچ viewport/رندر وجود ندارد؛ ساخت tween/label بی‌فایده است و
-	# در تست‌های DoD (بدون گرافیک) نشت/خطا می‌سازد.
-	if DisplayServer.get_name() == "headless":
-		return
 	var label: Label = Label.new()
 	label.text = text
 	label.add_theme_font_size_override("font_size", 14)
 	label.add_theme_color_override("font_color", color)
 	notification_container.add_child(label)
 
-	# محو شدن خودکار بعد از ۲ ثانیه
+	if DisplayServer.get_name() == "headless":
+		# بدون رندر، tween معنا ندارد؛ حذف زمان‌بندی‌شده با تایمر درختِ صحنه.
+		var timer: SceneTreeTimer = get_tree().create_timer(
+			TOAST_HOLD_SECONDS + TOAST_FADE_OUT_SECONDS + 0.1
+		)
+		timer.timeout.connect(label.queue_free)
+		return
+
+	# fade-in → مکث → محو شدن → آزادسازی (بدون polling؛ همه با tween رویدادمحور)
+	label.modulate.a = 0.0
 	var tween: Tween = create_tween()
-	tween.tween_interval(1.8)
-	tween.tween_property(label, "modulate:a", 0.0, 0.5)
+	tween.tween_property(label, "modulate:a", 1.0, TOAST_FADE_IN_SECONDS)
+	tween.tween_interval(TOAST_HOLD_SECONDS)
+	tween.tween_property(label, "modulate:a", 0.0, TOAST_FADE_OUT_SECONDS)
 	tween.tween_callback(label.queue_free)
+
+
+## تعداد toastهای فعلی (برای تست headless — وضعیت همگام و قابل‌اتکا).
+func get_toast_count() -> int:
+	return notification_container.get_child_count()
 
 
 func _on_player_died() -> void:
@@ -174,7 +216,7 @@ func _on_player_died() -> void:
 func _on_restart_button_pressed() -> void:
 	if GameState.is_paused:
 		GameState.is_paused = false
-	SceneManager.reload_current_scene()
+		SceneManager.reload_current_scene()
 
 
 func _build_night_hud() -> void:

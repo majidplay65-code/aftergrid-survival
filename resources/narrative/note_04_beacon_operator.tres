@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="NarrativeNote" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/narrative/narrative_note.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+note_id = &"note_beacon_operator"
+title = "آخرین گزارش اپراتور رادیو"
+body = "بند شرقی را پیدا کردم. فرستنده هشت ساعت روشن ماند و بعد باتری تمام شد. قبل از خاموشی، سه بار این جمله را شنیدم: «ایستگاه کمک شمالی، پاسخ بده.» کسی پاسخ نداد. اما حداقل می‌دانیم صدای ما می‌رسد. باتری‌ها را نگه دار؛ شبی که ساکت باشی، همان شبی است که دیگر برنمی‌گردی."
+order_index = 4
+location_hint = "کارگاه صنعتی شرقی — کنار بیکن رادیو"

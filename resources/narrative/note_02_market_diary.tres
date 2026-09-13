@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="NarrativeNote" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/narrative/narrative_note.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+note_id = &"note_market_diary"
+title = "دفترچه‌ی فروشنده‌ی فروشگاه"
+body = "روز نهم. قفسه‌ها را دیشب خالی کردند؛ فقط کنسرو لوبیا ماند و من آن را نگه داشتم. آن‌ها شب‌ها به کوچه می‌آیند. صدای پاهای سنگین. اگر پشت غرفه قایم شوی و نفس نکشی، رد می‌شوند. کلید انبار را زیر جعبه‌ی ماست گذاشتم — برای هر کسی که بعد از من بیاید."
+order_index = 2
+location_hint = "فروشگاه محلی — داخل غرفه، کنار صندوق"
