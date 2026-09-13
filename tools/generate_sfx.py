@@ -206,6 +206,7 @@ def main() -> None:
     _write("ui_click.wav", ui_click())
     _write("hit.wav", hit())
     _write("pause_whoosh.wav", pause_whoosh())
+    _write("low_health_warn.wav", low_health_warn())
 
 
 if __name__ == "__main__":
