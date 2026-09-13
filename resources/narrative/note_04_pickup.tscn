@@ -1,0 +1,30 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://entities/interactables/item_pickup.gd" id="1_item"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_note04"]
+size = Vector3(0.35, 0.03, 0.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_note04"]
+size = Vector3(0.35, 0.03, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_note04"]
+albedo_color = Color(0.86, 0.8, 0.62, 1)
+roughness = 0.9
+
+[node name="NarrativeNote04" type="StaticBody3D"]
+script = ExtResource("1_item")
+item_id = &"narrative_note_beacon_operator"
+item_name = "یادداشت: آخرین گزارش اپراتور رادیو"
+item_category = 0
+is_consumable_on_pickup = false
+prompt_message = "خواندن یادداشت: آخرین گزارش اپراتور رادیو"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.015, 0)
+shape = SubResource("BoxShape3D_note04")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.015, 0)
+mesh = SubResource("BoxMesh_note04")
+surface_material_override/0 = SubResource("StandardMaterial3D_note04")

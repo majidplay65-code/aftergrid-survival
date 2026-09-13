@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="NarrativeNote" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/narrative/narrative_note.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+note_id = &"note_workshop_log"
+title = "دفتر کارگاه"
+body = "فلز قراضه را جدا نگه دار؛ فیلتر آب با دو تکه ساخته می‌شود و کیت کمک‌های اولیه با یک کنسرو و یک قراضه. اگر بتوانی روی میز بمیری و پنج دقیقه بی‌حرکت، صبح معطل نمانی. کاری که یاد گرفتم: هر چیزی که صدا می‌دهد، دعوت‌نامه است. آرام باش، دقیقه‌ها را بشمار."
+order_index = 3
+location_hint = "کارگاه پشت محله — روی میز ساخت"

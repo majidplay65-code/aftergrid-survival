@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="NarrativeNote" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/narrative/narrative_note.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+note_id = &"note_dawn_letter"
+title = "نامه‌ای برای صبح"
+body = "اگر این را می‌خوانی، شب را رد کردی. من چهل و دو شب رد کردم و این را در شب چهل‌ویکم نوشتم. دست‌هایت یاد می‌گیرند کی باید آرام باشند و چشم‌هایت یاد می‌گیرد تاریکی را بشمارد. چراغ‌قوه را برای راهِ واقعی نگه دار، نه برای ترس. صبح که آمد، راه شمالی را امتحان کن — و این بار فقط آبی که کافی است با خودت ببر."
+order_index = 5
+location_hint = "پناهگاه سقفی طبقه‌ی دوازدهم — زیر تخت چوبی"
