@@ -49,7 +49,7 @@ func interaction_sound_path(interactable: Node) -> String:
 	if interactable == null:
 		return ""
 	var script: Script = interactable.get_script()
-	if script != null and String(script.class_name) == "Door":
+	if script != null and String(script.get_global_name()) == "Door":
 		return DOOR_OPEN
 	return ""
 

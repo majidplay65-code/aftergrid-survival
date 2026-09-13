@@ -67,7 +67,7 @@ func _run() -> void:
 	if door == null:
 		return
 	var door_script: Script = door.get_script()
-	_check(door_script != null and String(door_script.class_name) == "Door",
+	_check(door_script != null and String(door_script.get_global_name()) == "Door",
 			"اسکریپت در از نظر class_name از نوع Door است")
 	_check(str(am.interaction_sound_path(door)) == DOOR_PATH, "نگاشت: تعامل با Door → صدای در")
 	var other: Node3D = Node3D.new()
