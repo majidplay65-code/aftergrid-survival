@@ -14,4 +14,8 @@ The CI workflow is deliberately manual-only (`workflow_dispatch`) because downlo
 
 The local Godot 4.7.2 validation export succeeded and produced a 71 MiB Linux binary. A real `gh workflow run export-build.yml --ref manus/perf-and-build-pipeline` dispatch was attempted after pushing this branch, but GitHub returned `404: workflow export-build.yml not found on the default branch`. GitHub only exposes a newly added workflow for dispatch after the workflow exists on the default branch, so no CI run or artifact link exists yet; the workflow remains unmerged as requested.
 
+## Exported-binary smoke test
+
+The previously exported 71 MiB `aftergrid.x86_64` was executed directly, not through the Editor, with `--headless --audio-driver Dummy --verbose`. The official [Godot 4.7 dedicated-server documentation](https://docs.godotengine.org/en/4.7/tutorials/export/exporting_for_dedicated_servers.html) states that an editor or debug/release export template can run with `--headless` on a machine without a GPU or display server. The real run stayed alive for the 15-second smoke timeout (exit 124 from `timeout`, not a process crash), and its verbose stdout showed the exported `res://ui/menus/main_menu.tscn` loading and completing. No `ERROR`, `SCRIPT ERROR`, `Parse Error`, or `Invalid` lines were present. The manual workflow now performs the same check after export and before artifact upload; timeout 124 is treated as expected because the client remains at the main menu.
+
 Godot's official 4.7 documentation states that command-line export requires a named preset in `export_presets.cfg` and a matching export template: [Exporting projects](https://docs.godotengine.org/en/4.7/tutorials/export/exporting_projects.html).

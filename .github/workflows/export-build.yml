@@ -39,6 +39,26 @@ jobs:
           mkdir -p build
           godot --headless --path . --export-release "Linux" build/aftergrid.x86_64
 
+      - name: Smoke-test exported Linux binary
+        shell: bash
+        run: |
+          set +e
+          timeout --signal=TERM 15s build/aftergrid.x86_64 \
+            --headless --audio-driver Dummy --verbose > build/smoke-test.log 2>&1
+          rc=$?
+          cat build/smoke-test.log
+          # The client intentionally keeps running at the main menu, so timeout
+          # 124 is the expected non-crash termination for this smoke test.
+          if [[ "$rc" -ne 0 && "$rc" -ne 124 ]]; then
+            echo "Exported binary exited unexpectedly with code $rc" >&2
+            exit "$rc"
+          fi
+          grep -q "main_menu" build/smoke-test.log
+          if grep -Eq "ERROR|SCRIPT ERROR|Parse Error|Invalid" build/smoke-test.log; then
+            echo "Exported binary emitted a startup error" >&2
+            exit 1
+          fi
+
       - name: Upload Linux build artifact
         uses: actions/upload-artifact@v4
         with:

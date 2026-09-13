@@ -17,6 +17,9 @@ const PICKUP_PATH: String = "res://entities/interactables/water_bottle.tscn"
 const ENEMY_STEPS: Array[int] = [10, 25, 50, 100]
 const FRAMES_PER_STEP: int = 300
 const PICKUP_CYCLES: int = 200
+const SOAK_ENEMY_COUNT: int = 50
+const SOAK_FRAMES: int = 5000
+const SOAK_SAMPLE_INTERVAL: int = 250
 const RESULTS_PATH: String = "res://stress_test_results.json"
 
 var level: Node = null
@@ -35,6 +38,9 @@ var baseline_physics_mean: float = 0.0
 var process_samples: Array[float] = []
 var physics_samples: Array[float] = []
 var fps_samples: Array[float] = []
+var soak_process_samples: Array[float] = []
+var soak_results: Array[Dictionary] = []
+var soak_frames: int = 0
 var enemy_results: Array[Dictionary] = []
 var pickup_result: Dictionary = {}
 
@@ -70,6 +76,10 @@ func _process(_delta: float) -> bool:
 	match phase:
 		"spawn_enemies":
 			_run_enemy_step()
+		"soak_prepare":
+			_run_soak_prepare()
+		"soak":
+			_run_soak()
 		"despawn_enemies":
 			_run_enemy_despawn()
 		"pickup_cycles":
@@ -108,10 +118,44 @@ func _run_enemy_step() -> void:
 	step_index += 1
 	frames_left = 0
 	if step_index >= ENEMY_STEPS.size():
+		var existing_enemies: Array[Node] = stress_enemies.get_children()
+		for enemy_index: int in range(SOAK_ENEMY_COUNT, existing_enemies.size()):
+			existing_enemies[enemy_index].queue_free()
+		phase = "soak_prepare"
+		frames_left = 0
+
+
+func _run_soak_prepare() -> void:
+	if frames_left < 3:
+		frames_left += 1
+		return
+	soak_frames = 0
+	soak_process_samples.clear()
+	soak_results.clear()
+	phase = "soak"
+	frames_left = 0
+
+
+func _run_soak() -> void:
+	if soak_frames >= SOAK_FRAMES:
 		for enemy: Node in stress_enemies.get_children():
 			enemy.queue_free()
 		phase = "despawn_enemies"
 		frames_left = 0
+		return
+	soak_frames += 1
+	var process_time: float = float(Performance.get_monitor(Performance.TIME_PROCESS))
+	soak_process_samples.append(process_time)
+	if soak_frames % SOAK_SAMPLE_INTERVAL == 0 or soak_frames == SOAK_FRAMES:
+		soak_results.append({
+			"frame": soak_frames,
+			"time_process_seconds": process_time,
+			"time_process_mean_seconds": _mean(soak_process_samples),
+			"node_count": get_node_count(),
+			"object_count": int(Performance.get_monitor(Performance.OBJECT_COUNT)),
+			"orphan_node_count": int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)),
+		})
+		print("soak_frame=", soak_frames, " process=", process_time, " nodes=", get_node_count(), " objects=", Performance.get_monitor(Performance.OBJECT_COUNT))
 
 
 func _run_enemy_despawn() -> void:
@@ -203,6 +247,12 @@ func _finish() -> void:
 		"baseline_node_count": baseline_node_count,
 		"enemy_despawn_node_count": enemy_despawn_node_count,
 		"enemy_despawn_suspected_node_leak": enemy_despawn_node_count != baseline_node_count,
+		"soak": {
+			"enemy_count": SOAK_ENEMY_COUNT,
+			"frames": SOAK_FRAMES,
+			"sample_interval": SOAK_SAMPLE_INTERVAL,
+			"samples": soak_results,
+		},
 		"frames_per_enemy_step": FRAMES_PER_STEP,
 		"enemy_steps": enemy_results,
 		"pickup_despawn": pickup_result,

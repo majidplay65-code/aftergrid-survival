@@ -36,3 +36,40 @@ godot --headless --path . -s res://tools/stress_test.gd
 The machine-readable output is `stress_test_results.json`; it is ignored by Git and is not part of the change. `gdparse tools/stress_test.gd` and `godot --headless --import --quit` completed successfully for this run.
 
 This was a CPU/headless sandbox run without a user GPU or interactive display. **مطمئن نیستم این عدد نماینده‌ی عملکرد واقعی روی دستگاه کاربر است**; especially FPS and render-related behavior should be rechecked on the target hardware with the normal renderer. The results are measurements only, not a claim that the observed thresholds identify a production defect.
+
+## Long soak test
+
+A continuous **5,000-frame** soak with **50 fixed stress enemies** completed under Godot 4.7.2 headless. Samples were recorded every 250 frames. The node count stayed at 1,316 for every sample after setup; orphan nodes stayed at 0. `OBJECT_COUNT` moved from 3,367 to 3,378 in small non-monotonic steps and then remained flat, while the rolling `TIME_PROCESS` mean stayed in the observed 0.00454–0.00873 second range rather than rising continuously. This run did **not** show the requested pattern of a continuously rising node/object count or a creeping process-time trend.
+
+| Soak frame | TIME_PROCESS sample | TIME_PROCESS rolling mean | Nodes | OBJECT_COUNT | Orphans |
+|---:|---:|---:|---:|---:|---:|
+| 250 | 0.000485 | 0.008730 | 1,316 | 3,367 | 0 |
+| 500 | 0.000288 | 0.004538 | 1,316 | 3,367 | 0 |
+| 750 | 0.016193 | 0.006154 | 1,317 | 3,374 | 0 |
+| 1,000 | 0.000252 | 0.004715 | 1,316 | 3,371 | 0 |
+| 1,250 | 0.019358 | 0.004829 | 1,316 | 3,371 | 0 |
+| 1,500 | 0.000289 | 0.005091 | 1,316 | 3,371 | 0 |
+| 1,750 | 0.016452 | 0.005624 | 1,316 | 3,377 | 0 |
+| 2,000 | 0.000510 | 0.005072 | 1,316 | 3,377 | 0 |
+| 2,250 | 0.016021 | 0.004924 | 1,316 | 3,377 | 0 |
+| 2,500 | 0.000310 | 0.005043 | 1,316 | 3,377 | 0 |
+| 2,750 | 0.015740 | 0.005286 | 1,316 | 3,377 | 0 |
+| 3,000 | 0.000293 | 0.004994 | 1,316 | 3,377 | 0 |
+| 3,250 | 0.016375 | 0.004854 | 1,316 | 3,377 | 0 |
+| 3,500 | 0.000251 | 0.004997 | 1,316 | 3,377 | 0 |
+| 3,750 | 0.000377 | 0.004684 | 1,316 | 3,377 | 0 |
+| 4,000 | 0.000310 | 0.004988 | 1,316 | 3,377 | 0 |
+| 4,250 | 0.017273 | 0.004842 | 1,316 | 3,377 | 0 |
+| 4,500 | 0.000304 | 0.005016 | 1,316 | 3,378 | 0 |
+| 4,750 | 0.000389 | 0.004788 | 1,316 | 3,378 | 0 |
+| 5,000 | 0.000427 | 0.005157 | 1,316 | 3,378 | 0 |
+
+The isolated one-node increase at frame 750 and the small object-count changes are not a continuous upward trend in this run. They are reported as observed values only; no production code was changed.
+
+## Save-file fuzzing
+
+A separate external script, `tools/save_fuzz_test.py`, performs random bit flips on a supplied generated save file, runs the exported binary headlessly, captures stdout/stderr, and restores the original bytes in a `finally` block. It does not read or modify `core/save/**`, and it does not attempt to repair parsing behavior; that ownership remains with the concurrent Arena work.
+
+No generated save file was available in this sandbox. The existing `tests/save_load_test.gd` was run only to produce one, but it emitted repeated real errors (`Invalid assignment of property or key 'global_position' ... on a base object of type 'Nil'` at `tests/save_load_test.gd:126`) and did not produce a save artifact before it was stopped. The fuzz script therefore returned `FUZZ_SKIPPED missing_save=...` rather than fabricating a result. This means the bit-flip launch outcome is **not claimed** for this run. The Arena remote-branch audit found no `tools/`, `tests/save_load*`, or `core/save/**` changes, so work continued without touching those paths.
+
+The long soak and the save-generation failure were both observed under a headless sandbox. **مطمئن نیستم این عدد نماینده‌ی عملکرد واقعی روی دستگاه کاربر است**; target-hardware validation remains necessary.
