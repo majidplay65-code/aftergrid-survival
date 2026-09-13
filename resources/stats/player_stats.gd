@@ -54,14 +54,18 @@ func regen_stamina(amount: float) -> void:
 
 
 func decrease_hunger(amount: float) -> void:
-	hunger -= amount
-	if hunger <= 0.0:
+	# clamp تا مقدار منفی نشود + آسیب فقط یک‌بار در لحظه‌ی رسیدن به صفر
+	# (نه هر فریم که صفر است — caller، _physics_process بازیکن، هر فریم صدا می‌زند).
+	var was_positive: bool = hunger > 0.0
+	hunger = clampf(hunger - amount, 0.0, max_hunger)
+	if was_positive and hunger <= 0.0:
 		take_damage(1.0)
 
 
 func decrease_thirst(amount: float) -> void:
-	thirst -= amount
-	if thirst <= 0.0:
+	var was_positive: bool = thirst > 0.0
+	thirst = clampf(thirst - amount, 0.0, max_thirst)
+	if was_positive and thirst <= 0.0:
 		take_damage(1.5)
 
 
