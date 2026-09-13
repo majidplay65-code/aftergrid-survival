@@ -105,13 +105,17 @@ func _check_runtime() -> void:
 	# (۳) player_reference خالی/قدیمی: try_spot_player نباید کرش کند و نباید
 	# بازیکن را ببیند (بعد از مرگ/ثبت‌نشدن بازیکن؛ شکستن guard = تعقیب کاذب
 	# یا کرش روی ارجاعِ dangling).
-	var saved_ref: Node3D = GameState.player_reference
-	GameState.player_reference = null
-	_check(enemy.try_spot_player() == false,
-			"try_spot_player با player_reference=null → false بدون کرش")
-	GameState.player_reference = saved_ref
-	_check(enemy.try_spot_player() == true,
-			"بازگردانی ارجاع → دوباره دیده می‌شود")
+	# نکته: در اسکریپت اصلی -s، شناسه‌های خامِ autoload (مثل GameState) کامپایل
+	# نمی‌شوند؛ پس طبق الگوی همه‌ی تست‌ها از رفرنس نود استفاده می‌کنیم.
+	var gs: Variant = root.get_node_or_null("GameState")
+	if gs != null:
+		var saved_ref: Node3D = gs.player_reference
+		gs.player_reference = null
+		_check(enemy.try_spot_player() == false,
+				"try_spot_player با player_reference=null → false بدون کرش")
+		gs.player_reference = saved_ref
+		_check(enemy.try_spot_player() == true,
+				"بازگردانی ارجاع → دوباره دیده می‌شود")
 	host.free()
 
 
